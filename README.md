@@ -1,1 +1,1 @@
-# ReiserRT_Spectrum
+# CombGenerator
