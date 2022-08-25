@@ -41,7 +41,6 @@ namespace TSG_NG
             uint32_t randSeed;              // Used for generating random phases and scintillation magnitudes.
         };
 
-
         void reset( const ResetParameters & resetParameters );
 
         ReiserRT::Signal::FlyingPhasorElementBufferTypePtr getSamples();
