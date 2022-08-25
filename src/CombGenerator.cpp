@@ -1,11 +1,11 @@
 /**
- * @file SpectrumGenerator.cpp
- * @brief The implementation file for the ReiserRT Spectrum Generator
+ * @file CombGenerator.cpp
+ * @brief The implementation file for the ReiserRT Comb Generator
  * @authors Frank Reiser
  * @date Initiated August 22nd, 2022
  */
 
-#include "SpectrumGenerator.h"
+#include "CombGenerator.h"
 
 #include "FlyingPhasorToneGenerator.h"
 
@@ -14,12 +14,13 @@
 #include <random>
 #include <stdexcept>
 
+using namespace TSG_NG;
 using namespace ReiserRT::Signal;
 
-class SpectrumGenerator::Imple
+class CombGenerator::Imple
 {
 private:
-    friend class SpectrumGenerator;
+    friend class CombGenerator;
 
     using RandomNumberEngine = std::mt19937;
     using UniformDistribution = std::uniform_real_distribution<double>;
@@ -56,7 +57,7 @@ private:
         for ( size_t i = 0; i != numLines; ++i )
         {
             // Copy the Amplitude for Spectral Line
-            double normalMag = *pResetMag++;
+            auto normalMag = *pResetMag++;
             *pAmp++ = normalMag;
 
             // Reset Spectral Line Tone Generator
@@ -64,12 +65,12 @@ private:
             auto phi = uniformDistribution( rndEngine );
             spectralLineGenerators[ i ].reset( radiansPerSample, phi );
 
-            // If scintillating, record initial scintillated magnitude as normal magnitude
+            // If scintillating, record initial scintillated magnitude from rayleigh distributed desired mean magnitude.
             // And set slope to the next scintillation value initially to zero.
             // The slope will be adjusted immediately upon first getSamples invocation after reset.
             if ( 0 != resetParameters.decorrelationSamples )
             {
-                scintillationParams[ i ].first = normalMag;
+                scintillationParams[ i ].first = getRayleighValue( normalMag );
                 scintillationParams[ i ].second = 0.0;
             }
         }
@@ -169,22 +170,22 @@ private:
 
 };
 
-SpectrumGenerator::SpectrumGenerator(size_t maxSpectralLines , size_t epochSize )
+CombGenerator::CombGenerator(size_t maxSpectralLines , size_t epochSize )
   : pImple{ new Imple{maxSpectralLines, epochSize } }
 {
 }
 
-SpectrumGenerator::~SpectrumGenerator()
+CombGenerator::~CombGenerator()
 {
     delete pImple;
 }
 
-void SpectrumGenerator::reset( const ResetParameters & resetParameters )
+void CombGenerator::reset(const ResetParameters & resetParameters )
 {
     pImple->reset( resetParameters );
 }
 
-FlyingPhasorElementBufferTypePtr SpectrumGenerator::getSamples()
+FlyingPhasorElementBufferTypePtr CombGenerator::getSamples()
 {
     return pImple->getSamples();
 }

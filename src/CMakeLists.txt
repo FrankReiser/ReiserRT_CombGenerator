@@ -11,7 +11,7 @@ endif()
 
 # Specify all of our public headers for easy reference.
 set( _publicHeaders
-    "SpectrumGenerator.h"
+    "CombGenerator.h"
     )
 
 # Specify all of our private headers for easy reference.
@@ -21,7 +21,7 @@ set( _privateHeaders
 
 # Specify our source files
 set( _sourceFiles
-    "SpectrumGenerator.cpp"
+    "CombGenerator.cpp"
     )
 
 # Specify Sources to be built into our library
