@@ -11,7 +11,7 @@ int CommandLineParser::parseCommandLine( int argc, char * argv[] )
 //    int digitOptIndex = 0;
     int retCode = 0;
 
-    enum eOptions { SpacingRadsPerSample=1, NumLines=2, Profile=3, Seed=4, };
+    enum eOptions { SpacingRadsPerSample=1, NumLines=2, Profile=3, EpochSize=4, DecorrelSamples=5, Seed=6, };
 
     while (true) {
 //        int thisOptionOptIndex = optind ? optind : 1;
@@ -20,6 +20,8 @@ int CommandLineParser::parseCommandLine( int argc, char * argv[] )
                 {"spacingRadsPerSample", required_argument, nullptr, SpacingRadsPerSample },
                 {"numLines", required_argument, nullptr, NumLines },
                 {"profile", required_argument, nullptr, Profile },
+                {"epochSize", required_argument, nullptr, EpochSize },
+                {"decorrelSamples", required_argument, nullptr, DecorrelSamples },
                 {"seed", required_argument, nullptr, Seed },
                 {nullptr, 0, nullptr, 0 }
         };
@@ -50,6 +52,20 @@ int CommandLineParser::parseCommandLine( int argc, char * argv[] )
 #if 0
                 std::cout << "The getopt_long call detected the --profile=" << optarg
                           << ". Value extracted = " << profileIn << "." << std::endl;
+#endif
+                break;
+            case EpochSize:
+                epochSizeIn = std::stoul(optarg );
+#if 0
+                std::cout << "The getopt_long call detected the --epochSize=" << optarg
+                          << ". Value extracted = " << epochSizeIn << "." << std::endl;
+#endif
+                break;
+            case DecorrelSamples:
+                decorrelSamplesIn = std::stoul(optarg );
+#if 0
+                std::cout << "The getopt_long call detected the --decorrelSamples=" << optarg
+                          << ". Value extracted = " << decorrelSamplesIn << "." << std::endl;
 #endif
                 break;
             case Seed:

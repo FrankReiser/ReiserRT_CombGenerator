@@ -3,6 +3,8 @@
 #ifndef TSG_COMPLEXTONEGEN_COMMANDLINEPARSER_H
 #define TSG_COMPLEXTONEGEN_COMMANDLINEPARSER_H
 
+#include <cmath>
+
 class CommandLineParser
 {
 public:
@@ -13,13 +15,18 @@ public:
 
     inline double getSpacingRadsPerSample() const { return spacingRadsPerSampleIn; }
     inline unsigned long getNumLines() const { return numLinesIn; }
-    inline unsigned long getProfile() const { return profileIn; }
+    inline unsigned int getProfile() const { return profileIn; }
+    inline unsigned long getEpochSize() const { return epochSizeIn; }
+    inline unsigned long getDecorrelSamples() const { return decorrelSamplesIn; }
+    inline unsigned int getSeed() const { return seedIn; }
 
 private:
-    double spacingRadsPerSampleIn{ 1.0 };
-    unsigned long numLinesIn{ 0 };
-    unsigned long profileIn{ 0 };
-    unsigned short seedIn{ 0 };
+    double spacingRadsPerSampleIn{ M_PI / 16 };
+    unsigned long numLinesIn{ 10 };
+    unsigned long epochSizeIn{ 2048 };
+    unsigned long decorrelSamplesIn{ 0 };
+    unsigned int profileIn{ 0 };
+    unsigned int seedIn{ 0 };
 };
 
 
