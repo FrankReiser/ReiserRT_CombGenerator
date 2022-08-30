@@ -2,9 +2,12 @@
 // Created by frank on 8/27/22.
 //
 
+#include "CombGenerator.h"
 #include "CommandLineParser.h"
 
 #include <iostream>
+#include <memory>
+using namespace TSG_NG;
 
 int main( int argc, char * argv[] ) {
 
@@ -26,10 +29,55 @@ int main( int argc, char * argv[] ) {
 #if 0
     else
     {
-        std::cout << "Parsed: --radiansPerSample=" << cmdLineParser.getRadsPerSample()
-                  << " --phase=" << cmdLineParser.getPhase() << std::endl << std::endl;
+        std::cout << "Parsed: " << std::endl
+                  << " --spacingRadsPerSample=" << cmdLineParser.getSpacingRadsPerSample() << std::endl
+                  << " --numLines=" << cmdLineParser.getNumLines() << std::endl
+                  << " --epochSize=" << cmdLineParser.getEpochSize() << std::endl
+                  << " --decorrelSamples=" << cmdLineParser.getDecorrelSamples() << std::endl
+                  << " --profile=" << cmdLineParser.getProfile() << std::endl
+                  << " --seed=" << cmdLineParser.getProfile() << std::endl
+                  << std::endl;
     }
 #endif
 
+    // Instantiate CombGenerator for NLines and Epoch Size
+    CombGenerator combGenerator{ cmdLineParser.getNumLines(), cmdLineParser.getEpochSize() };
 
+    // What Profile did we ask for.
+    std::unique_ptr< double[] > magnitudes{ new double[ cmdLineParser.getNumLines() ] };
+    switch ( cmdLineParser.getProfile() ) {
+        case 1: {
+            const auto sqrt2over2 = std::sqrt( 2.0 ) / 2.0;
+            for ( size_t i = 0; i != cmdLineParser.getNumLines(); ++i )
+                magnitudes[i] = 1.0 * std::pow( sqrt2over2, i );
+            break;
+        }
+        default: {
+            for ( size_t i = 0; i != cmdLineParser.getNumLines(); ++i )
+                magnitudes[i] = 1.0;
+            break;
+        }
+    }
+
+    // Reset the Comb Generator
+    CombGenerator::ResetParameters resetParams{
+        .numLines = cmdLineParser.getNumLines(),
+        .spacingRadiansPerSample = cmdLineParser.getSpacingRadsPerSample(),
+        .pMagnitudes = magnitudes.get(),
+        .decorrelationSamples = cmdLineParser.getDecorrelSamples(),
+        .randSeed = cmdLineParser.getSeed(),
+    };
+    combGenerator.reset( resetParams );
+
+    auto pSamples = combGenerator.getSamples();
+
+    // Write to standard out. It can be redirected.
+    std::cout << std::scientific;
+    std::cout.precision(17);
+    for ( size_t n = 0; cmdLineParser.getEpochSize() != n; ++n )
+    {
+        std::cout << pSamples[n].real() << " " << pSamples[n].imag() << std::endl;
+    }
+
+    return 0;
 }

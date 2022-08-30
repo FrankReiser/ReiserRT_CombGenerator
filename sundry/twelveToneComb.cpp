@@ -68,7 +68,7 @@ int main()
 
     // Setup some initial magnitudes. Each tone half the power of the previous.
     std::unique_ptr< double[] > magnitudes{ new double[maxSpectralLines] };
-    auto sqrt2over2 = std::sqrt( 2.0 ) / 2.0;
+    const auto sqrt2over2 = std::sqrt( 2.0 ) / 2.0;
     for ( size_t i = 0; i != maxSpectralLines; ++i )
     {
         magnitudes[i] = 1.0 * std::pow( sqrt2over2, i );
@@ -79,7 +79,7 @@ int main()
             .numLines = maxSpectralLines,
             .spacingRadiansPerSample = M_PI / maxSpectralLines / 2.0,
             .pMagnitudes = magnitudes.get(),
-            .decorrelationSamples = epochSize * 2,      // This is costlier, so we're sort of getting a worse case.
+            .decorrelationSamples = epochSize * 2,      // Scintillation is costlier, so we're sort of getting a worse case.
             .randSeed = 1113,
     };
     combGenerator.reset( resetParams );
