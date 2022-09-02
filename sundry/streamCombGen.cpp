@@ -60,13 +60,12 @@ int main( int argc, char * argv[] ) {
     }
 
     // Reset the Comb Generator
-    CombGenerator::ResetParameters resetParams{
-        .numLines = cmdLineParser.getNumLines(),
-        .spacingRadiansPerSample = cmdLineParser.getSpacingRadsPerSample(),
-        .pMagnitudes = magnitudes.get(),
-        .decorrelationSamples = cmdLineParser.getDecorrelSamples(),
-        .randSeed = cmdLineParser.getSeed(),
-    };
+    CombGeneratorResetParameters resetParams;
+    resetParams.numLines = cmdLineParser.getNumLines();
+    resetParams.spacingRadiansPerSample = cmdLineParser.getSpacingRadsPerSample();
+    resetParams.pMagnitudes = magnitudes.get();
+    resetParams.decorrelationSamples = cmdLineParser.getDecorrelSamples();
+    resetParams.randSeed = cmdLineParser.getSeed();
     combGenerator.reset( resetParams );
 
     auto pSamples = combGenerator.getSamples();

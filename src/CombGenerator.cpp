@@ -28,17 +28,17 @@ private:
 
     Imple() = delete;
     Imple(size_t theMaxSpectralLines, size_t theEpochSize )
-      : maxSpectralLines(theMaxSpectralLines )
+      : maxSpectralLines( theMaxSpectralLines )
       , epochSize( theEpochSize )
-      , spectralLineGenerators{maxSpectralLines }
-      , normalMagnitudes(maxSpectralLines, 0.0 )            // Default normalMagnitudes of zero
-      , scintillationParams(maxSpectralLines, { 0.0, 0.0 } )
-      , scintillationBuffer{new double[ epochSize ] }
+      , spectralLineGenerators{ maxSpectralLines }
+      , normalMagnitudes( maxSpectralLines, 0.0 )            // Default normalMagnitudes of zero
+      , scintillationParams( maxSpectralLines, { 0.0, 0.0 } )
+      , scintillationBuffer{ new double[ epochSize ] }
       , epochSampleBuffer{ new FlyingPhasorElementType[ epochSize ] }
     {
     }
 
-    void reset( const ResetParameters & resetParameters )
+    void reset( const CombGeneratorResetParameters & resetParameters )
     {
         // Ensure that the user has not specified more lines than they constructed us to handle.
         if ( maxSpectralLines < resetParameters.numLines )
@@ -180,7 +180,7 @@ CombGenerator::~CombGenerator()
     delete pImple;
 }
 
-void CombGenerator::reset(const ResetParameters & resetParameters )
+void CombGenerator::reset(const CombGeneratorResetParameters & resetParameters )
 {
     pImple->reset( resetParameters );
 }

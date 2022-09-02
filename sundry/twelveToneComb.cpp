@@ -7,6 +7,7 @@
 #include <memory>
 #include <cmath>
 #include <iostream>
+#include <random>
 #include <cstring>
 
 using namespace TSG_NG;
@@ -41,7 +42,6 @@ void setupScheduling()
     std::cout << "Enabled Real Time Scheduling!" << std::endl;
 }
 
-
 double getClockMonotonic()
 {
     timespec tNow = { 0, 0 };
@@ -49,8 +49,6 @@ double getClockMonotonic()
 
     return double( tNow.tv_sec ) + double( tNow.tv_nsec ) / 1e9;
 }
-
-
 
 int main()
 {
@@ -75,13 +73,20 @@ int main()
 //        std::cout << "Mag[" << i << "] = " << magnitudes[i] << std::endl;
     }
 
-    CombGenerator::ResetParameters resetParams{
-            .numLines = maxSpectralLines,
-            .spacingRadiansPerSample = M_PI / maxSpectralLines / 2.0,
-            .pMagnitudes = magnitudes.get(),
-            .decorrelationSamples = epochSize * 2,      // Scintillation is costlier, so we're sort of getting a worse case.
-            .randSeed = 1113,
-    };
+    // We are going to generate seeds from a master seed for eventual use with multiple comb generator instances.
+    // We do not want to use the same engine used by the CombGenerator itself as that would be problematic.
+    // Doing so would lead to multiple CombGenerators producing overlapping random sequences. That would be bad.
+    const uint32_t masterSeed = 1113;
+    std::knuth_b subSeedGenerator(masterSeed );
+    std::uniform_int_distribution< uint32_t> subSeedDistribution{};
+
+    // Reset the Comb Generator with some parameters.
+    CombGeneratorResetParameters resetParams;
+    resetParams.numLines = maxSpectralLines;
+    resetParams.spacingRadiansPerSample = M_PI / maxSpectralLines / 2.0;
+    resetParams.pMagnitudes = magnitudes.get();
+    resetParams.decorrelationSamples = epochSize * 2;   // Scintillation is costlier, so we're sort of getting a worse case.
+    resetParams.randSeed = subSeedDistribution(subSeedGenerator ),
     combGenerator.reset( resetParams );
 
     double t0, t1;
