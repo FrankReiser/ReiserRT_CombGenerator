@@ -157,8 +157,8 @@ private:
     std::vector< double > normalMagnitudes;
     std::vector< std::pair< double, double > > scintillationParams;
 
-    std::unique_ptr< double > scintillationBuffer;
-    std::unique_ptr< FlyingPhasorElementType > epochSampleBuffer;
+    std::unique_ptr< double[] > scintillationBuffer;
+    std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer;
 
     // Construct Temporary std::random_device and invoke it for a default seed.
     RandomNumberEngine rndEngine{ std::random_device{}() };
