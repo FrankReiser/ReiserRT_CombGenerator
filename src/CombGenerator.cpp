@@ -1,6 +1,6 @@
 /**
  * @file CombGenerator.cpp
- * @brief The implementation file for the ReiserRT Comb Generator
+ * @brief The implementation file for the Comb Generator
  * @authors Frank Reiser
  * @date Initiated August 22nd, 2022
  */
