@@ -17,12 +17,13 @@ set( _publicHeaders
 
 # Specify all of our private headers for easy reference.
 set( _privateHeaders
-    ""
+    "CombGeneratorPrivate.h"
     )
 
 # Specify our source files
 set( _sourceFiles
     "CombGenerator.cpp"
+    "CombGeneratorPrivate.cpp"
     "CombGeneratorDataTypes.cpp"
     )
 

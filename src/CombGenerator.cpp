@@ -6,13 +6,15 @@
  */
 
 #include "CombGenerator.h"
+#include "CombGeneratorPrivate.h"
 
 #include "FlyingPhasorToneGenerator.h"
 
 #include <vector>
 #include <memory>
-#include <random>
 #include <stdexcept>
+#include <random>
+
 
 using namespace TSG_NG;
 using namespace ReiserRT::Signal;
@@ -22,11 +24,13 @@ class CombGenerator::Imple
 private:
     friend class CombGenerator;
 
-    using RandomNumberEngine = std::mt19937;
+    using CombGeneratorRandomNumberEngineType = std::mt19937;
     using UniformDistribution = std::uniform_real_distribution<double>;
     using GaussianDistribution = std::normal_distribution<double>;
 
     Imple() = delete;
+
+    ///@todo Should I compute the random phases here or should that be input with the magnitudes in a 'pair'.
     Imple(size_t theMaxSpectralLines, size_t theEpochSize )
       : maxSpectralLines( theMaxSpectralLines )
       , epochSize( theEpochSize )
@@ -35,6 +39,7 @@ private:
       , scintillationParams( maxSpectralLines, { 0.0, 0.0 } )
       , scintillationBuffer{ new double[ epochSize ] }
       , epochSampleBuffer{ new FlyingPhasorElementType[ epochSize ] }
+      , scintillationHarness{ scintillationBuffer.get(), epochSize }
     {
     }
 
@@ -81,7 +86,9 @@ private:
         // If no Scintillation.
         if ( !decorrelationSamples )
         {
+            // For, each spectral line accumulate its samples.
             for ( size_t i = 0; i != numLines; ++i ) {
+                // First line optimization, just get the samples. Accumulation not necessary.
                 if ( 0 == i )
                     spectralLineGenerators[ i ].getSamplesScaled(epochSampleBuffer.get(), epochSize,
                         normalMagnitudes[i] );
@@ -93,13 +100,14 @@ private:
         // Else, we are to scintillate
         else
         {
-            // Get the current sample count for the first spectral line generator. They are all the same value.
-            auto currentSampleCount = spectralLineGenerators[0].getSampleCount();
+            // For, each spectral line accumulate its scintillated samples.
             for ( size_t i = 0; i != numLines; ++i )
             {
                 // Scintillation Management for spectral line I
+                auto currentSampleCount = spectralLineGenerators[i].getSampleCount();
                 scintillationManagement( i, currentSampleCount );
 
+                // First line optimization, just get the scintillated samples. Accumulation not necessary.
                 if ( 0 == i )
                     spectralLineGenerators[ i ].getSamplesScaled(epochSampleBuffer.get(), epochSize,
                         scintillationBuffer.get() );
@@ -112,27 +120,39 @@ private:
         return epochSampleBuffer.get();
     }
 
-    void scintillationManagement( size_t lineNum, size_t currentSampleCount )
+    void scintillationManagement( size_t lineNum, size_t startingSampleCount )
     {
-        auto & scintillationParam = scintillationParams[ lineNum ];
+#if 1
+        // We need to provide a random value to our Scintillation Harness.
+        // It does not know the distribution internally.
+        auto randFunk = [ this, lineNum ]()
+        {
+            return getRayleighValue( normalMagnitudes[ lineNum ] );
+        };
+
+        auto & sParams = scintillationParams[ lineNum ];
+        scintillationHarness.run( std::ref( randFunk ), sParams, startingSampleCount, decorrelationSamples );
+#else
+        auto & sParams = scintillationParams[ lineNum ];
         auto pScintillationMag = scintillationBuffer.get();
         for ( int i = 0; i != epochSize; ++i )
         {
             // If time to calculate a new scintillation slope
-            if ( 0 == ( currentSampleCount++ % decorrelationSamples ) )
+            if ( 0 == ( startingSampleCount++ % decorrelationSamples ) )
             {
                 // Get a new scintillation target magnitude based off of normal magnitude.
                 auto scintillationTargetMag = getRayleighValue( normalMagnitudes[ lineNum ] );
 
                 // Calculate the change in magnitude per sample and store as the second parameter for the line.
-                scintillationParam.second = ( scintillationTargetMag - scintillationParam.first ) / decorrelationSamples;
+                sParams.second = (scintillationTargetMag - sParams.first ) / decorrelationSamples;
             }
 
             // Set scintillation buffer magnitude value for sample i.
             // This is the current magnitude value plus the change in magnitude per sample.
             // We conveniently update the magnitude while we are at it.
-            *pScintillationMag++ = scintillationParam.first += scintillationParam.second;
+            *pScintillationMag++ = sParams.first += sParams.second;
         }
+#endif
     }
 
     double getRayleighValue( double desiredMean )
@@ -155,15 +175,18 @@ private:
     const size_t epochSize;
     std::vector< FlyingPhasorToneGenerator > spectralLineGenerators;
     std::vector< double > normalMagnitudes;
-    std::vector< std::pair< double, double > > scintillationParams;
+    std::vector< ScintillationParamsType > scintillationParams;
 
     std::unique_ptr< double[] > scintillationBuffer;
     std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer;
 
     // Construct Temporary std::random_device and invoke it for a default seed.
-    RandomNumberEngine rndEngine{ std::random_device{}() };
+    CombGeneratorRandomNumberEngineType rndEngine{std::random_device{}() };
     UniformDistribution uniformDistribution{ -M_PI, M_PI };     // For Random Phase.
     GaussianDistribution normalDistribution{};                      // Parameterized before each use.
+
+    // Scintillation Harness
+    ScintillationHarness scintillationHarness;
 
     size_t numLines{};
     size_t decorrelationSamples{};
