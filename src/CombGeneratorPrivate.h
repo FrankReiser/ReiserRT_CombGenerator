@@ -8,6 +8,8 @@
 #ifndef COMBGENERATOR_COMBGENERATORPRIVATE_H
 #define COMBGENERATOR_COMBGENERATORPRIVATE_H
 
+#include "CombGeneratorExport.h"
+
 #include <functional>
 #include <cstdlib>
 
@@ -15,15 +17,18 @@ using ScintillationParamsType = std::pair< double, double >;
 
 // Provides unit testability of scintillation logic without the entire baggage of the CombGenerator.
 // Also, reduces the need for redundant and painful testing of the logic.
-class ScintillationHarness
+///@note We EXPORT this so we can test it. It should to be invisible to the linker because it an
+///implementation detail but then we cannot test it. Regardless, this header file doesn't get installed,
+///so it would be difficult to write anything but a 'ctest' against it.
+class CombGenerator_EXPORT ScintillationEngine
 {
 public:
     using RandomValueFunkType = std::function< double() >;
 
-    ScintillationHarness() = delete;
+    ScintillationEngine() = delete;
 
-    // Requires a buffer space for putting results.
-    ScintillationHarness( double * pTheScintillationBuffer, size_t theBufLen )
+    // Requires a buffer space for putting results. We do not take ownership of this buffer.
+    ScintillationEngine( double * pTheScintillationBuffer, size_t theBufLen )
       : pScintillationBuffer( pTheScintillationBuffer )
       , bufLen( theBufLen )
     {
@@ -32,7 +37,7 @@ public:
     ///@note Invoking with decorrelationSamples of zero is a bad idea. Don't do it.
     void run( const RandomValueFunkType & randomFunk,
              ScintillationParamsType & scintillationParams,
-             size_t startingSampleCount,
+             size_t sampleCounter,
              size_t decorrelationSamples );
 
 private:

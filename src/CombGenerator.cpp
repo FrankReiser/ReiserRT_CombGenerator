@@ -122,7 +122,6 @@ private:
 
     void scintillationManagement( size_t lineNum, size_t startingSampleCount )
     {
-#if 1
         // We need to provide a random value to our Scintillation Harness.
         // It does not know the distribution internally.
         auto randFunk = [ this, lineNum ]()
@@ -132,27 +131,6 @@ private:
 
         auto & sParams = scintillationParams[ lineNum ];
         scintillationHarness.run( std::ref( randFunk ), sParams, startingSampleCount, decorrelationSamples );
-#else
-        auto & sParams = scintillationParams[ lineNum ];
-        auto pScintillationMag = scintillationBuffer.get();
-        for ( int i = 0; i != epochSize; ++i )
-        {
-            // If time to calculate a new scintillation slope
-            if ( 0 == ( startingSampleCount++ % decorrelationSamples ) )
-            {
-                // Get a new scintillation target magnitude based off of normal magnitude.
-                auto scintillationTargetMag = getRayleighValue( normalMagnitudes[ lineNum ] );
-
-                // Calculate the change in magnitude per sample and store as the second parameter for the line.
-                sParams.second = (scintillationTargetMag - sParams.first ) / decorrelationSamples;
-            }
-
-            // Set scintillation buffer magnitude value for sample i.
-            // This is the current magnitude value plus the change in magnitude per sample.
-            // We conveniently update the magnitude while we are at it.
-            *pScintillationMag++ = sParams.first += sParams.second;
-        }
-#endif
     }
 
     double getRayleighValue( double desiredMean )
@@ -186,7 +164,7 @@ private:
     GaussianDistribution normalDistribution{};                      // Parameterized before each use.
 
     // Scintillation Harness
-    ScintillationHarness scintillationHarness;
+    ScintillationEngine scintillationHarness;
 
     size_t numLines{};
     size_t decorrelationSamples{};

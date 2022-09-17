@@ -7,16 +7,15 @@
 
 #include "CombGeneratorPrivate.h"
 
-void ScintillationHarness::run( const RandomValueFunkType & randomFunk,
-        ScintillationParamsType & scintillationParams,
-        size_t startingSampleCount,
-        size_t decorrelationSamples )
+void ScintillationEngine::run( const RandomValueFunkType & randomFunk,
+      ScintillationParamsType & scintillationParams,
+      size_t sampleCounter,
+      size_t decorrelationSamples )
 {
     // Compute Scintillated Magnitude over the Buffer Length.
+    auto pScintillationMag = pScintillationBuffer;
     for ( int i = 0; i != bufLen; ++i )
     {
-        auto pScintillationMag = pScintillationBuffer;
-
         // Set scintillation buffer magnitude value for sample i.
         // This is the current magnitude value (first) plus the change in magnitude per sample (second).
         // We conveniently update the magnitude while we are at it for the next iteration.
@@ -24,9 +23,9 @@ void ScintillationHarness::run( const RandomValueFunkType & randomFunk,
         *pScintillationMag++ = scintillationParams.first += scintillationParams.second;
 
         // If time to calculate a new scintillation slope
-        if ( 0 == ( startingSampleCount++ % decorrelationSamples ) )
+        if ( 0 == (sampleCounter++ % decorrelationSamples ) )
         {
-            // Get a new scintillation target magnitude based off of normal magnitude.
+            // Get a new scintillation target magnitude by invoking randomFunk observer.
             auto scintillationTargetMag = randomFunk();
 
             // Calculate the change in magnitude per sample and store as the second parameter for the line.
