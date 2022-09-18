@@ -116,13 +116,16 @@ private:
 
     void scintillationManagement( size_t lineNum, size_t startingSampleCount )
     {
-        // We need to provide a random value to our Scintillation Engine when requested.
+        // We need to provide a random value to our Scintillation Engine as it may require.
         // It does not know anything about what sort of distribution we are using.
+        // We take care of that.
         auto randFunk = [ this, lineNum ]()
         {
             return randomNumberGenerator.getRayleighValue( normalMagnitudes[ lineNum ] );
         };
 
+        // Our scintillation engine will manage (i.e., mute) the scintillation parameters we provide
+        // to complete the scintillation state machine for our given 'line' number.
         auto & sParams = scintillationParams[ lineNum ];
         scintillationEngine.run( std::ref( randFunk ), sParams, startingSampleCount, decorrelationSamples );
     }

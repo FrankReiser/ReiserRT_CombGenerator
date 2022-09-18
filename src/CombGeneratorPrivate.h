@@ -59,7 +59,9 @@ public:
     RandomNumberGenerator();
     ~RandomNumberGenerator();
 
-    void reset( uint32_t seed );
+    using SeedType = uint32_t;
+
+    void reset( SeedType seed );
 
     /**
      * @brief Obtain a Uniformly Distributed Random Phase Angle

@@ -45,7 +45,7 @@ private:
     using UniformDistribution = std::uniform_real_distribution<double>;
     using GaussianDistribution = std::normal_distribution<double>;
 
-    void reset( uint32_t seed )
+    void reset( SeedType seed )
     {
         rndEngine.seed( seed );
     }
@@ -95,7 +95,7 @@ RandomNumberGenerator::~RandomNumberGenerator()
     delete pImple;
 }
 
-void RandomNumberGenerator::reset( uint32_t seed )
+void RandomNumberGenerator::reset( SeedType seed )
 {
     pImple->reset( seed );
 }
