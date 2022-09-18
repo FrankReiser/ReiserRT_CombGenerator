@@ -13,8 +13,6 @@
 #include <vector>
 #include <memory>
 #include <stdexcept>
-#include <random>
-
 
 using namespace TSG_NG;
 using namespace ReiserRT::Signal;
@@ -23,10 +21,6 @@ class CombGenerator::Imple
 {
 private:
     friend class CombGenerator;
-
-    using CombGeneratorRandomNumberEngineType = std::mt19937;
-    using UniformDistribution = std::uniform_real_distribution<double>;
-    using GaussianDistribution = std::normal_distribution<double>;
 
     Imple() = delete;
 
@@ -39,7 +33,7 @@ private:
       , scintillationParams( maxSpectralLines, { 0.0, 0.0 } )
       , scintillationBuffer{ new double[ epochSize ] }
       , epochSampleBuffer{ new FlyingPhasorElementType[ epochSize ] }
-      , scintillationHarness{ scintillationBuffer.get(), epochSize }
+      , scintillationEngine{ scintillationBuffer.get(), epochSize }
     {
     }
 
@@ -54,7 +48,7 @@ private:
         decorrelationSamples = resetParameters.decorrelationSamples;
 
         // Seed our Random Number Generator Engine
-        rndEngine.seed( resetParameters.randSeed );
+        randomNumberGenerator.reset( resetParameters.randSeed );
 
         // For each Spectral Line
         auto pAmp = normalMagnitudes.begin();
@@ -67,7 +61,7 @@ private:
 
             // Reset Spectral Line Tone Generator
             auto radiansPerSample = resetParameters.spacingRadiansPerSample + resetParameters.spacingRadiansPerSample * i;
-            auto phi = uniformDistribution( rndEngine );
+            auto phi = randomNumberGenerator.getRandomPhaseAngle();
             spectralLineGenerators[ i ].reset( radiansPerSample, phi );
 
             // If scintillating, record initial scintillated magnitude from rayleigh distributed desired mean magnitude.
@@ -75,7 +69,7 @@ private:
             // The slope will be adjusted immediately upon first getSamples invocation after reset.
             if ( 0 != resetParameters.decorrelationSamples )
             {
-                scintillationParams[ i ].first = getRayleighValue( normalMag );
+                scintillationParams[ i ].first = randomNumberGenerator.getRayleighValue( normalMag );
                 scintillationParams[ i ].second = 0.0;
             }
         }
@@ -122,33 +116,17 @@ private:
 
     void scintillationManagement( size_t lineNum, size_t startingSampleCount )
     {
-        // We need to provide a random value to our Scintillation Harness.
-        // It does not know the distribution internally.
+        // We need to provide a random value to our Scintillation Engine when requested.
+        // It does not know anything about what sort of distribution we are using.
         auto randFunk = [ this, lineNum ]()
         {
-            return getRayleighValue( normalMagnitudes[ lineNum ] );
+            return randomNumberGenerator.getRayleighValue( normalMagnitudes[ lineNum ] );
         };
 
         auto & sParams = scintillationParams[ lineNum ];
-        scintillationHarness.run( std::ref( randFunk ), sParams, startingSampleCount, decorrelationSamples );
+        scintillationEngine.run( std::ref( randFunk ), sParams, startingSampleCount, decorrelationSamples );
     }
 
-    double getRayleighValue( double desiredMean )
-    {
-        if ( desiredMean <= 0.0 ) return 0.0;
-
-        const auto sigma = desiredMean / sqrtQtyPiOver2;
-
-        // We use sigma and not sigma^2 (variance) in the arguments below because the C++ standard
-        // for the normal (gaussian) distribution function requires sigma as input, not variance.
-        using ParamType = GaussianDistribution::param_type;
-        const auto X = normalDistribution(rndEngine, ParamType{0.0, sigma } );
-        const auto Y = normalDistribution(rndEngine, ParamType{0.0, sigma } );
-
-        return std::sqrt( X * X + Y * Y );
-    }
-
-    const double sqrtQtyPiOver2{ std::sqrt( M_PI / 2.0 ) };
     const size_t maxSpectralLines;
     const size_t epochSize;
     std::vector< FlyingPhasorToneGenerator > spectralLineGenerators;
@@ -158,13 +136,11 @@ private:
     std::unique_ptr< double[] > scintillationBuffer;
     std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer;
 
-    // Construct Temporary std::random_device and invoke it for a default seed.
-    CombGeneratorRandomNumberEngineType rndEngine{std::random_device{}() };
-    UniformDistribution uniformDistribution{ -M_PI, M_PI };     // For Random Phase.
-    GaussianDistribution normalDistribution{};                      // Parameterized before each use.
+    // Random Number Requirements met with RandomNumberGenerator class.
+    RandomNumberGenerator randomNumberGenerator{};
 
-    // Scintillation Harness
-    ScintillationEngine scintillationHarness;
+    // Scintillation Engine
+    ScintillationEngine scintillationEngine;
 
     size_t numLines{};
     size_t decorrelationSamples{};
