@@ -13,6 +13,9 @@
 #include <functional>
 #include <cstdlib>
 
+// The first value of the pair represents the initial scintillated magnitude over the course of a decorrelation
+// period. The second value of the pair represents the change per sample in magnitude (i.e., a slope) from the initial
+// (first) value.
 using ScintillationParamsType = std::pair< double, double >;
 
 // Provides unit testability of scintillation logic without the entire baggage of the CombGenerator.
