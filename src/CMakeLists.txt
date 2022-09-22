@@ -13,6 +13,7 @@ endif()
 set( _publicHeaders
     "CombGenerator.h"
     "CombGeneratorDataTypes.h"
+    "SubSeedGenerator.h"
     )
 
 # Specify all of our private headers for easy reference.
@@ -25,6 +26,7 @@ set( _sourceFiles
     "CombGenerator.cpp"
     "CombGeneratorPrivate.cpp"
     "CombGeneratorDataTypes.cpp"
+    "SubSeedGenerator.cpp"
     )
 
 # Specify Sources to be built into our library
