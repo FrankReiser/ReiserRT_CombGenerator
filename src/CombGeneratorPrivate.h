@@ -13,6 +13,9 @@
 #include <functional>
 #include <cstdlib>
 
+///@todo Deprecate as much of this as possible for new "Exportable" APIs
+
+
 // The first value of the pair represents the initial scintillated magnitude over the course of a decorrelation
 // period. The second value of the pair represents the change per sample in magnitude (i.e., a slope) from the initial
 // (first) value.
