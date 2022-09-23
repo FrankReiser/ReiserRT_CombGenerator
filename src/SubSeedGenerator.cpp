@@ -1,5 +1,5 @@
 /**
- * @file SubSeedGenerator.h
+ * @file SubSeedGenerator.cpp
  * @brief The specification file for the Sub Seed Generator.
  * @authors Frank Reiser
  * @date Initiated September 21st, 2022
