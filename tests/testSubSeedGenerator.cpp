@@ -114,12 +114,13 @@ int testSubSeedGeneratorDistribution( TSG_NG::SubSeedGenerator & subSeedGenerato
     // **** From here, we bail on first failure returning error code ****
     // *****************************************************************
 
-    // Chi-Squared results that are too low in value indicate non-random as we do not expect perfection
-    // from a random number generator distribution. Therefore, we do not expect many "observed" low values.
-    // We ranged our "observed" bin buffers from 0.0 to 42.0 over 21 bins (2.0 per bin).
-    // Our cumulative bin buffer, bin 3, contains the proportion of "observed" Chi-Squared
-    // results that were less than 8.0. Some occurrences are to be expected, but many occurrences
-    // would appear too good to be true.
+    // Running the above test only once may lead to occasional failure indications due to the nature of random number
+    // generators. Perfect fits are bad and occasionally poor fits are acceptable. What we will do is run
+    // many Chi-squared tests, sort results into bins of their own and then verify that the majority of our results
+    // are what expect. The thresholds we
+    // use are typically derived from a table and table inputs are the number of bins and number of degrees of freedom
+    // among other factors. The minimum expected error energy is 0.0 (unlikely)
+    // and the maximum expected error energy shall be 42.0. Values larger than that, weight towards failure detection.
     double expected = 0.015;
     if ( expected < cumulativeBinBuf[ 3 ] )
     {

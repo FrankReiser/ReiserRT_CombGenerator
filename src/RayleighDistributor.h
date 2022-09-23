@@ -2,7 +2,7 @@
  * @file RayleighDistributor.h
  * @brief The specification file for the Rayleigh Random Value Distributor.
  * @authors Frank Reiser
- * @date Initiated September 21st, 2022
+ * @date Initiated September 22nd, 2022
  */
 
 #ifndef TSG_NG_RAYLEIGHDISTRIBUTOR_H
@@ -24,7 +24,7 @@ namespace TSG_NG
         ~RayleighDistributor();
 
         void reset( uint32_t seed );
-        double getDistributedValue( double desiredMean );
+        double getValue( double desiredMean );
 
     private:
         Imple * pImple;
