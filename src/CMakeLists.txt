@@ -14,6 +14,7 @@ set( _publicHeaders
     "CombGenerator.h"
     "CombGeneratorDataTypes.h"
     "SubSeedGenerator.h"
+    "RayleighDistributor.h"
     )
 
 # Specify all of our private headers for easy reference.
@@ -27,6 +28,7 @@ set( _sourceFiles
     "CombGeneratorPrivate.cpp"
     "CombGeneratorDataTypes.cpp"
     "SubSeedGenerator.cpp"
+    "RayleighDistributor.cpp"
     )
 
 # Specify Sources to be built into our library

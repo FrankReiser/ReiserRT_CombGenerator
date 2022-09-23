@@ -5,8 +5,8 @@
  * @date Initiated September 21st, 2022
  */
 
-#ifndef TSG_NG_COMBGENERATOR_SUBSEEDGENERATOR_H
-#define TSG_NG_COMBGENERATOR_SUBSEEDGENERATOR_H
+#ifndef TSG_NG_SUBSEEDGENERATOR_H
+#define TSG_NG_SUBSEEDGENERATOR_H
 
 #include "CombGeneratorExport.h"
 
@@ -46,4 +46,4 @@ namespace TSG_NG
 }
 
 
-#endif //TSG_NG_COMBGENERATOR_SUBSEEDGENERATOR_H
+#endif TSG_NG_SUBSEEDGENERATOR_H
