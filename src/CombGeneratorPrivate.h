@@ -51,41 +51,4 @@ private:
     size_t bufLen;
 };
 
-// Provides unit testability of random number distributions with the entire baggage of the CombGenerator.
-// Also, reduces the need for redundant and painful testing of that logic once integrated.
-///@note We EXPORT this so we can test it. It should to be invisible to the linker because it an
-///implementation detail but then we cannot test it. Regardless, this header file doesn't get installed,
-///so it would be difficult to write anything but a 'ctest' against it.
-class CombGenerator_EXPORT RandomNumberGenerator
-{
-private:
-    class Imple;
-
-public:
-    RandomNumberGenerator();
-    ~RandomNumberGenerator();
-
-    using SeedType = uint32_t;
-
-    void reset( SeedType seed );
-
-    /**
-     * @brief Obtain a Uniformly Distributed Random Phase Angle
-     *
-     * @return Returns a uniformly distributed random value between -pi and pi.
-     */
-    double getRandomPhaseAngle();
-
-    /**
-     * @brief Obtain a Rayleigh Distributed Random Magnitude Value
-     *
-     * @param desiredMean The expected value around where the distribution is based.
-     * @return Returns a Rayleigh distributed value around the desired mean value.
-     */
-    double getRayleighValue( double desiredMean );
-
-private:
-    Imple * pImple;
-};
-
 #endif //COMBGENERATOR_COMBGENERATORPRIVATE_H

@@ -9,6 +9,8 @@
 #include "CombGeneratorPrivate.h"
 
 #include "FlyingPhasorToneGenerator.h"
+#include "RandomPhaseDistributor.h"
+#include "RayleighDistributor.h"
 
 #include <vector>
 #include <memory>
@@ -47,8 +49,9 @@ private:
         numLines = resetParameters.numLines;
         decorrelationSamples = resetParameters.decorrelationSamples;
 
-        // Seed our Random Number Generator Engine
-        randomNumberGenerator.reset( resetParameters.randSeed );
+        // Seed our Random Number Generator Distributors
+        randomPhaseDistributor.reset( resetParameters.seeds.first );
+        rayleighDistributor.reset( resetParameters.seeds.second );
 
         // For each Spectral Line
         auto pAmp = normalMagnitudes.begin();
@@ -61,7 +64,7 @@ private:
 
             // Reset Spectral Line Tone Generator
             auto radiansPerSample = resetParameters.spacingRadiansPerSample + resetParameters.spacingRadiansPerSample * i;
-            auto phi = randomNumberGenerator.getRandomPhaseAngle();
+            auto phi = randomPhaseDistributor.getValue();
             spectralLineGenerators[ i ].reset( radiansPerSample, phi );
 
             // If scintillating, record initial scintillated magnitude from rayleigh distributed desired mean magnitude.
@@ -69,7 +72,7 @@ private:
             // The slope will be adjusted immediately upon first getSamples invocation after reset.
             if ( 0 != resetParameters.decorrelationSamples )
             {
-                scintillationParams[ i ].first = randomNumberGenerator.getRayleighValue( normalMag );
+                scintillationParams[ i ].first = rayleighDistributor.getValue( normalMag );
                 scintillationParams[ i ].second = 0.0;
             }
         }
@@ -121,7 +124,7 @@ private:
         // We take care of that.
         auto randFunk = [ this, lineNum ]()
         {
-            return randomNumberGenerator.getRayleighValue( normalMagnitudes[ lineNum ] );
+            return rayleighDistributor.getValue( normalMagnitudes[ lineNum ] );
         };
 
         // Our scintillation engine will manage (i.e., mute) the scintillation parameters we provide
@@ -140,7 +143,9 @@ private:
     std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer;
 
     // Random Number Requirements met with RandomNumberGenerator class.
-    RandomNumberGenerator randomNumberGenerator{};
+//    RandomNumberGenerator randomNumberGenerator{};
+    RandomPhaseDistributor randomPhaseDistributor{};
+    RayleighDistributor rayleighDistributor{};
 
     // Scintillation Engine
     ScintillationEngine scintillationEngine;
