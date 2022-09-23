@@ -3,10 +3,12 @@
 //
 
 #include "CombGenerator.h"
+#include "SubSeedGenerator.h"
 #include "CommandLineParser.h"
 
 #include <iostream>
 #include <memory>
+
 using namespace TSG_NG;
 
 int main( int argc, char * argv[] ) {
@@ -59,13 +61,20 @@ int main( int argc, char * argv[] ) {
         }
     }
 
+    // We are going to generate seeds from a master seed for eventual use with multiple comb generator instances.
+    // We do not want to use the same engine used by the CombGenerator itself as that would be problematic.
+    // Doing so would lead to multiple CombGenerators producing overlapping random sequences. That would be bad.
+    SubSeedGenerator subSeedGenerator{};
+    subSeedGenerator.reset( cmdLineParser.getSeed() );
+
     // Reset the Comb Generator
     CombGeneratorResetParameters resetParams;
     resetParams.numLines = cmdLineParser.getNumLines();
     resetParams.spacingRadiansPerSample = cmdLineParser.getSpacingRadsPerSample();
     resetParams.pMagnitudes = magnitudes.get();
     resetParams.decorrelationSamples = cmdLineParser.getDecorrelSamples();
-    resetParams.randSeed = cmdLineParser.getSeed();
+    resetParams.seeds.first = subSeedGenerator.getSubSeed();
+    resetParams.seeds.second = subSeedGenerator.getSubSeed();
     combGenerator.reset( resetParams );
 
     auto pSamples = combGenerator.getSamples();

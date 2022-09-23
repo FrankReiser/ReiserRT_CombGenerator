@@ -25,7 +25,7 @@ struct CombGenerator_EXPORT CombGeneratorResetParameters
     const double * pMagnitudes{};       // A series of magnitudes of numLines length.
     size_t decorrelationSamples{};      // Zero means no scintillation, otherwise specifies scintillation rate.
 
-    uint32_t randSeed{};                // Used for generating random phases and scintillation magnitudes.
+    std::pair< uint32_t, u_int32_t >seeds{};  // Used for generating random phases and scintillation magnitudes.
 };
 
 

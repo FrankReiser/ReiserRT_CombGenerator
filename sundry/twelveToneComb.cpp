@@ -3,11 +3,11 @@
 //
 
 #include "CombGenerator.h"
+#include "SubSeedGenerator.h"
 
 #include <memory>
 #include <cmath>
 #include <iostream>
-#include <random>
 #include <cstring>
 
 using namespace TSG_NG;
@@ -77,8 +77,8 @@ int main()
     // We do not want to use the same engine used by the CombGenerator itself as that would be problematic.
     // Doing so would lead to multiple CombGenerators producing overlapping random sequences. That would be bad.
     const uint32_t masterSeed = 1113;
-    std::knuth_b subSeedGenerator(masterSeed );
-    std::uniform_int_distribution< uint32_t> subSeedDistribution{};
+    SubSeedGenerator subSeedGenerator{};
+    subSeedGenerator.reset( masterSeed );
 
     // Reset the Comb Generator with some parameters.
     CombGeneratorResetParameters resetParams;
@@ -86,7 +86,8 @@ int main()
     resetParams.spacingRadiansPerSample = M_PI / maxSpectralLines / 2.0;
     resetParams.pMagnitudes = magnitudes.get();
     resetParams.decorrelationSamples = epochSize * 2;   // Scintillation is costlier, so we're sort of getting a worse case.
-    resetParams.randSeed = subSeedDistribution(subSeedGenerator ),
+    resetParams.seeds.first = subSeedGenerator.getSubSeed();
+    resetParams.seeds.second = subSeedGenerator.getSubSeed();
     combGenerator.reset( resetParams );
 
     double t0, t1;
