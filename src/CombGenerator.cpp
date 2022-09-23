@@ -6,11 +6,11 @@
  */
 
 #include "CombGenerator.h"
-#include "CombGeneratorPrivate.h"
 
 #include "FlyingPhasorToneGenerator.h"
 #include "RandomPhaseDistributor.h"
 #include "RayleighDistributor.h"
+#include "ScintillationEngine.h"
 
 #include <vector>
 #include <memory>
@@ -32,7 +32,7 @@ private:
       , epochSize( theEpochSize )
       , spectralLineGenerators{ maxSpectralLines }
       , normalMagnitudes( maxSpectralLines, 0.0 )            // Default normalMagnitudes of zero
-      , scintillationParams( maxSpectralLines, { 0.0, 0.0 } )
+      , scintillationStates(maxSpectralLines, {0.0, 0.0 } )
       , scintillationBuffer{ new double[ epochSize ] }
       , epochSampleBuffer{ new FlyingPhasorElementType[ epochSize ] }
       , scintillationEngine{ scintillationBuffer.get(), epochSize }
@@ -72,8 +72,8 @@ private:
             // The slope will be adjusted immediately upon first getSamples invocation after reset.
             if ( 0 != resetParameters.decorrelationSamples )
             {
-                scintillationParams[ i ].first = rayleighDistributor.getValue( normalMag );
-                scintillationParams[ i ].second = 0.0;
+                scintillationStates[ i ].first = rayleighDistributor.getValue(normalMag );
+                scintillationStates[ i ].second = 0.0;
             }
         }
     }
@@ -129,7 +129,7 @@ private:
 
         // Our scintillation engine will manage (i.e., mute) the scintillation parameters we provide
         // to complete the scintillation state machine for our given 'line' number.
-        auto & sParams = scintillationParams[ lineNum ];
+        auto & sParams = scintillationStates[ lineNum ];
         scintillationEngine.run( std::ref( randFunk ), sParams, startingSampleCount, decorrelationSamples );
     }
 
@@ -137,7 +137,7 @@ private:
     const size_t epochSize;
     std::vector< FlyingPhasorToneGenerator > spectralLineGenerators;
     std::vector< double > normalMagnitudes;
-    std::vector< ScintillationParamsType > scintillationParams;
+    std::vector< ScintillationEngine::StateType > scintillationStates;
 
     std::unique_ptr< double[] > scintillationBuffer;
     std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer;

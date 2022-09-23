@@ -2,7 +2,8 @@
 // Created by frank on 9/17/22.
 //
 
-#include "CombGeneratorPrivate.h"
+#include "ScintillationEngine.h"
+
 #include <memory>
 #include <iostream>
 #include <cmath>
@@ -25,7 +26,7 @@ int main()
     std::unique_ptr< double[] > scintillationBuffer{ new double[ EPOCH_SIZE ] };
 
     // And with that, we can now instantiate our scintillation engine.
-    ScintillationEngine scintillationEngine{ scintillationBuffer.get(), EPOCH_SIZE };
+    TSG_NG::ScintillationEngine scintillationEngine{ scintillationBuffer.get(), EPOCH_SIZE };
 
     // Before we can use the ScintillationEngine, we need a have function that will give it a differing random number
     // when required. This would normally come from a specialized distribution. We are going to fake this so
@@ -42,8 +43,8 @@ int main()
     // Invoke the ScintillationEngine's run function. It requires mutable scintillation parameters.
     // We will start will default values of 1 for magnitude and zero for slope. The initial slope will be
     // computed immediately.
-    ScintillationParamsType scintillationParams{ 1.0, 0.0 };
-    scintillationEngine.run( std::ref( randFunk), scintillationParams, 0, DECORREL_SAMPLES );
+    TSG_NG::ScintillationEngine::StateType scintillationState{1.0, 0.0 };
+    scintillationEngine.run(std::ref( randFunk), scintillationState, 0, DECORREL_SAMPLES );
 
     // For maximum view of significant digits for diagnostic purposes.
     std::cout << std::scientific;
