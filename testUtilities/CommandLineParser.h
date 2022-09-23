@@ -14,6 +14,7 @@ public:
     int parseCommandLine( int argc, char * argv[] );
 
     inline double getSpacingRadsPerSample() const { return spacingRadsPerSampleIn; }
+    inline double getDesiredMean() const { return desiredMeanIn; }
     inline unsigned long getNumLines() const { return numLinesIn; }
     inline unsigned int getProfile() const { return profileIn; }
     inline unsigned long getEpochSize() const { return epochSizeIn; }
@@ -22,6 +23,7 @@ public:
 
 private:
     double spacingRadsPerSampleIn{ M_PI / 16 };
+    double desiredMeanIn{ 3.0 };      // Used for Rayleigh Distributor Testing.
     unsigned long numLinesIn{ 10 };
     unsigned long epochSizeIn{ 2048 };
     unsigned long decorrelSamplesIn{ 0 };

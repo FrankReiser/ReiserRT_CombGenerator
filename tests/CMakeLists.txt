@@ -6,6 +6,14 @@ add_test( NAME runSubSeedGeneratorTest1 COMMAND $<TARGET_FILE:testSubSeedGenerat
 add_test( NAME runSubSeedGeneratorTest2 COMMAND $<TARGET_FILE:testSubSeedGenerator> --seed=5674457 )
 add_test( NAME runSubSeedGeneratorTest3 COMMAND $<TARGET_FILE:testSubSeedGenerator> --seed=8348489 )
 
+add_executable( testRayleighDistributor )
+target_sources( testRayleighDistributor PRIVATE testRayleighDistributor.cpp )
+target_include_directories( testRayleighDistributor PUBLIC ../src ../testUtilities )
+target_link_libraries( testRayleighDistributor CombGenerator TestUtilities )
+add_test( NAME runRayleighDistributorTest1 COMMAND $<TARGET_FILE:testRayleighDistributor> --seed=83884 --desiredMean=3.0 )
+add_test( NAME runRayleighDistributorTest2 COMMAND $<TARGET_FILE:testRayleighDistributor> --seed=6234 --desiredMean=2.2 )
+add_test( NAME runRayleighDistributorTest3 COMMAND $<TARGET_FILE:testRayleighDistributor> --seed=1934567 --desiredMean=1.2 )
+
 add_executable( testScintillation "" )
 target_sources( testScintillation PRIVATE testScintillation.cpp )
 target_include_directories( testScintillation PUBLIC ../src )

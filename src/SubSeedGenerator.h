@@ -45,5 +45,4 @@ namespace TSG_NG
     };
 }
 
-
-#endif TSG_NG_SUBSEEDGENERATOR_H
+#endif // TSG_NG_SUBSEEDGENERATOR_H

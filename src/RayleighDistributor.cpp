@@ -9,6 +9,8 @@
 
 #include <random>
 
+using namespace TSG_NG;
+
 class RayleighDistributor::Imple
 {
 private:
@@ -25,7 +27,7 @@ private:
         rndEngine.seed( seed );
     }
 
-    uint32_t getDistributedValue( double desiredMean )
+    double getDistributedValue( double desiredMean )
     {
         if ( desiredMean <= 0.0 ) return 0.0;
 
@@ -33,7 +35,7 @@ private:
 
         // We use sigma and not sigma^2 (variance) in the arguments below because the C++ standard
         // for the normal (gaussian) distribution function requires sigma as input, not variance.
-#if 1
+#if 0
         using ParamType = GaussianDistribution::param_type;
         normalDistribution.param( ParamType{0.0, sigma } );
         const auto X = normalDistribution(rndEngine );
@@ -69,7 +71,7 @@ void RayleighDistributor::reset( uint32_t seed )
     pImple->reset( seed );
 }
 
-uint32_t RayleighDistributor::getDistributedValue( double desiredMean )
+double RayleighDistributor::getDistributedValue( double desiredMean )
 {
     return pImple->getDistributedValue( desiredMean );
 }

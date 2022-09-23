@@ -12,20 +12,23 @@
 
 #include <cstdint>
 
-class CombGenerator_EXPORT RayleighDistributor
+namespace TSG_NG
 {
-private:
-    class Imple;
+    class CombGenerator_EXPORT RayleighDistributor
+    {
+    private:
+        class Imple;
 
-public:
-    RayleighDistributor();
-    ~RayleighDistributor();
+    public:
+        RayleighDistributor();
+        ~RayleighDistributor();
 
-    void reset( uint32_t seed );
-    uint32_t getDistributedValue( double desiredMean );
+        void reset( uint32_t seed );
+        double getDistributedValue( double desiredMean );
 
-private:
-    Imple * pImple;
-};
+    private:
+        Imple * pImple;
+    };
+}
 
 #endif //TSG_NG_RAYLEIGHDISTRIBUTOR_H
