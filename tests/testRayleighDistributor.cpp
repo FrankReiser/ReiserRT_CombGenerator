@@ -61,7 +61,7 @@ static double runRayleighDistributorTest( TSG_NG::RayleighDistributor & rayleigh
 {
     auto rayleighDistributorFunc = [ &rayleighDistributor, desiredMean ]()
     {
-        return rayleighDistributor.getDistributedValue( desiredMean );
+        return rayleighDistributor.getValue(desiredMean);
     };
     auto observedValues = categorizeIntoBins(theNumBins, theSampleSize,
          std::ref( rayleighDistributorFunc ), 0.0, fullScale );
@@ -102,12 +102,11 @@ int testRayleighDistributor( TSG_NG::RayleighDistributor & rayleighDistributor, 
 
     // Running the above test only once may lead to occasional failure indications due to the nature of random number
     // generators. Perfect fits are bad and occasionally poor fits are acceptable. What we will do is run
-    // many Chi-squared tests, sort error indications into bins of their own and then look at the Chi-squared error
-    // cumulative distribution. It's almost like a Chi-squared of a Chi-Squared but, not exactly. Also, the thresholds we
-    // use are typically derived from a table that requires the number of bins and number of degrees of freedom.
-    // The minimum expected error energy is 0.0 (unlikely)
-    // and the maximum expected error energy is 42.0. Larger values will be discarded which may
-    // lead to failure.
+    // many Chi-squared tests, sort results into bins of their own and then verify that the majority of our results
+    // are what expect. The thresholds we
+    // use are typically derived from a table and table inputs are the number of bins and number of degrees of freedom
+    // among other factors. The minimum expected error energy is 0.0 (unlikely)
+    // and the maximum expected error energy shall be 42.0. Values larger than that, weight towards failure detection.
     auto chiSquaredObservations = categorizeIntoBins( numBins, sampleSize,
                                                       std::ref( chiSquaredFunk ), 0.0, 42.0 );
 

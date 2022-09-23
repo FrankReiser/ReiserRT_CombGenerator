@@ -1,16 +1,14 @@
 //
-// Created by frank on 9/21/22.
+// Created by frank on 9/23/22.
 //
 
-#include "SubSeedGenerator.h"
-#include "CommandLineParser.h"
+#include "RandomPhaseDistributor.h"
+
 #include "MiscTestUtilities.h"
+#include "CommandLineParser.h"
 
 #include <iostream>
-#include <vector>
-#include <limits>
 #include <cstring>
-#include <random>
 
 // Returns expected values for each bin of our sub-seed distribution. Basically this just divides
 // the number of samples by the number of bins, the result of which is how many we expect in each bin.
@@ -34,21 +32,22 @@ static BinBufferRealType getUniformExpectedValues( size_t theNumBins, size_t the
 // argument is the number of bins and the third argument is its chiSquared "fit test" result.
 using DistributionDiagnosticFunkType = std::function< void( const BinBufferIntType &, size_t, double ) >;
 
-// Returns the Chi-squared Result of a sub-seed generator distribution test run. We will likely run
+
+// Returns the Chi-squared Result of a random phase distribution test run. We will likely run
 // many to obtain an average level of confidence that the distribution is good.
-// This function basically invokes the sub-seed generator sample size times and then
+// This function basically invokes the random phase distributor, sample size times and then
 // categorizes the results into N bins. The bins are then compared against the expected values for
 // a Chi-squared result.
 // The Diagnostic function allows the developer to find problems within the implementation
 // if testing indicates problems.
-static double runSubSeedGeneratorDistributionTest( TSG_NG::SubSeedGenerator & subSeedGenerator,
+static double runRandomPhaseDistributorTest( TSG_NG::RandomPhaseDistributor & randomPhaseDistributor,
                                              const BinBufferRealType & expectedValues,
                                              size_t theNumBins, size_t theSampleSize,
                                              const DistributionDiagnosticFunkType & diagnosticFunk )
 {
-    auto uniformRndFunc = [ & subSeedGenerator ](){ return subSeedGenerator.getSubSeed(); };
+    auto uniformRndFunc = [ & randomPhaseDistributor ](){ return randomPhaseDistributor.getValue(); };
     auto observedValues = categorizeIntoBins(theNumBins, theSampleSize,
-    std::ref( uniformRndFunc ), std::numeric_limits< uint32_t>::min(), std::numeric_limits< uint32_t>::max() );
+           std::ref( uniformRndFunc ), -M_PI, M_PI );
     auto chiSquaredRes = chiSquared(theNumBins, observedValues, expectedValues );
 
     diagnosticFunk(observedValues, theNumBins, chiSquaredRes );
@@ -56,15 +55,15 @@ static double runSubSeedGeneratorDistributionTest( TSG_NG::SubSeedGenerator & su
     return chiSquaredRes;
 }
 
-int testSubSeedGeneratorDistribution( TSG_NG::SubSeedGenerator & subSeedGenerator )
+int testRandomPhaseDistributor( TSG_NG::RandomPhaseDistributor & randomPhaseDistributor )
 {
     const size_t sampleSize = 10000;
     const size_t numBins = 21;
 
     // Expected values do not change run from run, so fetch them once.
-    auto expectedValues = getUniformExpectedValues(numBins, sampleSize );
+    auto expectedValues = getUniformExpectedValues( numBins, sampleSize );
 
-    unsigned diagnose = 0;
+    unsigned diagnose = 1;
     auto chiSquaredFunk = [&]()
     {
         auto distributionDiagnosticFunk = [&diagnose]( const BinBufferIntType & observedValues,
@@ -72,14 +71,13 @@ int testSubSeedGeneratorDistribution( TSG_NG::SubSeedGenerator & subSeedGenerato
         {
             if ( 0 < diagnose )
             {
-                plotDistribution(observedValues, numBins, chiSquaredRes, std::numeric_limits< uint32_t>::min(),
-                                 std::numeric_limits< uint32_t>::max() );
+                plotDistribution( observedValues, numBins, chiSquaredRes, -M_PI, M_PI );
                 --diagnose;
             }
         };
 
-        return runSubSeedGeneratorDistributionTest(subSeedGenerator, expectedValues,
-                       numBins, sampleSize, std::ref( distributionDiagnosticFunk ) );
+        return runRandomPhaseDistributorTest( randomPhaseDistributor, expectedValues,
+            numBins, sampleSize, std::ref( distributionDiagnosticFunk ) );
     };
 
     // Running the above test only once may lead to occasional failure indications due to the nature of random number
@@ -91,7 +89,7 @@ int testSubSeedGeneratorDistribution( TSG_NG::SubSeedGenerator & subSeedGenerato
     // and the maximum expected error energy is 42.0. Larger values will be discarded which may
     // lead to failure.
     auto chiSquaredObservations = categorizeIntoBins( numBins, sampleSize,
-                                           std::ref( chiSquaredFunk ), 0.0, 42.0 );
+                                                      std::ref( chiSquaredFunk ), 0.0, 42.0 );
 
     // Now determine the average cumulative distribution bin over bin. This is a Cumulative Distribution Analysis.
     // After we do an integration pass, our last bin should indicate near 100% of the observations have
@@ -181,47 +179,13 @@ int main( int argc, char * argv[] )
 #if 1
     else
     {
-        std::cout << "Parsed: --seed=" << cmdLineParser.getSeed() << std::endl << std::endl;
+        std::cout << "Parsed: --seed=" << cmdLineParser.getSeed() << std::endl;
     }
 #endif
 
     // Instantiate SubSeedGenerator
-    TSG_NG::SubSeedGenerator subSeedGenerator{};
+    TSG_NG::RandomPhaseDistributor randomPhaseDistributor{};
+    randomPhaseDistributor.reset( cmdLineParser.getSeed() );
 
-    // Seed the generator and obtain a set of values. Then reseed the generator with original seed and verify
-    // that it produces the same sequence (Predictability Test)
-    std::vector< uint32_t > randValues{};
-    randValues.reserve( 5 );
-    subSeedGenerator.reset( cmdLineParser.getSeed() );
-    for ( int i = 0; 12 != i; ++i )
-    {
-        randValues.push_back( subSeedGenerator.getSubSeed() );
-//        std::cout << "Sub-seed[" << i << "]=" << randValues[i] << std::endl;
-    }
-    subSeedGenerator.reset( cmdLineParser.getSeed() );
-    for ( const auto s : randValues )
-    {
-        if ( s != subSeedGenerator.getSubSeed() )
-        {
-            std::cout << "SubSeedGenerator FAILED Predictability Test!" << std::endl;
-            return 1;
-        }
-    }
-
-    // Verify that the sequence of sub-seeds produced is completely different from that of
-    // the mt19937 engine utilized with an identical distribution. We use mt19937 as the engine
-    // type for all of our other random number facilities. We will use the sub-seed generator
-    // under test to provide seeds for all mt19937 instances we may use.
-    // We only test the first value from the MT distribution against the first value of the
-    // sub-seed generator.
-    std::mt19937 mtEngine{ cmdLineParser.getSeed() };     // Seed with the same seed.
-    std::uniform_int_distribution< uint32_t> mtEngineUniformDistribution{}; // Same as used internally by sub-seed generator.
-    const auto mtSeed = mtEngineUniformDistribution( mtEngine );
-    if ( mtSeed == randValues[0] )
-    {
-        std::cout << "SubSeedGenerator FAILED MT Uniqueness Test!" << std::endl;
-        return 2;
-    }
-
-    return testSubSeedGeneratorDistribution( subSeedGenerator );
+    return testRandomPhaseDistributor( randomPhaseDistributor );
 }

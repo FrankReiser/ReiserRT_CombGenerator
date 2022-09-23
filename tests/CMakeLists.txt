@@ -14,6 +14,14 @@ add_test( NAME runRayleighDistributorTest1 COMMAND $<TARGET_FILE:testRayleighDis
 add_test( NAME runRayleighDistributorTest2 COMMAND $<TARGET_FILE:testRayleighDistributor> --seed=6234 --desiredMean=2.2 )
 add_test( NAME runRayleighDistributorTest3 COMMAND $<TARGET_FILE:testRayleighDistributor> --seed=1934567 --desiredMean=1.2 )
 
+add_executable( testRandomPhaseDistributor )
+target_sources( testRandomPhaseDistributor PRIVATE testRandomPhaseDistributor.cpp )
+target_include_directories( testRandomPhaseDistributor PUBLIC ../src ../testUtilities )
+target_link_libraries( testRandomPhaseDistributor CombGenerator TestUtilities )
+add_test( NAME runRandomPhaseDistributorTest1 COMMAND $<TARGET_FILE:testRandomPhaseDistributor> --seed=78576 )
+add_test( NAME runRandomPhaseDistributorTest2 COMMAND $<TARGET_FILE:testRandomPhaseDistributor> --seed=53859 )
+add_test( NAME runRandomPhaseDistributorTest3 COMMAND $<TARGET_FILE:testRandomPhaseDistributor> --seed=173849 )
+
 add_executable( testScintillation "" )
 target_sources( testScintillation PRIVATE testScintillation.cpp )
 target_include_directories( testScintillation PUBLIC ../src )
