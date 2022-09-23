@@ -64,7 +64,7 @@ int testSubSeedGeneratorDistribution( TSG_NG::SubSeedGenerator & subSeedGenerato
     // Expected values do not change run from run, so fetch them once.
     auto expectedValues = getUniformExpectedValues(numBins, sampleSize );
 
-    unsigned diagnose = 4;
+    unsigned diagnose = 0;
     auto chiSquaredFunk = [&]()
     {
         auto distributionDiagnosticFunk = [&diagnose]( const BinBufferIntType & observedValues,
@@ -195,6 +195,7 @@ int main( int argc, char * argv[] )
     for ( int i = 0; 12 != i; ++i )
     {
         randValues.push_back( subSeedGenerator.getSubSeed() );
+//        std::cout << "Sub-seed[" << i << "]=" << randValues[i] << std::endl;
     }
     subSeedGenerator.reset( cmdLineParser.getSeed() );
     for ( const auto s : randValues )
@@ -206,17 +207,20 @@ int main( int argc, char * argv[] )
         }
     }
 
-    // Verify that the sequence of sub-seeds produced is completely different than that of
+    // Verify that the sequence of sub-seeds produced is completely different from that of
     // the mt19937 engine utilized with an identical distribution. We use mt19937 as the engine
     // type for all of our other random number facilities. We will use the sub-seed generator
-    // under test to provide seeds for all mt19937 instances.
-    std::mt19937 mtEngine{ randValues[0] };     // Seed with the first sub-seed we obtained initially.
+    // under test to provide seeds for all mt19937 instances we may use.
+    // We only test the first value from the MT distribution against the first value of the
+    // sub-seed generator.
+    std::mt19937 mtEngine{ cmdLineParser.getSeed() };     // Seed with the same seed.
     std::uniform_int_distribution< uint32_t> mtEngineUniformDistribution{}; // Same as used internally by sub-seed generator.
-
-
-    ///@todo Finish this.
-
-
+    const auto mtSeed = mtEngineUniformDistribution( mtEngine );
+    if ( mtSeed == randValues[0] )
+    {
+        std::cout << "SubSeedGenerator FAILED MT Uniqueness Test!" << std::endl;
+        return 2;
+    }
 
     return testSubSeedGeneratorDistribution( subSeedGenerator );
 }
