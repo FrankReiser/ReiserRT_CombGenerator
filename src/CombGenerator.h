@@ -20,7 +20,7 @@ namespace TSG_NG
 
     public:
         CombGenerator() = delete;
-        explicit  CombGenerator(size_t maxSpectralLines, size_t epochSize );
+        explicit  CombGenerator( size_t maxSpectralLines, size_t epochSize );
 
         ~CombGenerator();
 

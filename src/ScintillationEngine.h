@@ -36,10 +36,10 @@ namespace TSG_NG
         }
 
         ///@note Invoking with decorrelationSamples of zero is a bad idea. Don't do it.
-        void run(const RandomValueFunkType & randomFunk,
-                 StateType & scintillationState,
-                 size_t sampleCounter,
-                 size_t decorrelationSamples );
+        void run( const RandomValueFunkType & randomFunk,
+                  StateType & scintillationState,
+                  size_t sampleCounter,
+                  size_t decorrelationSamples );
 
     private:
         double * pScintillationBuffer;

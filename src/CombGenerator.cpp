@@ -8,7 +8,6 @@
 #include "CombGenerator.h"
 
 #include "FlyingPhasorToneGenerator.h"
-#include "RandomPhaseDistributor.h"
 #include "RayleighDistributor.h"
 #include "ScintillationEngine.h"
 
@@ -26,7 +25,6 @@ private:
 
     Imple() = delete;
 
-    ///@todo Should I compute the random phases here or should that be input with the magnitudes in a 'pair'.
     Imple(size_t theMaxSpectralLines, size_t theEpochSize )
       : maxSpectralLines( theMaxSpectralLines )
       , epochSize( theEpochSize )
@@ -50,22 +48,20 @@ private:
         decorrelationSamples = resetParameters.decorrelationSamples;
 
         // Seed our Random Number Generator Distributors
-        randomPhaseDistributor.reset( resetParameters.seeds.first );
-        rayleighDistributor.reset( resetParameters.seeds.second );
+        rayleighDistributor.reset( resetParameters.seed );
 
         // For each Spectral Line
         auto pAmp = normalMagnitudes.begin();
-        auto pResetMag = resetParameters.pMagnitudes;
-        for ( size_t i = 0; i != numLines; ++i )
+        auto pResetMagPhase = resetParameters.pMagPhase;
+        for ( size_t i = 0; i != numLines; ++i, ++pResetMagPhase )
         {
             // Copy the Amplitude for Spectral Line
-            auto normalMag = *pResetMag++;
+            auto normalMag = pResetMagPhase->first;
             *pAmp++ = normalMag;
 
             // Reset Spectral Line Tone Generator
             auto radiansPerSample = resetParameters.spacingRadiansPerSample + resetParameters.spacingRadiansPerSample * i;
-            auto phi = randomPhaseDistributor.getValue();
-            spectralLineGenerators[ i ].reset( radiansPerSample, phi );
+            spectralLineGenerators[ i ].reset( radiansPerSample, pResetMagPhase->second );
 
             // If scintillating, record initial scintillated magnitude from rayleigh distributed desired mean magnitude.
             // And set slope to the next scintillation value initially to zero.
@@ -143,8 +139,6 @@ private:
     std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer;
 
     // Random Number Requirements met with RandomNumberGenerator class.
-//    RandomNumberGenerator randomNumberGenerator{};
-    RandomPhaseDistributor randomPhaseDistributor{};
     RayleighDistributor rayleighDistributor{};
 
     // Scintillation Engine
@@ -155,7 +149,7 @@ private:
 
 };
 
-CombGenerator::CombGenerator(size_t maxSpectralLines , size_t epochSize )
+CombGenerator::CombGenerator( size_t maxSpectralLines , size_t epochSize )
   : pImple{ new Imple{maxSpectralLines, epochSize } }
 {
 }
@@ -165,7 +159,7 @@ CombGenerator::~CombGenerator()
     delete pImple;
 }
 
-void CombGenerator::reset(const CombGeneratorResetParameters & resetParameters )
+void CombGenerator::reset( const CombGeneratorResetParameters & resetParameters )
 {
     pImple->reset( resetParameters );
 }

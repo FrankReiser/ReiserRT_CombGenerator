@@ -9,10 +9,10 @@
 
 using namespace TSG_NG;
 
-void ScintillationEngine::run(const RandomValueFunkType & randomFunk,
-                              StateType & scintillationState,
-                              size_t sampleCounter,
-                              size_t decorrelationSamples )
+void ScintillationEngine::run( const RandomValueFunkType & randomFunk,
+                               StateType & scintillationState,
+                               size_t sampleCounter,
+                               size_t decorrelationSamples )
 {
     // Compute Scintillated Magnitude over the Buffer Length.
     auto pScintillationMag = pScintillationBuffer;
