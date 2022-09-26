@@ -64,7 +64,7 @@ int testSubSeedGeneratorDistribution( TSG_NG::SubSeedGenerator & subSeedGenerato
     // Expected values do not change run from run, so fetch them once.
     auto expectedValues = getUniformExpectedValues(numBins, sampleSize );
 
-    unsigned diagnose = 0;
+    unsigned diagnose = 1;
     auto chiSquaredFunk = [&]()
     {
         auto distributionDiagnosticFunk = [&diagnose]( const BinBufferIntType & observedValues,

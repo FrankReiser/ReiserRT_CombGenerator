@@ -82,7 +82,7 @@ int testRayleighDistributor( TSG_NG::RayleighDistributor & rayleighDistributor, 
     auto expectedValues = getRayleighExpectedValues( numBins, sampleSize,
                                                      desiredMean, fullScale );
 
-    unsigned diagnose = 0;
+    unsigned diagnose = 1;
     auto chiSquaredFunk = [&]()
     {
         auto distributionDiagnosticFunk = [&]( const BinBufferIntType & observedValues,
