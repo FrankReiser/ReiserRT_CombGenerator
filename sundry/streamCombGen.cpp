@@ -5,6 +5,7 @@
 #include "CombGenerator.h"
 #include "SubSeedGenerator.h"
 #include "RandomPhaseDistributor.h"
+#include "RayleighDistributor.h"
 #include "CommandLineParser.h"
 
 #include <iostream>
@@ -58,14 +59,12 @@ int main( int argc, char * argv[] ) {
 
     // What Profile did we ask for.
     using MagPhaseType = CombGeneratorResetParameters::MagPhaseType;
-//    std::unique_ptr< double[] > magnitudes{ new double[ cmdLineParser.getNumLines() ] };
     std::unique_ptr< MagPhaseType[] > magPhase{ new MagPhaseType [ cmdLineParser.getNumLines() ] };
     switch ( cmdLineParser.getProfile() ) {
         case 1: {
             const auto sqrt2over2 = std::sqrt( 2.0 ) / 2.0;
             for ( size_t i = 0; i != cmdLineParser.getNumLines(); ++i )
             {
-//                magnitudes[i] = 1.0 * std::pow( sqrt2over2, i );
                 magPhase[i].first = 1.0 * std::pow( sqrt2over2, i );
                 magPhase[i].second = randomPhaseDistributor.getValue();
             }
@@ -74,7 +73,6 @@ int main( int argc, char * argv[] ) {
         default: {
             for ( size_t i = 0; i != cmdLineParser.getNumLines(); ++i )
             {
-//                magnitudes[i] = 1.0;
                 magPhase[i].first = 1.0;
                 magPhase[i].second = randomPhaseDistributor.getValue();
             }
@@ -82,19 +80,23 @@ int main( int argc, char * argv[] ) {
         }
     }
 
+    // We are going to need a scintillation random number distributor
+    RayleighDistributor rayleighDistributor{};
+    rayleighDistributor.reset( subSeedGenerator.getSubSeed() );
+    auto scintillateFunk = [ &rayleighDistributor ]( double desiredMean, size_t lineNumberHint )
+    {
+        return rayleighDistributor.getValue( desiredMean );
+    };
+
     // Reset the Comb Generator
     CombGeneratorResetParameters resetParams;
     resetParams.numLines = cmdLineParser.getNumLines();
     resetParams.spacingRadiansPerSample = cmdLineParser.getSpacingRadsPerSample();
-//    resetParams.pMagnitudes = magnitudes.get();
     resetParams.pMagPhase = magPhase.get();
     resetParams.decorrelationSamples = cmdLineParser.getDecorrelSamples();
-//    resetParams.seeds.first = subSeedGenerator.getSubSeed();
-//    resetParams.seeds.second = subSeedGenerator.getSubSeed();
-    resetParams.seed = subSeedGenerator.getSubSeed();
-    combGenerator.reset( resetParams );
+    combGenerator.reset( resetParams, std::ref( scintillateFunk ) );
 
-    auto pSamples = combGenerator.getSamples();
+    auto pSamples = combGenerator.getSamples( std::ref( scintillateFunk ) );
 
     // Write to standard out. It can be redirected.
     std::cout << std::scientific;

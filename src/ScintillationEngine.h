@@ -24,7 +24,7 @@ namespace TSG_NG
         using StateType = std::pair< double, double >;
 
 
-        using RandomValueFunkType = std::function< double() >;
+        using ScintillateFunkType = std::function< double() >;
 
         ScintillationEngine() = delete;
 
@@ -36,7 +36,7 @@ namespace TSG_NG
         }
 
         ///@note Invoking with decorrelationSamples of zero is a bad idea. Don't do it.
-        void run( const RandomValueFunkType & randomFunk,
+        void run( const ScintillateFunkType & scintillateFunk,
                   StateType & scintillationState,
                   size_t sampleCounter,
                   size_t decorrelationSamples );

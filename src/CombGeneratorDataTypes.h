@@ -24,12 +24,10 @@ struct CombGenerator_EXPORT CombGeneratorResetParameters
 
     size_t numLines{};                  // Cannot exceed maxSpectralLines
     double spacingRadiansPerSample{};   // First tone and spacing between tones. No Zero tone.
-//    const double * pMagnitudes{};       // A series of magnitudes of numLines length.
     const MagPhaseType * pMagPhase{};   // A series of Magnitudes and Initial Phases for each line.
     size_t decorrelationSamples{};      // Zero means no scintillation, otherwise specifies scintillation rate.
 
-//    std::pair< uint32_t, u_int32_t >seeds{};  // Used for generating random phases and scintillation magnitudes.
-    uint32_t seed{};                    // Used for generating scintillation magnitudes.
+//    uint32_t seed{};                    // Used for generating scintillation magnitudes.
 };
 
 
