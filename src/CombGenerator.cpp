@@ -8,7 +8,7 @@
 #include "CombGenerator.h"
 
 #include "FlyingPhasorToneGenerator.h"
-#include "RayleighDistributor.h"
+//#include "RayleighDistributor.h"
 #include "ScintillationEngine.h"
 
 #include <vector>
@@ -37,7 +37,7 @@ private:
     {
     }
 
-    void reset( const CombGeneratorResetParameters & resetParameters )
+    void reset( const CombGeneratorResetParameters & resetParameters, const ScintillateFunkType & randomMagFunk )
     {
         // Ensure that the user has not specified more lines than they constructed us to handle.
         if ( maxSpectralLines < resetParameters.numLines )
@@ -47,8 +47,8 @@ private:
         numLines = resetParameters.numLines;
         decorrelationSamples = resetParameters.decorrelationSamples;
 
-        // Seed our Random Number Generator Distributors
-        rayleighDistributor.reset( resetParameters.seed );
+//        // Seed our Random Number Generator Distributors
+//        rayleighDistributor.reset( resetParameters.seed );
 
         // For each Spectral Line
         auto pAmp = normalMagnitudes.begin();
@@ -68,13 +68,14 @@ private:
             // The slope will be adjusted immediately upon first getSamples invocation after reset.
             if ( 0 != resetParameters.decorrelationSamples )
             {
-                scintillationStates[ i ].first = rayleighDistributor.getValue(normalMag );
+//                scintillationStates[ i ].first = rayleighDistributor.getValue( normalMag );
+                scintillationStates[ i ].first = randomMagFunk( normalMag, i );
                 scintillationStates[ i ].second = 0.0;
             }
         }
     }
 
-    FlyingPhasorElementBufferTypePtr getSamples()
+    FlyingPhasorElementBufferTypePtr getSamples( const ScintillateFunkType & scintillateFunk )
     {
         // If no Scintillation.
         if ( !decorrelationSamples )
@@ -98,7 +99,7 @@ private:
             {
                 // Scintillation Management for spectral line I
                 auto currentSampleCount = spectralLineGenerators[i].getSampleCount();
-                scintillationManagement( i, currentSampleCount );
+                scintillationManagement(i, currentSampleCount, scintillateFunk );
 
                 // First line optimization, just get the scintillated samples. Accumulation not necessary.
                 if ( 0 == i )
@@ -113,20 +114,21 @@ private:
         return epochSampleBuffer.get();
     }
 
-    void scintillationManagement( size_t lineNum, size_t startingSampleCount )
+    void scintillationManagement( size_t lineNum, size_t startingSampleCount, const ScintillateFunkType & scintillateFunk )
     {
         // We need to provide a random value to our Scintillation Engine as it may require.
         // It does not know anything about what sort of distribution we are using.
         // We take care of that.
-        auto randFunk = [ this, lineNum ]()
+        auto sFunk = [ this, scintillateFunk, lineNum ]()
         {
-            return rayleighDistributor.getValue( normalMagnitudes[ lineNum ] );
+//            return rayleighDistributor.getValue( normalMagnitudes[ lineNum ] );
+            return scintillateFunk(normalMagnitudes[ lineNum ], lineNum );
         };
 
         // Our scintillation engine will manage (i.e., mute) the scintillation parameters we provide
         // to complete the scintillation state machine for our given 'line' number.
         auto & sParams = scintillationStates[ lineNum ];
-        scintillationEngine.run( std::ref( randFunk ), sParams, startingSampleCount, decorrelationSamples );
+        scintillationEngine.run( std::ref( sFunk ), sParams, startingSampleCount, decorrelationSamples );
     }
 
     const size_t maxSpectralLines;
@@ -138,8 +140,8 @@ private:
     std::unique_ptr< double[] > scintillationBuffer;
     std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer;
 
-    // Random Number Requirements met with RandomNumberGenerator class.
-    RayleighDistributor rayleighDistributor{};
+//    // Random Number Requirements met with RandomNumberGenerator class.
+//    RayleighDistributor rayleighDistributor{};
 
     // Scintillation Engine
     ScintillationEngine scintillationEngine;
@@ -159,12 +161,12 @@ CombGenerator::~CombGenerator()
     delete pImple;
 }
 
-void CombGenerator::reset( const CombGeneratorResetParameters & resetParameters )
+void CombGenerator::reset( const CombGeneratorResetParameters & resetParameters, const ScintillateFunkType & scintillateFunk )
 {
-    pImple->reset( resetParameters );
+    pImple->reset(resetParameters, scintillateFunk );
 }
 
-FlyingPhasorElementBufferTypePtr CombGenerator::getSamples()
+FlyingPhasorElementBufferTypePtr CombGenerator::getSamples( const ScintillateFunkType & scintillateFunk )
 {
-    return pImple->getSamples();
+    return pImple->getSamples(scintillateFunk );
 }

@@ -9,7 +9,7 @@
 
 using namespace TSG_NG;
 
-void ScintillationEngine::run( const RandomValueFunkType & randomFunk,
+void ScintillationEngine::run( const ScintillateFunkType & scintillateFunk,
                                StateType & scintillationState,
                                size_t sampleCounter,
                                size_t decorrelationSamples )
@@ -27,8 +27,8 @@ void ScintillationEngine::run( const RandomValueFunkType & randomFunk,
         // If time to calculate a new scintillation slope
         if ( 0 == (sampleCounter++ % decorrelationSamples ) )
         {
-            // Get a new scintillation target magnitude by invoking randomFunk observer.
-            auto scintillationTargetMag = randomFunk();
+            // Get a new scintillation target magnitude by invoking scintillateFunk observer.
+            auto scintillationTargetMag = scintillateFunk();
 
             // Calculate the change in magnitude per sample and store as the second parameter for the line.
             scintillationState.second = (scintillationTargetMag - scintillationState.first ) / decorrelationSamples;
