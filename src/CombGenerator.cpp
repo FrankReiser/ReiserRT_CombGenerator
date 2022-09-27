@@ -8,7 +8,6 @@
 #include "CombGenerator.h"
 
 #include "FlyingPhasorToneGenerator.h"
-//#include "RayleighDistributor.h"
 #include "ScintillationEngine.h"
 
 #include <vector>
@@ -47,9 +46,6 @@ private:
         numLines = resetParameters.numLines;
         decorrelationSamples = resetParameters.decorrelationSamples;
 
-//        // Seed our Random Number Generator Distributors
-//        rayleighDistributor.reset( resetParameters.seed );
-
         // For each Spectral Line
         auto pAmp = normalMagnitudes.begin();
         auto pResetMagPhase = resetParameters.pMagPhase;
@@ -68,7 +64,6 @@ private:
             // The slope will be adjusted immediately upon first getSamples invocation after reset.
             if ( 0 != resetParameters.decorrelationSamples )
             {
-//                scintillationStates[ i ].first = rayleighDistributor.getValue( normalMag );
                 scintillationStates[ i ].first = randomMagFunk( normalMag, i );
                 scintillationStates[ i ].second = 0.0;
             }
@@ -121,7 +116,6 @@ private:
         // We take care of that.
         auto sFunk = [ this, scintillateFunk, lineNum ]()
         {
-//            return rayleighDistributor.getValue( normalMagnitudes[ lineNum ] );
             return scintillateFunk(normalMagnitudes[ lineNum ], lineNum );
         };
 
@@ -139,9 +133,6 @@ private:
 
     std::unique_ptr< double[] > scintillationBuffer;
     std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer;
-
-//    // Random Number Requirements met with RandomNumberGenerator class.
-//    RayleighDistributor rayleighDistributor{};
 
     // Scintillation Engine
     ScintillationEngine scintillationEngine;
