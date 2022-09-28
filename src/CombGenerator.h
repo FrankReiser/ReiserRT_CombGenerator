@@ -33,7 +33,6 @@ namespace TSG_NG
 
         ReiserRT::Signal::FlyingPhasorElementBufferTypePtr getSamples( const ScintillateFunkType & scintillateFunk );
 
-
     private:
         Imple * pImple;
     };

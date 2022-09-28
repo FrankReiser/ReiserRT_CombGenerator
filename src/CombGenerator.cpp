@@ -13,6 +13,7 @@
 #include <vector>
 #include <memory>
 #include <stdexcept>
+#include <cstring>
 
 using namespace TSG_NG;
 using namespace ReiserRT::Signal;
@@ -28,15 +29,15 @@ private:
       : maxSpectralLines( theMaxSpectralLines )
       , epochSize( theEpochSize )
       , spectralLineGenerators{ maxSpectralLines }
-      , normalMagnitudes( maxSpectralLines, 0.0 )            // Default normalMagnitudes of zero
       , scintillationStates(maxSpectralLines, {0.0, 0.0 } )
       , scintillationBuffer{ new double[ epochSize ] }
       , epochSampleBuffer{ new FlyingPhasorElementType[ epochSize ] }
       , scintillationEngine{ scintillationBuffer.get(), epochSize }
     {
+        std::memset( epochSampleBuffer.get(), 0, sizeof( FlyingPhasorElementType ) * epochSize );
     }
 
-    void reset( const CombGeneratorResetParameters & resetParameters, const ScintillateFunkType & randomMagFunk )
+    void reset( const CombGeneratorResetParameters & resetParameters, const ScintillateFunkType & scintillateFunk )
     {
         // Ensure that the user has not specified more lines than they constructed us to handle.
         if ( maxSpectralLines < resetParameters.numLines )
@@ -45,26 +46,22 @@ private:
         // Record number of lines and decorrelation samples
         numLines = resetParameters.numLines;
         decorrelationSamples = resetParameters.decorrelationSamples;
+        pMagPhase = resetParameters.pMagPhase;
 
         // For each Spectral Line
-        auto pAmp = normalMagnitudes.begin();
-        auto pResetMagPhase = resetParameters.pMagPhase;
-        for ( size_t i = 0; i != numLines; ++i, ++pResetMagPhase )
+        auto pMP = pMagPhase;
+        for ( size_t i = 0; i != numLines; ++i, ++pMP )
         {
-            // Copy the Amplitude for Spectral Line
-            auto normalMag = pResetMagPhase->first;
-            *pAmp++ = normalMag;
-
             // Reset Spectral Line Tone Generator
             auto radiansPerSample = resetParameters.spacingRadiansPerSample + resetParameters.spacingRadiansPerSample * i;
-            spectralLineGenerators[ i ].reset( radiansPerSample, pResetMagPhase->second );
+            spectralLineGenerators[ i ].reset( radiansPerSample, pMP->second );
 
             // If scintillating, record initial scintillated magnitude from rayleigh distributed desired mean magnitude.
             // And set slope to the next scintillation value initially to zero.
             // The slope will be adjusted immediately upon first getSamples invocation after reset.
             if ( 0 != resetParameters.decorrelationSamples )
             {
-                scintillationStates[ i ].first = randomMagFunk( normalMag, i );
+                scintillationStates[ i ].first = scintillateFunk(pMP->first, i );
                 scintillationStates[ i ].second = 0.0;
             }
         }
@@ -80,10 +77,10 @@ private:
                 // First line optimization, just get the samples. Accumulation not necessary.
                 if ( 0 == i )
                     spectralLineGenerators[ i ].getSamplesScaled(epochSampleBuffer.get(), epochSize,
-                        normalMagnitudes[i] );
+                        pMagPhase[i].first );
                 else
                     spectralLineGenerators[ i ].accumSamplesScaled(epochSampleBuffer.get(), epochSize,
-                        normalMagnitudes[ i ] );
+                        pMagPhase[i].first );
             }
         }
         // Else, we are to scintillate
@@ -116,7 +113,7 @@ private:
         // We take care of that.
         auto sFunk = [ this, scintillateFunk, lineNum ]()
         {
-            return scintillateFunk(normalMagnitudes[ lineNum ], lineNum );
+            return scintillateFunk( pMagPhase[ lineNum ].first, lineNum );
         };
 
         // Our scintillation engine will manage (i.e., mute) the scintillation parameters we provide
@@ -128,7 +125,7 @@ private:
     const size_t maxSpectralLines;
     const size_t epochSize;
     std::vector< FlyingPhasorToneGenerator > spectralLineGenerators;
-    std::vector< double > normalMagnitudes;
+    const CombGeneratorResetParameters::MagPhaseType * pMagPhase{};
     std::vector< ScintillationEngine::StateType > scintillationStates;
 
     std::unique_ptr< double[] > scintillationBuffer;

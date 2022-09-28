@@ -14,8 +14,9 @@
 
 #include "FlyingPhasorToneGeneratorDataTypes.h"
 
-///@todo Put onus on user to not exceed nyquist or control it here. Seems that bandwidth limitation
+///@note Put onus on user to not exceed nyquist or control it here. Seems that bandwidth limitation
 ///is a user parameter for TSG_NG. However, we could allow an absolute nyquist limit here unless we desire wrapping.
+
 struct CombGenerator_EXPORT CombGeneratorResetParameters
 {
     using MagPhaseType = std::pair< double, double >;
@@ -23,11 +24,10 @@ struct CombGenerator_EXPORT CombGeneratorResetParameters
     CombGeneratorResetParameters() = default;
 
     size_t numLines{};                  // Cannot exceed maxSpectralLines
-    double spacingRadiansPerSample{};   // First tone and spacing between tones. No Zero tone.
+    ///@note The MagPhaseType buffer must persist between resets as it may be referenced during getSamples if scintillating.
     const MagPhaseType * pMagPhase{};   // A series of Magnitudes and Initial Phases for each line.
+    double spacingRadiansPerSample{};   // First tone and spacing between tones. No Zero tone.
     size_t decorrelationSamples{};      // Zero means no scintillation, otherwise specifies scintillation rate.
-
-//    uint32_t seed{};                    // Used for generating scintillation magnitudes.
 };
 
 
