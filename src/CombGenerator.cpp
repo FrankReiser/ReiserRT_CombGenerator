@@ -29,15 +29,15 @@ private:
       : maxSpectralLines( theMaxSpectralLines )
       , epochSize( theEpochSize )
       , spectralLineGenerators{ maxSpectralLines }
-      , scintillationStates(maxSpectralLines, {0.0, 0.0 } )
+      , scintillationStates{maxSpectralLines, {0.0, 0.0 } }
       , scintillationBuffer{ new double[ epochSize ] }
-      , epochSampleBuffer{ new FlyingPhasorElementType[ epochSize ] }
       , scintillationEngine{ scintillationBuffer.get(), epochSize }
+      , epochSampleBuffer{ new FlyingPhasorElementType[ epochSize ] }
     {
         std::memset( epochSampleBuffer.get(), 0, sizeof( FlyingPhasorElementType ) * epochSize );
     }
 
-    void reset( const CombGeneratorResetParameters & resetParameters, const ScintillateFunkType & scintillateFunk )
+    void reset( const ResetParameters & resetParameters, const ScintillateFunkType & scintillateFunk )
     {
         // Ensure that the user has not specified more lines than they constructed us to handle.
         if ( maxSpectralLines < resetParameters.numLines )
@@ -53,7 +53,8 @@ private:
         for ( size_t i = 0; i != numLines; ++i, ++pMP )
         {
             // Reset Spectral Line Tone Generator
-            auto radiansPerSample = resetParameters.spacingRadiansPerSample + resetParameters.spacingRadiansPerSample * i;
+//            auto radiansPerSample = resetParameters.spacingRadiansPerSample + resetParameters.spacingRadiansPerSample * i;
+            auto radiansPerSample = (i+1) * resetParameters.spacingRadiansPerSample;
             spectralLineGenerators[ i ].reset( radiansPerSample, pMP->second );
 
             // If scintillating, record initial scintillated magnitude from rayleigh distributed desired mean magnitude.
@@ -125,14 +126,15 @@ private:
     const size_t maxSpectralLines;
     const size_t epochSize;
     std::vector< FlyingPhasorToneGenerator > spectralLineGenerators;
-    const CombGeneratorResetParameters::MagPhaseType * pMagPhase{};
-    std::vector< ScintillationEngine::StateType > scintillationStates;
-
-    std::unique_ptr< double[] > scintillationBuffer;
-    std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer;
+    const MagPhaseType * pMagPhase{};
 
     // Scintillation Engine
+    std::vector< ScintillationEngine::StateType > scintillationStates;
+    std::unique_ptr< double[] > scintillationBuffer;
     ScintillationEngine scintillationEngine;
+
+    std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer;
+
 
     size_t numLines{};
     size_t decorrelationSamples{};
@@ -149,7 +151,7 @@ CombGenerator::~CombGenerator()
     delete pImple;
 }
 
-void CombGenerator::reset( const CombGeneratorResetParameters & resetParameters, const ScintillateFunkType & scintillateFunk )
+void CombGenerator::reset( const ResetParameters & resetParameters, const ScintillateFunkType & scintillateFunk )
 {
     pImple->reset(resetParameters, scintillateFunk );
 }

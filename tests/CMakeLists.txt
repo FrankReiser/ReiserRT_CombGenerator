@@ -28,3 +28,8 @@ target_include_directories( testScintillation PUBLIC ../src )
 target_link_libraries( testScintillation CombGenerator )
 add_test( NAME runScintillationTest COMMAND $<TARGET_FILE:testScintillation> )
 
+add_executable( testCombGenerator "" )
+target_sources( testCombGenerator PRIVATE testCombGenerator.cpp )
+target_include_directories( testCombGenerator PUBLIC ../src ../testUtilities )
+target_link_libraries( testCombGenerator CombGenerator TestUtilities )
+add_test( NAME runCombGeneratorTest COMMAND $<TARGET_FILE:testCombGenerator> )

@@ -3,6 +3,7 @@
 //
 
 #include "CombGenerator.h"
+//#include "CombGeneratorDataTypes.h"
 #include "SubSeedGenerator.h"
 #include "RandomPhaseDistributor.h"
 #include "RayleighDistributor.h"
@@ -44,7 +45,7 @@ int main( int argc, char * argv[] ) {
     }
 #endif
 
-    // Instantiate CombGenerator for NLines and Epoch Size
+    // Instantiate CombGenerator for a max of NLines and Epoch Size
     CombGenerator combGenerator{ cmdLineParser.getNumLines(), cmdLineParser.getEpochSize() };
 
     // We are going to generate seeds from a master seed for eventual use with multiple comb generator instances.
@@ -58,7 +59,7 @@ int main( int argc, char * argv[] ) {
     randomPhaseDistributor.reset( subSeedGenerator.getSubSeed() );
 
     // What Profile did we ask for.
-    using MagPhaseType = CombGeneratorResetParameters::MagPhaseType;
+    using MagPhaseType = CombGenerator::MagPhaseType;
     std::unique_ptr< MagPhaseType[] > magPhase{ new MagPhaseType [ cmdLineParser.getNumLines() ] };
     switch ( cmdLineParser.getProfile() ) {
         case 1: {
@@ -89,7 +90,7 @@ int main( int argc, char * argv[] ) {
     };
 
     // Reset the Comb Generator
-    CombGeneratorResetParameters resetParams;
+    CombGenerator::ResetParameters resetParams;
     resetParams.numLines = cmdLineParser.getNumLines();
     resetParams.spacingRadiansPerSample = cmdLineParser.getSpacingRadsPerSample();
     resetParams.pMagPhase = magPhase.get();
