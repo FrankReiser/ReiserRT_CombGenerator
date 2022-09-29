@@ -17,12 +17,15 @@
 
 namespace TSG_NG
 {
+    struct CombGeneratorResetParameters;
+
     class CombGenerator_EXPORT CombGenerator
     {
     private:
         class Imple;
 
     public:
+#if 0
         using MagPhaseType = std::pair< double, double >;
 
         ///@note Put onus on user to not exceed nyquist or control it here. Seems that bandwidth limitation
@@ -37,7 +40,7 @@ namespace TSG_NG
             double spacingRadiansPerSample{};   // First tone and spacing between tones. No Zero tone.
             size_t decorrelationSamples{};      // Zero means no scintillation, otherwise specifies scintillation rate.
         };
-
+#endif
         // The Line number hint is primarily intended for but, not limited to, testing purposes.
         using ScintillateFunkType = std::function< double( double desiredMean, size_t lineNumberHint ) >;
 
@@ -46,7 +49,7 @@ namespace TSG_NG
 
         ~CombGenerator();
 
-        void reset( const ResetParameters & resetParameters, const ScintillateFunkType & scintillateFunk );
+        void reset( const CombGeneratorResetParameters & resetParameters, const ScintillateFunkType & scintillateFunk );
 
         ReiserRT::Signal::FlyingPhasorElementBufferTypePtr getSamples( const ScintillateFunkType & scintillateFunk );
 

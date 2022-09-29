@@ -3,7 +3,7 @@
 //
 
 #include "CombGenerator.h"
-//#include "CombGeneratorDataTypes.h"
+#include "CombGeneratorDataTypes.h"
 #include "SubSeedGenerator.h"
 #include "RandomPhaseDistributor.h"
 #include "RayleighDistributor.h"
@@ -59,7 +59,7 @@ int main( int argc, char * argv[] ) {
     randomPhaseDistributor.reset( subSeedGenerator.getSubSeed() );
 
     // What Profile did we ask for.
-    using MagPhaseType = CombGenerator::MagPhaseType;
+//    using MagPhaseType = CombGenerator::MagPhaseType;
     std::unique_ptr< MagPhaseType[] > magPhase{ new MagPhaseType [ cmdLineParser.getNumLines() ] };
     switch ( cmdLineParser.getProfile() ) {
         case 1: {
@@ -90,7 +90,7 @@ int main( int argc, char * argv[] ) {
     };
 
     // Reset the Comb Generator
-    CombGenerator::ResetParameters resetParams;
+    CombGeneratorResetParameters resetParams;
     resetParams.numLines = cmdLineParser.getNumLines();
     resetParams.spacingRadiansPerSample = cmdLineParser.getSpacingRadsPerSample();
     resetParams.pMagPhase = magPhase.get();
