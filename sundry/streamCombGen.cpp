@@ -59,23 +59,23 @@ int main( int argc, char * argv[] ) {
     randomPhaseDistributor.reset( subSeedGenerator.getSubSeed() );
 
     // What Profile did we ask for.
-//    using MagPhaseType = CombGenerator::MagPhaseType;
-    std::unique_ptr< MagPhaseType[] > magPhase{ new MagPhaseType [ cmdLineParser.getNumLines() ] };
+    std::unique_ptr< double[] > magnitudes{ new double[ cmdLineParser.getNumLines() ] };
+    std::unique_ptr< double[] > phases{ new double[ cmdLineParser.getNumLines() ] };
     switch ( cmdLineParser.getProfile() ) {
         case 1: {
             const auto sqrt2over2 = std::sqrt( 2.0 ) / 2.0;
             for ( size_t i = 0; i != cmdLineParser.getNumLines(); ++i )
             {
-                magPhase[i].first = 1.0 * std::pow( sqrt2over2, i );
-                magPhase[i].second = randomPhaseDistributor.getValue();
+                magnitudes[i] = 1.0 * std::pow( sqrt2over2, i );
+                phases[i] = randomPhaseDistributor.getValue();
             }
             break;
         }
         default: {
             for ( size_t i = 0; i != cmdLineParser.getNumLines(); ++i )
             {
-                magPhase[i].first = 1.0;
-                magPhase[i].second = randomPhaseDistributor.getValue();
+                magnitudes[i] = 1.0;
+                phases[i] = randomPhaseDistributor.getValue();
             }
             break;
         }
@@ -93,7 +93,8 @@ int main( int argc, char * argv[] ) {
     CombGeneratorResetParameters resetParams;
     resetParams.numLines = cmdLineParser.getNumLines();
     resetParams.spacingRadiansPerSample = cmdLineParser.getSpacingRadsPerSample();
-    resetParams.pMagPhase = magPhase.get();
+    resetParams.pMagnitude = magnitudes.get();
+    resetParams.pPhase = phases.get();
     resetParams.decorrelationSamples = cmdLineParser.getDecorrelSamples();
     combGenerator.reset( resetParams, std::ref( scintillateFunk ) );
 

@@ -41,12 +41,13 @@ int main( int argc, char * argv[] )
     RandomPhaseDistributor randomPhaseDistributor{};
     randomPhaseDistributor.reset( subSeedGenerator.getSubSeed() );
 
-    // What Profile did we ask for.
-    std::unique_ptr< MagPhaseType[] > magPhase{ new MagPhaseType [ numLines ] };
+    // Initialize Mags and Phase.
+    std::unique_ptr< double[] > magnitudes{ new double[ numLines ] };
+    std::unique_ptr< double[] > phases{ new double[ numLines ] };
     for ( size_t i = 0; numLines != i; ++i )
     {
-        magPhase[i].first = 1.0;
-        magPhase[i].second = randomPhaseDistributor.getValue();
+        magnitudes[i] = 1.0;
+        phases[i] = randomPhaseDistributor.getValue();
     }
 
     // We will use a null Function (empty) when not scintillating. Invocations to it should throw.
@@ -57,7 +58,8 @@ int main( int argc, char * argv[] )
     CombGeneratorResetParameters resetParams;
     resetParams.numLines = numLines;
     resetParams.spacingRadiansPerSample = M_PI / 8;
-    resetParams.pMagPhase = magPhase.get();
+    resetParams.pMagnitude = magnitudes.get();
+    resetParams.pPhase = phases.get();
     resetParams.decorrelationSamples = 0;           // No Scintillation for Initial Test.
     combGenerator.reset( resetParams, std::ref(nullScintillateFunk ) );
 
@@ -70,8 +72,7 @@ int main( int argc, char * argv[] )
     std::unique_ptr< FlyingPhasorElementType[] > compareSampleBuffer{new FlyingPhasorElementType[ epochSize ] };
     for ( size_t i = 0; numLines != i; ++i )
     {
-        const auto phi = magPhase[i].second;
-        spectralLineGenerators[i].reset( (i+1) * resetParams.spacingRadiansPerSample, phi );
+        spectralLineGenerators[i].reset( (i+1) * resetParams.spacingRadiansPerSample, phases[i] );
         if ( 0 == i )
             spectralLineGenerators[i].getSamples(compareSampleBuffer.get(), epochSize );
         else
@@ -139,8 +140,7 @@ int main( int argc, char * argv[] )
         scintillationManagement( i, sampleCounter );
 
         // Setup Tone Generator
-        const auto phi = magPhase[i].second;
-        spectralLineGenerators[i].reset( (i+1) * resetParams.spacingRadiansPerSample, phi );
+        spectralLineGenerators[i].reset( (i+1) * resetParams.spacingRadiansPerSample, phases[i] );
 
         // First line optimization, just get the scintillated samples. Accumulation not necessary.
         if ( 0 == i )

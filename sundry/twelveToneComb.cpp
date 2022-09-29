@@ -79,13 +79,13 @@ int main()
     randomPhaseDistributor.reset( subSeedGenerator.getSubSeed() );
 
     // Setup some initial magnitudes. Each tone half the power of the previous.
-//    using MagPhaseType = CombGenerator::MagPhaseType;
-    std::unique_ptr< MagPhaseType[] > magPhase{ new MagPhaseType [maxSpectralLines] };
+    std::unique_ptr< double[] > magnitudes{ new double[ maxSpectralLines ] };
+    std::unique_ptr< double[] > phases{ new double[ maxSpectralLines ] };
     const auto sqrt2over2 = std::sqrt( 2.0 ) / 2.0;
     for ( size_t i = 0; i != maxSpectralLines; ++i )
     {
-        magPhase[i].first = 1.0 * std::pow( sqrt2over2, i );
-        magPhase[i].second = randomPhaseDistributor.getValue();
+        magnitudes[i] = 1.0 * std::pow( sqrt2over2, i );
+        phases[i] = randomPhaseDistributor.getValue();
     }
 
     // We are going to need a scintillation random number distributor
@@ -100,7 +100,8 @@ int main()
     CombGeneratorResetParameters resetParams;
     resetParams.numLines = maxSpectralLines;
     resetParams.spacingRadiansPerSample = M_PI / maxSpectralLines / 2.0;
-    resetParams.pMagPhase = magPhase.get();
+    resetParams.pMagnitude = magnitudes.get();
+    resetParams.pPhase = phases.get();
     resetParams.decorrelationSamples = epochSize * 2;   // Scintillation is costlier, so we're sort of getting a worse case.
     combGenerator.reset( resetParams, std::ref( scintillateFunk ) );
 

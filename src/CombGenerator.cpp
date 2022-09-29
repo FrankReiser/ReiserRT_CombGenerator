@@ -46,23 +46,24 @@ private:
         // Record number of lines and decorrelation samples
         numLines = resetParameters.numLines;
         decorrelationSamples = resetParameters.decorrelationSamples;
-        pMagPhase = resetParameters.pMagPhase;
+        pMagnitude = resetParameters.pMagnitude;
 
         // For each Spectral Line
-        auto pMP = pMagPhase;
-        for ( size_t i = 0; i != numLines; ++i, ++pMP )
+        auto pMag= pMagnitude;
+        auto pPhase = resetParameters.pPhase;
+        for ( size_t i = 0; i != numLines; ++i, ++pMag, ++pPhase )
         {
             // Reset Spectral Line Tone Generator
 //            auto radiansPerSample = resetParameters.spacingRadiansPerSample + resetParameters.spacingRadiansPerSample * i;
             auto radiansPerSample = (i+1) * resetParameters.spacingRadiansPerSample;
-            spectralLineGenerators[ i ].reset( radiansPerSample, pMP->second );
+            spectralLineGenerators[ i ].reset( radiansPerSample, *pPhase );
 
             // If scintillating, record initial scintillated magnitude from rayleigh distributed desired mean magnitude.
             // And set slope to the next scintillation value initially to zero.
             // The slope will be adjusted immediately upon first getSamples invocation after reset.
             if ( 0 != resetParameters.decorrelationSamples )
             {
-                scintillationStates[ i ].first = scintillateFunk(pMP->first, i );
+                scintillationStates[ i ].first = scintillateFunk( *pMag, i );
                 scintillationStates[ i ].second = 0.0;
             }
         }
@@ -74,14 +75,13 @@ private:
         if ( !decorrelationSamples )
         {
             // For, each spectral line accumulate its samples.
-            for ( size_t i = 0; i != numLines; ++i ) {
+            auto pMag = pMagnitude;
+            for ( size_t i = 0; i != numLines; ++i, ++pMag ) {
                 // First line optimization, just get the samples. Accumulation not necessary.
                 if ( 0 == i )
-                    spectralLineGenerators[ i ].getSamplesScaled(epochSampleBuffer.get(), epochSize,
-                        pMagPhase[i].first );
+                    spectralLineGenerators[ i ].getSamplesScaled(epochSampleBuffer.get(), epochSize, *pMag );
                 else
-                    spectralLineGenerators[ i ].accumSamplesScaled(epochSampleBuffer.get(), epochSize,
-                        pMagPhase[i].first );
+                    spectralLineGenerators[ i ].accumSamplesScaled(epochSampleBuffer.get(), epochSize, *pMag );
             }
         }
         // Else, we are to scintillate
@@ -114,7 +114,7 @@ private:
         // We take care of that.
         auto sFunk = [ this, scintillateFunk, lineNum ]()
         {
-            return scintillateFunk( pMagPhase[ lineNum ].first, lineNum );
+            return scintillateFunk( pMagnitude[ lineNum ], lineNum );
         };
 
         // Our scintillation engine will manage (i.e., mute) the scintillation parameters we provide
@@ -126,7 +126,7 @@ private:
     const size_t maxSpectralLines;
     const size_t epochSize;
     std::vector< FlyingPhasorToneGenerator > spectralLineGenerators;
-    const MagPhaseType * pMagPhase{};
+    const double * pMagnitude{};
 
     // Scintillation Engine
     std::vector< ScintillationEngine::StateType > scintillationStates;
