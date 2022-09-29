@@ -3,10 +3,15 @@
 //
 
 #include "CombGenerator.h"
+//#include "CombGeneratorDataTypes.h"
+#include "SubSeedGenerator.h"
+#include "RandomPhaseDistributor.h"
+#include "RayleighDistributor.h"
 #include "CommandLineParser.h"
 
 #include <iostream>
 #include <memory>
+
 using namespace TSG_NG;
 
 int main( int argc, char * argv[] ) {
@@ -40,35 +45,59 @@ int main( int argc, char * argv[] ) {
     }
 #endif
 
-    // Instantiate CombGenerator for NLines and Epoch Size
+    // Instantiate CombGenerator for a max of NLines and Epoch Size
     CombGenerator combGenerator{ cmdLineParser.getNumLines(), cmdLineParser.getEpochSize() };
 
+    // We are going to generate seeds from a master seed for eventual use with multiple comb generator instances.
+    // We do not want to use the same engine used by the CombGenerator itself as that would be problematic.
+    // Doing so would lead to multiple CombGenerators producing overlapping random sequences. That would be bad.
+    SubSeedGenerator subSeedGenerator{};
+    subSeedGenerator.reset( cmdLineParser.getSeed() );
+
+    // Instantiate a Random Phase Distributor and seed it with a value from our sub-seed generator.
+    RandomPhaseDistributor randomPhaseDistributor{};
+    randomPhaseDistributor.reset( subSeedGenerator.getSubSeed() );
+
     // What Profile did we ask for.
-    std::unique_ptr< double[] > magnitudes{ new double[ cmdLineParser.getNumLines() ] };
+    using MagPhaseType = CombGenerator::MagPhaseType;
+    std::unique_ptr< MagPhaseType[] > magPhase{ new MagPhaseType [ cmdLineParser.getNumLines() ] };
     switch ( cmdLineParser.getProfile() ) {
         case 1: {
             const auto sqrt2over2 = std::sqrt( 2.0 ) / 2.0;
             for ( size_t i = 0; i != cmdLineParser.getNumLines(); ++i )
-                magnitudes[i] = 1.0 * std::pow( sqrt2over2, i );
+            {
+                magPhase[i].first = 1.0 * std::pow( sqrt2over2, i );
+                magPhase[i].second = randomPhaseDistributor.getValue();
+            }
             break;
         }
         default: {
             for ( size_t i = 0; i != cmdLineParser.getNumLines(); ++i )
-                magnitudes[i] = 1.0;
+            {
+                magPhase[i].first = 1.0;
+                magPhase[i].second = randomPhaseDistributor.getValue();
+            }
             break;
         }
     }
 
+    // We are going to need a scintillation random number distributor
+    RayleighDistributor rayleighDistributor{};
+    rayleighDistributor.reset( subSeedGenerator.getSubSeed() );
+    auto scintillateFunk = [ &rayleighDistributor ]( double desiredMean, size_t lineNumberHint )
+    {
+        return rayleighDistributor.getValue( desiredMean );
+    };
+
     // Reset the Comb Generator
-    CombGeneratorResetParameters resetParams;
+    CombGenerator::ResetParameters resetParams;
     resetParams.numLines = cmdLineParser.getNumLines();
     resetParams.spacingRadiansPerSample = cmdLineParser.getSpacingRadsPerSample();
-    resetParams.pMagnitudes = magnitudes.get();
+    resetParams.pMagPhase = magPhase.get();
     resetParams.decorrelationSamples = cmdLineParser.getDecorrelSamples();
-    resetParams.randSeed = cmdLineParser.getSeed();
-    combGenerator.reset( resetParams );
+    combGenerator.reset( resetParams, std::ref( scintillateFunk ) );
 
-    auto pSamples = combGenerator.getSamples();
+    auto pSamples = combGenerator.getSamples( std::ref( scintillateFunk ) );
 
     // Write to standard out. It can be redirected.
     std::cout << std::scientific;

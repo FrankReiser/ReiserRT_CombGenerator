@@ -11,7 +11,7 @@ int CommandLineParser::parseCommandLine( int argc, char * argv[] )
 //    int digitOptIndex = 0;
     int retCode = 0;
 
-    enum eOptions { SpacingRadsPerSample=1, NumLines=2, Profile=3, EpochSize=4, DecorrelSamples=5, Seed=6, };
+    enum eOptions { SpacingRadsPerSample=1, NumLines=2, Profile=3, EpochSize=4, DecorrelSamples=5, Seed=6, DesiredMean };
 
     while (true) {
 //        int thisOptionOptIndex = optind ? optind : 1;
@@ -23,6 +23,7 @@ int CommandLineParser::parseCommandLine( int argc, char * argv[] )
                 {"epochSize", required_argument, nullptr, EpochSize },
                 {"decorrelSamples", required_argument, nullptr, DecorrelSamples },
                 {"seed", required_argument, nullptr, Seed },
+                { "desiredMean", required_argument, nullptr, DesiredMean },
                 {nullptr, 0, nullptr, 0 }
         };
 
@@ -73,6 +74,13 @@ int CommandLineParser::parseCommandLine( int argc, char * argv[] )
 #if 0
                 std::cout << "The getopt_long call detected the --seed=" << optarg
                           << ". Value extracted = " << seedIn << "." << std::endl;
+#endif
+                break;
+            case DesiredMean:
+                desiredMeanIn = std::stod(optarg );
+#if 0
+                std::cout << "The getopt_long call detected the --desiredMeanIn=" << optarg
+                          << ". Value extracted = " << desiredMeanIn << "." << std::endl;
 #endif
                 break;
             case '?':

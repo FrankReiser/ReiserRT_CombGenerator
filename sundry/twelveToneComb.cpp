@@ -3,11 +3,13 @@
 //
 
 #include "CombGenerator.h"
+#include "SubSeedGenerator.h"
+#include "RandomPhaseDistributor.h"
+#include "RayleighDistributor.h"
 
 #include <memory>
 #include <cmath>
 #include <iostream>
-#include <random>
 #include <cstring>
 
 using namespace TSG_NG;
@@ -64,34 +66,46 @@ int main()
     // Instantiate our Comb Generator
     CombGenerator combGenerator{ maxSpectralLines, epochSize };
 
-    // Setup some initial magnitudes. Each tone half the power of the previous.
-    std::unique_ptr< double[] > magnitudes{ new double[maxSpectralLines] };
-    const auto sqrt2over2 = std::sqrt( 2.0 ) / 2.0;
-    for ( size_t i = 0; i != maxSpectralLines; ++i )
-    {
-        magnitudes[i] = 1.0 * std::pow( sqrt2over2, i );
-//        std::cout << "Mag[" << i << "] = " << magnitudes[i] << std::endl;
-    }
-
     // We are going to generate seeds from a master seed for eventual use with multiple comb generator instances.
     // We do not want to use the same engine used by the CombGenerator itself as that would be problematic.
     // Doing so would lead to multiple CombGenerators producing overlapping random sequences. That would be bad.
     const uint32_t masterSeed = 1113;
-    std::knuth_b subSeedGenerator(masterSeed );
-    std::uniform_int_distribution< uint32_t> subSeedDistribution{};
+    SubSeedGenerator subSeedGenerator{};
+    subSeedGenerator.reset( masterSeed );
+
+    // Instantiate a Random Phase Distributor and seed it with a value from our sub-seed generator.
+    RandomPhaseDistributor randomPhaseDistributor{};
+    randomPhaseDistributor.reset( subSeedGenerator.getSubSeed() );
+
+    // Setup some initial magnitudes. Each tone half the power of the previous.
+    using MagPhaseType = CombGenerator::MagPhaseType;
+    std::unique_ptr< MagPhaseType[] > magPhase{ new MagPhaseType [maxSpectralLines] };
+    const auto sqrt2over2 = std::sqrt( 2.0 ) / 2.0;
+    for ( size_t i = 0; i != maxSpectralLines; ++i )
+    {
+        magPhase[i].first = 1.0 * std::pow( sqrt2over2, i );
+        magPhase[i].second = randomPhaseDistributor.getValue();
+    }
+
+    // We are going to need a scintillation random number distributor
+    RayleighDistributor rayleighDistributor{};
+    rayleighDistributor.reset( subSeedGenerator.getSubSeed() );
+    auto scintillateFunk = [ &rayleighDistributor ]( double desiredMean, size_t lineNumberHint )
+    {
+        return rayleighDistributor.getValue( desiredMean );
+    };
 
     // Reset the Comb Generator with some parameters.
-    CombGeneratorResetParameters resetParams;
+    CombGenerator::ResetParameters resetParams;
     resetParams.numLines = maxSpectralLines;
     resetParams.spacingRadiansPerSample = M_PI / maxSpectralLines / 2.0;
-    resetParams.pMagnitudes = magnitudes.get();
+    resetParams.pMagPhase = magPhase.get();
     resetParams.decorrelationSamples = epochSize * 2;   // Scintillation is costlier, so we're sort of getting a worse case.
-    resetParams.randSeed = subSeedDistribution(subSeedGenerator ),
-    combGenerator.reset( resetParams );
+    combGenerator.reset( resetParams, std::ref( scintillateFunk ) );
 
     double t0, t1;
     t0 = getClockMonotonic();
-    combGenerator.getSamples();
+    combGenerator.getSamples( std::ref( scintillateFunk ) );
     t1 = getClockMonotonic();
 
     std::cout
