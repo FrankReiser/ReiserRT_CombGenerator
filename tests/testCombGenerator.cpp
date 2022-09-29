@@ -3,6 +3,7 @@
 //
 
 #include "CombGenerator.h"
+#include "CombGeneratorDataTypes.h"
 #include "SubSeedGenerator.h"
 #include "RandomPhaseDistributor.h"
 #include "FlyingPhasorToneGenerator.h"
@@ -16,8 +17,6 @@
 
 using namespace TSG_NG;
 using namespace ReiserRT::Signal;
-
-
 
 int main( int argc, char * argv[] )
 {
@@ -43,7 +42,6 @@ int main( int argc, char * argv[] )
     randomPhaseDistributor.reset( subSeedGenerator.getSubSeed() );
 
     // What Profile did we ask for.
-    using MagPhaseType = CombGenerator::MagPhaseType;
     std::unique_ptr< MagPhaseType[] > magPhase{ new MagPhaseType [ numLines ] };
     for ( size_t i = 0; numLines != i; ++i )
     {
@@ -56,7 +54,7 @@ int main( int argc, char * argv[] )
     CombGenerator::ScintillateFunkType nullScintillateFunk{};
 
     // Reset the Comb Generator
-    CombGenerator::ResetParameters resetParams;
+    CombGeneratorResetParameters resetParams;
     resetParams.numLines = numLines;
     resetParams.spacingRadiansPerSample = M_PI / 8;
     resetParams.pMagPhase = magPhase.get();

@@ -3,6 +3,7 @@
 //
 
 #include "CombGenerator.h"
+#include "CombGeneratorDataTypes.h"
 #include "SubSeedGenerator.h"
 #include "RandomPhaseDistributor.h"
 #include "RayleighDistributor.h"
@@ -78,7 +79,7 @@ int main()
     randomPhaseDistributor.reset( subSeedGenerator.getSubSeed() );
 
     // Setup some initial magnitudes. Each tone half the power of the previous.
-    using MagPhaseType = CombGenerator::MagPhaseType;
+//    using MagPhaseType = CombGenerator::MagPhaseType;
     std::unique_ptr< MagPhaseType[] > magPhase{ new MagPhaseType [maxSpectralLines] };
     const auto sqrt2over2 = std::sqrt( 2.0 ) / 2.0;
     for ( size_t i = 0; i != maxSpectralLines; ++i )
@@ -96,7 +97,7 @@ int main()
     };
 
     // Reset the Comb Generator with some parameters.
-    CombGenerator::ResetParameters resetParams;
+    CombGeneratorResetParameters resetParams;
     resetParams.numLines = maxSpectralLines;
     resetParams.spacingRadiansPerSample = M_PI / maxSpectralLines / 2.0;
     resetParams.pMagPhase = magPhase.get();

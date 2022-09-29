@@ -6,7 +6,7 @@
  */
 
 #include "CombGenerator.h"
-
+#include "CombGeneratorDataTypes.h"
 #include "FlyingPhasorToneGenerator.h"
 #include "ScintillationEngine.h"
 
@@ -37,7 +37,7 @@ private:
         std::memset( epochSampleBuffer.get(), 0, sizeof( FlyingPhasorElementType ) * epochSize );
     }
 
-    void reset( const ResetParameters & resetParameters, const ScintillateFunkType & scintillateFunk )
+    void reset( const CombGeneratorResetParameters & resetParameters, const ScintillateFunkType & scintillateFunk )
     {
         // Ensure that the user has not specified more lines than they constructed us to handle.
         if ( maxSpectralLines < resetParameters.numLines )
@@ -151,7 +151,7 @@ CombGenerator::~CombGenerator()
     delete pImple;
 }
 
-void CombGenerator::reset( const ResetParameters & resetParameters, const ScintillateFunkType & scintillateFunk )
+void CombGenerator::reset( const CombGeneratorResetParameters & resetParameters, const ScintillateFunkType & scintillateFunk )
 {
     pImple->reset(resetParameters, scintillateFunk );
 }

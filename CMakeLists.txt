@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 project(
         CombGenerator
         VERSION 1.0.1
-	DESCRIPTION "TSG Comb Generator")
+        DESCRIPTION "TSG Next Generation Comb Generator" )
 
 # Set up compiler requirements
 set(CMAKE_CXX_STANDARD 11)
