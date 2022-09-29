@@ -8,6 +8,7 @@
 #include <iostream>
 #include <cmath>
 
+///@todo Shouldn't this be an absolute tolerance. Ratio is often inappropriate.
 bool inTolerance( double value, double desiredValue, double toleranceRatio )
 {
     auto limitA = desiredValue * ( 1 + toleranceRatio );
