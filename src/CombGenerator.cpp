@@ -51,19 +51,18 @@ private:
         // For each Spectral Line
         auto pMag= pMagnitude;
         auto pPhase = resetParameters.pPhase;
-        for ( size_t i = 0; i != numLines; ++i, ++pMag, ++pPhase )
+        for ( size_t i = 0; i != numLines; ++i )
         {
             // Reset Spectral Line Tone Generator
-//            auto radiansPerSample = resetParameters.spacingRadiansPerSample + resetParameters.spacingRadiansPerSample * i;
             auto radiansPerSample = (i+1) * resetParameters.spacingRadiansPerSample;
-            spectralLineGenerators[ i ].reset( radiansPerSample, *pPhase );
+            spectralLineGenerators[ i ].reset( radiansPerSample, pPhase ? *pPhase++ : 0.0 );
 
             // If scintillating, record initial scintillated magnitude from rayleigh distributed desired mean magnitude.
             // And set slope to the next scintillation value initially to zero.
             // The slope will be adjusted immediately upon first getSamples invocation after reset.
             if ( 0 != resetParameters.decorrelationSamples )
             {
-                scintillationStates[ i ].first = scintillateFunk( *pMag, i );
+                scintillationStates[ i ].first = scintillateFunk( pMag ? *pMag++ : 1.0, i );
                 scintillationStates[ i ].second = 0.0;
             }
         }
@@ -114,7 +113,7 @@ private:
         // We take care of that.
         auto sFunk = [ this, scintillateFunk, lineNum ]()
         {
-            return scintillateFunk( pMagnitude[ lineNum ], lineNum );
+            return scintillateFunk( pMagnitude ? pMagnitude[ lineNum ] : 1.0, lineNum );
         };
 
         // Our scintillation engine will manage (i.e., mute) the scintillation parameters we provide

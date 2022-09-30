@@ -17,15 +17,32 @@
 
 namespace TSG_NG
 {
-//    using MagPhaseType = std::pair< double, double >;
+    /**
+     * @brief Reset Parameters for the CombGenerator
+     *
+     * This type is utilized by the CombGenerator::reset operation. It may also be utilized by other APIs that
+     * indirectly reset a CombGenerator instance.
+     */
     struct CombGeneratorResetParameters
     {
+        /**
+         * @brief Default Constructor
+         *
+         * Defaults are all zero or nullptr.
+         */
         CombGeneratorResetParameters() = default;
 
-        size_t numLines{};                  // Cannot exceed maxSpectralLines
+        /**
+         * @brief The Number of Spectral Lines
+         *
+         * This field specifies the number of spectral lines to produce. The value must not
+         * exceed the maximum spectral lines specified for an instance of CombGenerator or
+         * exceptions may be thrown.
+         */
+        size_t numLines{};
+
         ///@note The magnitude buffer must persist between resets as it may be referenced during getSamples if scintillating.
         ///The phase buffer is only used during the reset call and need not persist.
-//        const MagPhaseType * pMagPhase{};   // A series of Magnitudes and Initial Phases for each line.
         const double * pMagnitude{};        // A series of Magnitudes for each line of length numLines.
         const double * pPhase{};            // A series of Phases for each line of length numLines.
         double spacingRadiansPerSample{};   // First tone and spacing between tones. No Zero tone.

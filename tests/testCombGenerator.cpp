@@ -41,14 +41,16 @@ int main( int argc, char * argv[] )
     RandomPhaseDistributor randomPhaseDistributor{};
     randomPhaseDistributor.reset( subSeedGenerator.getSubSeed() );
 
-    // Initialize Mags and Phase.
+    // Initialize Mags and Phase. We will use a magnitude of 2.0 and a random phase
     std::unique_ptr< double[] > magnitudes{ new double[ numLines ] };
     std::unique_ptr< double[] > phases{ new double[ numLines ] };
     for ( size_t i = 0; numLines != i; ++i )
     {
-        magnitudes[i] = 1.0;
+        magnitudes[i] = 2.0;
         phases[i] = randomPhaseDistributor.getValue();
     }
+
+    //////////// Non-Scintillated Test ////////////
 
     // We will use a null Function (empty) when not scintillating. Invocations to it should throw.
     // However, we do not expect it to be invoked if we are not scintillating. I.e., decorrelation samples of zero.
@@ -74,9 +76,9 @@ int main( int argc, char * argv[] )
     {
         spectralLineGenerators[i].reset( (i+1) * resetParams.spacingRadiansPerSample, phases[i] );
         if ( 0 == i )
-            spectralLineGenerators[i].getSamples(compareSampleBuffer.get(), epochSize );
+            spectralLineGenerators[i].getSamplesScaled(compareSampleBuffer.get(), epochSize, resetParams.pMagnitude[i] );
         else
-            spectralLineGenerators[i].accumSamples(compareSampleBuffer.get(), epochSize );
+            spectralLineGenerators[i].accumSamplesScaled(compareSampleBuffer.get(), epochSize, resetParams.pMagnitude[i] );
     }
     std::unique_ptr< FlyingPhasorElementType[] > deltaSampleBuffer{new FlyingPhasorElementType[ epochSize ] };
     for ( size_t i = 0; numLines != i; ++i )
@@ -88,6 +90,8 @@ int main( int argc, char * argv[] )
             return 1;
         }
     }
+
+    //////////// Scintillated Test - First Epoch ////////////
 
     // Now we are going to Scintillate at a fraction epoch and each time we are asked for a scintillation value
     // we will cache it in order to reproduce the data manually.
@@ -163,6 +167,8 @@ int main( int argc, char * argv[] )
         }
     }
 
+    //////////// Scintillated Test - Second Epoch ////////////
+
     // Grab another Epoch of Scintillated Data from the CombGenerator
     pSamples = combGenerator.getSamples( std::ref(scintillateFunk ) );
 
@@ -190,6 +196,59 @@ int main( int argc, char * argv[] )
         {
             std::cout << "Failed Scintillated Test#2 at epoch sample index " << i << "." << std::endl;
             return 3;
+        }
+    }
+
+
+    //////////// NULL PHASE AND MAGNITUDE TEST ////////////
+
+    // The capability to pass a null phase or magnitude was provided. If this is detected phase defaults to 0.0
+    // and magnitude defaults to 1.0. We will validate this under scintillation conditions.
+    resetParams.pMagnitude = nullptr;
+    resetParams.pPhase = nullptr;
+    svc.clear();
+
+    // Reset the CombGenerator and get samples for scintillated harmonic series.
+    combGenerator.reset( resetParams, std::ref(scintillateFunk ) );
+    pSamples = combGenerator.getSamples( std::ref(scintillateFunk ) );
+
+    // Now we need to manually create a scintillated 'compare' buffer.
+    // We have to set the initial scintillated state for each line. This is only initial the scintillated magnitudes.
+    // The slopes will be computed immediately on the first comparison sample generation for each line.
+    cacheIndex = 0;
+    for ( size_t i = 0; numLines != i; ++i )
+    {
+        scintillationStates[ i ].first = svc[ cacheIndex++ ];
+        scintillationStates[ i ].second = 0.0;
+    }
+    sampleCounter = 0;
+    // Generate the scintillated 'compare' buffer.
+    for ( size_t i = 0; numLines != i; ++i )
+    {
+        // Setup Scintillation Magnitude Buffer that we will scale by.
+        scintillationManagement( i, sampleCounter );
+
+        // Setup Tone Generator
+        spectralLineGenerators[i].reset( (i+1) * resetParams.spacingRadiansPerSample, 0.0 );
+
+        // First line optimization, just get the scintillated samples. Accumulation not necessary.
+        if ( 0 == i )
+            spectralLineGenerators[i].getSamplesScaled(compareSampleBuffer.get(), epochSize,
+                                                       scintillationBuffer.get() );
+        else
+            spectralLineGenerators[i].accumSamplesScaled(compareSampleBuffer.get(), epochSize,
+                                                         scintillationBuffer.get() );
+    }
+    sampleCounter += epochSize;
+
+    // The difference for second scintillated epoch should be zero
+    for ( size_t i = 0; numLines != i; ++i )
+    {
+        deltaSampleBuffer[i] = pSamples[i] - compareSampleBuffer[i];
+        if ( 0.0 != deltaSampleBuffer[i] )
+        {
+            std::cout << "Failed NULL PHASE AND MAG test at epoch sample index " << i << "." << std::endl;
+            return 4;
         }
     }
 
