@@ -98,7 +98,7 @@ int main( int argc, char * argv[] ) {
     resetParams.decorrelationSamples = cmdLineParser.getDecorrelSamples();
     combGenerator.reset( resetParams, std::ref( scintillateFunk ) );
 
-    auto pSamples = combGenerator.getSamples( std::ref( scintillateFunk ) );
+    auto pSamples = combGenerator.getEpoch(std::ref(scintillateFunk));
 
     // Write to standard out. It can be redirected.
     std::cout << std::scientific;

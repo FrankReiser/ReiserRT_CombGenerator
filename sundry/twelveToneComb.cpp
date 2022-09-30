@@ -107,7 +107,7 @@ int main()
 
     double t0, t1;
     t0 = getClockMonotonic();
-    combGenerator.getSamples( std::ref( scintillateFunk ) );
+    combGenerator.getEpoch(std::ref(scintillateFunk));
     t1 = getClockMonotonic();
 
     std::cout
