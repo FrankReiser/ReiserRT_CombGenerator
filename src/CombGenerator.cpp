@@ -59,7 +59,7 @@ private:
 
             // If scintillating, record initial scintillated magnitude from rayleigh distributed desired mean magnitude.
             // And set slope to the next scintillation value initially to zero.
-            // The slope will be adjusted immediately upon first getSamples invocation after reset.
+            // The slope will be adjusted immediately upon first getEpoch invocation after reset.
             if ( 0 != resetParameters.decorrelationSamples )
             {
                 scintillationStates[ i ].first = scintillateFunk( pMag ? *pMag++ : 1.0, i );
@@ -68,7 +68,7 @@ private:
         }
     }
 
-    FlyingPhasorElementBufferTypePtr getSamples( const ScintillateFunkType & scintillateFunk )
+    FlyingPhasorElementBufferTypePtr getEpoch( const ScintillateFunkType & scintillateFunk )
     {
         // If no Scintillation.
         if ( !decorrelationSamples )
@@ -155,7 +155,7 @@ void CombGenerator::reset( const CombGeneratorResetParameters & resetParameters,
     pImple->reset(resetParameters, scintillateFunk );
 }
 
-FlyingPhasorElementBufferTypePtr CombGenerator::getSamples( const ScintillateFunkType & scintillateFunk )
+FlyingPhasorElementBufferTypePtr CombGenerator::getEpoch( const ScintillateFunkType & scintillateFunk )
 {
-    return pImple->getSamples(scintillateFunk );
+    return pImple->getEpoch( scintillateFunk );
 }

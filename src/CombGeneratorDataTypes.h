@@ -41,11 +41,45 @@ namespace TSG_NG
          */
         size_t numLines{};
 
-        ///@note The magnitude buffer must persist between resets as it may be referenced during getSamples if scintillating.
-        ///The phase buffer is only used during the reset call and need not persist.
+        /**
+         * @brief Magnitude Vector Address
+         *
+         * This field provides for addressing of a series of magnitude values, of length numLines.
+         * This data pointed to is expected to persist between CombGenerator reset cycles.
+         * CombGenerator does not make it's own copy and the data may be accessed during getEpoch invocations.
+         * Other API's using CombGeneratorResetParameters may relax this requirement, providing their own guarantee.
+         * If a nullptr is provided, default magnitude values of 1.0 will be used for each spectral line.
+         */
         const double * pMagnitude{};        // A series of Magnitudes for each line of length numLines.
+
+        /**
+         * @brief Phase Vector Address
+         *
+         * This field provides for addressing of a series of radian phase values, of length numLines.
+         * This data pointed to need not persist between CombGenerator reset cycles.
+         * CombGenerator only needs it for the reset call.
+         * Other API's using CombGeneratorResetParameters may strengthen this requirement if necessary.
+         * If a nullptr is provided, default phase values of 0.0 will be used for each spectral line.
+         */
         const double * pPhase{};            // A series of Phases for each line of length numLines.
-        double spacingRadiansPerSample{};   // First tone and spacing between tones. No Zero tone.
+
+        /**
+         * @brief Spectral Line Spacing
+         *
+         * The CombGenerator creates a harmonic series starting with a fundamental frequency specified
+         * in radians per sample, and followed by numLines harmonics. The fundamental frequency and the
+         * spacing, specify the same thing.
+         * This field specifies the fundamental frequency and the spacing per tone.
+         */
+        double spacingRadiansPerSample{};
+
+        /**
+         * @brief Decorrelation Samples
+         *
+         * If non-zero, this field specifies that the generated spectral lines will scintillate over a period
+         * of N samples. If zero, no scintillation will occur. The CombGenerator relies on client hooks
+         * to provide scintillation values. See CombGenerator reset and getEpoch operation.
+         */
         size_t decorrelationSamples{};      // Zero means no scintillation, otherwise specifies scintillation rate.
     };
 }

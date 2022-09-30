@@ -66,7 +66,7 @@ int main( int argc, char * argv[] )
     combGenerator.reset( resetParams, std::ref(nullScintillateFunk ) );
 
     // Get samples for non-scintillated harmonic series.
-    auto pSamples = combGenerator.getSamples( std::ref(nullScintillateFunk ) );
+    auto pSamples = combGenerator.getEpoch(std::ref(nullScintillateFunk));
 
     // To Verify the non-scintillated samples produced. We will use a FlyingPhasor and attempt to remove the tones
     // generated. Since both use FlyingPhasors in the same order, we expect the delta to be exactly zero.
@@ -109,7 +109,7 @@ int main( int argc, char * argv[] )
 
     // Reset the CombGenerator and get samples for scintillated harmonic series.
     combGenerator.reset( resetParams, std::ref(scintillateFunk ) );
-    pSamples = combGenerator.getSamples( std::ref(scintillateFunk ) );
+    pSamples = combGenerator.getEpoch(std::ref(scintillateFunk));
 
 
     // Now we need to manually create a scintillated 'compare' buffer.
@@ -170,7 +170,7 @@ int main( int argc, char * argv[] )
     //////////// Scintillated Test - Second Epoch ////////////
 
     // Grab another Epoch of Scintillated Data from the CombGenerator
-    pSamples = combGenerator.getSamples( std::ref(scintillateFunk ) );
+    pSamples = combGenerator.getEpoch(std::ref(scintillateFunk));
 
     // Generate another Epoch of scintillated 'compare' buffer.
     for ( size_t i = 0; numLines != i; ++i )
@@ -210,7 +210,7 @@ int main( int argc, char * argv[] )
 
     // Reset the CombGenerator and get samples for scintillated harmonic series.
     combGenerator.reset( resetParams, std::ref(scintillateFunk ) );
-    pSamples = combGenerator.getSamples( std::ref(scintillateFunk ) );
+    pSamples = combGenerator.getEpoch(std::ref(scintillateFunk));
 
     // Now we need to manually create a scintillated 'compare' buffer.
     // We have to set the initial scintillated state for each line. This is only initial the scintillated magnitudes.

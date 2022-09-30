@@ -35,7 +35,7 @@ namespace TSG_NG
             ResetParameters() = default;
 
             size_t numLines{};                  // Cannot exceed maxSpectralLines
-            ///@note The MagPhaseType buffer must persist between resets as it may be referenced during getSamples if scintillating.
+            ///@note The MagPhaseType buffer must persist between resets as it may be referenced during getEpoch if scintillating.
             const MagPhaseType * pMagPhase{};   // A series of Magnitudes and Initial Phases for each line.
             double spacingRadiansPerSample{};   // First tone and spacing between tones. No Zero tone.
             size_t decorrelationSamples{};      // Zero means no scintillation, otherwise specifies scintillation rate.
@@ -51,7 +51,7 @@ namespace TSG_NG
 
         void reset( const CombGeneratorResetParameters & resetParameters, const ScintillateFunkType & scintillateFunk );
 
-        ReiserRT::Signal::FlyingPhasorElementBufferTypePtr getSamples( const ScintillateFunkType & scintillateFunk );
+        ReiserRT::Signal::FlyingPhasorElementBufferTypePtr getEpoch( const ScintillateFunkType & scintillateFunk );
 
     private:
         Imple * pImple;
