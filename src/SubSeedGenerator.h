@@ -31,17 +31,46 @@ namespace TSG_NG
     class CombGenerator_EXPORT SubSeedGenerator
     {
     private:
+        /**
+         * @brief Forward Reference to Hidden Implementation
+         */
         class Imple;
 
     public:
+        /**
+         * @brief Default Constructor
+         *
+         * Instantiates the Implementation.
+         */
         SubSeedGenerator();
+
+        /**
+         * @brief Destructor
+         *
+         * Deletes the Implementation.
+         */
         ~SubSeedGenerator();
 
+        /**
+         * @brief Reset the Seed Used
+         *
+         * This operation resets the seed used by the internal std::knuth_b random number engine.
+         *
+         * @param seed The seed to use for reseeding.
+         */
         void reset( uint32_t seed );
+
+        /**
+         * @brief Get Sub-seed
+         *
+         * This operation returns the next random sub-seed from the full set of uint32_t values.
+         *
+         * @return Returns the next sub-seed value.
+         */
         uint32_t getSubSeed();
 
     private:
-        Imple * pImple;
+        Imple * pImple;    //!< Pointer to hidden implementation.
     };
 }
 
