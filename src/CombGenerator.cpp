@@ -37,7 +37,9 @@ private:
         std::memset( epochSampleBuffer.get(), 0, sizeof( FlyingPhasorElementType ) * epochSize );
     }
 
-    void reset( const CombGeneratorResetParameters & resetParameters, const ScintillateFunkType & scintillateFunk )
+    void reset( const CombGeneratorResetParameters & resetParameters,
+                const double * pMagVector, const double * pPhaseVector,
+                const ScintillateFunkType & scintillateFunk )
     {
         // Ensure that the user has not specified more lines than they constructed us to handle.
         if ( maxSpectralLines < resetParameters.numLines )
@@ -46,23 +48,21 @@ private:
         // Record number of lines and decorrelation samples
         numLines = resetParameters.numLines;
         decorrelationSamples = resetParameters.decorrelationSamples;
-        pMagnitude = resetParameters.pMagnitude;
+        pMagnitude = pMagVector;
 
         // For each Spectral Line
-        auto pMag= pMagnitude;
-        auto pPhase = resetParameters.pPhase;
         for ( size_t i = 0; i != numLines; ++i )
         {
             // Reset Spectral Line Tone Generator
             auto radiansPerSample = (i+1) * resetParameters.spacingRadiansPerSample;
-            spectralLineGenerators[ i ].reset( radiansPerSample, pPhase ? *pPhase++ : 0.0 );
+            spectralLineGenerators[ i ].reset( radiansPerSample, pPhaseVector ? *pPhaseVector++ : 0.0 );
 
             // If scintillating, record initial scintillated magnitude from rayleigh distributed desired mean magnitude.
             // And set slope to the next scintillation value initially to zero.
             // The slope will be adjusted immediately upon first getEpoch invocation after reset.
             if ( 0 != resetParameters.decorrelationSamples )
             {
-                scintillationStates[ i ].first = scintillateFunk( pMag ? *pMag++ : 1.0, i );
+                scintillationStates[ i ].first = scintillateFunk( pMagVector ? *pMagVector++ : 1.0, i );
                 scintillationStates[ i ].second = 0.0;
             }
         }
@@ -150,9 +150,11 @@ CombGenerator::~CombGenerator()
     delete pImple;
 }
 
-void CombGenerator::reset( const CombGeneratorResetParameters & resetParameters, const ScintillateFunkType & scintillateFunk )
+void CombGenerator::reset( const CombGeneratorResetParameters & resetParameters,
+                           const double * pMagVector, const double * pPhaseVector,
+                           const ScintillateFunkType & scintillateFunk )
 {
-    pImple->reset(resetParameters, scintillateFunk );
+    pImple->reset( resetParameters, pMagVector, pPhaseVector, scintillateFunk );
 }
 
 FlyingPhasorElementBufferTypePtr CombGenerator::getEpoch( const ScintillateFunkType & scintillateFunk )

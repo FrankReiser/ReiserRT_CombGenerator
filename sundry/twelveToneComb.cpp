@@ -100,10 +100,8 @@ int main()
     CombGeneratorResetParameters resetParams;
     resetParams.numLines = maxSpectralLines;
     resetParams.spacingRadiansPerSample = M_PI / maxSpectralLines / 2.0;
-    resetParams.pMagnitude = magnitudes.get();
-    resetParams.pPhase = phases.get();
     resetParams.decorrelationSamples = epochSize * 2;   // Scintillation is costlier, so we're sort of getting a worse case.
-    combGenerator.reset( resetParams, std::ref( scintillateFunk ) );
+    combGenerator.reset( resetParams, magnitudes.get(), phases.get(), std::ref( scintillateFunk ) );
 
     double t0, t1;
     t0 = getClockMonotonic();

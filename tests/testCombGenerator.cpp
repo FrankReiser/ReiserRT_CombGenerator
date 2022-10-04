@@ -60,10 +60,8 @@ int main( int argc, char * argv[] )
     CombGeneratorResetParameters resetParams;
     resetParams.numLines = numLines;
     resetParams.spacingRadiansPerSample = M_PI / 8;
-    resetParams.pMagnitude = magnitudes.get();
-    resetParams.pPhase = phases.get();
     resetParams.decorrelationSamples = 0;           // No Scintillation for Initial Test.
-    combGenerator.reset( resetParams, std::ref(nullScintillateFunk ) );
+    combGenerator.reset( resetParams, magnitudes.get(), phases.get(), std::ref(nullScintillateFunk ) );
 
     // Get samples for non-scintillated harmonic series.
     auto pSamples = combGenerator.getEpoch(std::ref(nullScintillateFunk));
@@ -76,9 +74,9 @@ int main( int argc, char * argv[] )
     {
         spectralLineGenerators[i].reset( (i+1) * resetParams.spacingRadiansPerSample, phases[i] );
         if ( 0 == i )
-            spectralLineGenerators[i].getSamplesScaled(compareSampleBuffer.get(), epochSize, resetParams.pMagnitude[i] );
+            spectralLineGenerators[i].getSamplesScaled(compareSampleBuffer.get(), epochSize, magnitudes.get()[i] );
         else
-            spectralLineGenerators[i].accumSamplesScaled(compareSampleBuffer.get(), epochSize, resetParams.pMagnitude[i] );
+            spectralLineGenerators[i].accumSamplesScaled(compareSampleBuffer.get(), epochSize, magnitudes.get()[i] );
     }
     std::unique_ptr< FlyingPhasorElementType[] > deltaSampleBuffer{new FlyingPhasorElementType[ epochSize ] };
     for ( size_t i = 0; numLines != i; ++i )
@@ -108,7 +106,7 @@ int main( int argc, char * argv[] )
     };
 
     // Reset the CombGenerator and get samples for scintillated harmonic series.
-    combGenerator.reset( resetParams, std::ref(scintillateFunk ) );
+    combGenerator.reset( resetParams,  magnitudes.get(), phases.get(), std::ref(scintillateFunk ) );
     pSamples = combGenerator.getEpoch(std::ref(scintillateFunk));
 
 
@@ -204,12 +202,10 @@ int main( int argc, char * argv[] )
 
     // The capability to pass a null phase or magnitude was provided. If this is detected phase defaults to 0.0
     // and magnitude defaults to 1.0. We will validate this under scintillation conditions.
-    resetParams.pMagnitude = nullptr;
-    resetParams.pPhase = nullptr;
     svc.clear();
 
     // Reset the CombGenerator and get samples for scintillated harmonic series.
-    combGenerator.reset( resetParams, std::ref(scintillateFunk ) );
+    combGenerator.reset( resetParams, nullptr, nullptr, std::ref(scintillateFunk ) );
     pSamples = combGenerator.getEpoch(std::ref(scintillateFunk));
 
     // Now we need to manually create a scintillated 'compare' buffer.

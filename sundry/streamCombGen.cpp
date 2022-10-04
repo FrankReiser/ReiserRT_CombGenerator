@@ -93,10 +93,8 @@ int main( int argc, char * argv[] ) {
     CombGeneratorResetParameters resetParams;
     resetParams.numLines = cmdLineParser.getNumLines();
     resetParams.spacingRadiansPerSample = cmdLineParser.getSpacingRadsPerSample();
-    resetParams.pMagnitude = magnitudes.get();
-    resetParams.pPhase = phases.get();
     resetParams.decorrelationSamples = cmdLineParser.getDecorrelSamples();
-    combGenerator.reset( resetParams, std::ref( scintillateFunk ) );
+    combGenerator.reset( resetParams, magnitudes.get(), phases.get(), std::ref( scintillateFunk ) );
 
     auto pSamples = combGenerator.getEpoch(std::ref(scintillateFunk));
 
