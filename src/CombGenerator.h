@@ -24,11 +24,11 @@ namespace TSG_NG
      *
      * The CombGenerator generates a harmonic spectrum in the form of a complex time series
      * of specified length. Internally it utilizes a batch of ReiserRT_FlyingPhasor instances
-     * set up at a specified harmonic spacing. The magnitudes and phases of each tone
-     * are to be specified by the client.
+     * set up at a specific harmonic spacing. The magnitudes and phases of each tone
+     * are to specified by the client during the reset operation along with other parameters.
      *
      * The Comb Generator also provides support for scintillating each tone produced through
-     * a scintillation observer interface. @see reset operation.
+     * a scintillation observer interface. @see ScintillateFunkType.
      */
     class CombGenerator_EXPORT CombGenerator
     {
@@ -39,15 +39,14 @@ namespace TSG_NG
         class Imple;
 
     public:
-        // The Line number hint is primarily intended for but, not limited to, testing purposes.
         /**
-         * @brief The Scintillate Function Type
+         * @brief The Scintillate Functor Type
          *
          * The CombGenerator does not specify particular distribution for scintillating. It relies on the
          * client to provide those details at the beginning of decorrelation periods.
          * We specify a functor that returns a double precision value and accepts for arguments, what the
-         * nominal value should be and a spectral line number hint which may be useful to the client.
-         * This type is used in the reset and getEpoch operations.
+         * expected value should be and a spectral line number hint which may be useful to the client.
+         * This functor type is used in the reset and getEpoch operations.
          */
         using ScintillateFunkType = std::function< double( double desiredMean, size_t lineNumberHint ) >;
 
@@ -80,19 +79,19 @@ namespace TSG_NG
         /**
          * @brief The Reset Operation
          *
-         * This operation prepares the CombGenerator for a new series of getEpoch invocations.
+         * This operation prepares the CombGenerator for a subsequent series of getEpoch invocations.
          * It will set the initial scintillated magnitudes if resetParameters specifies a
-         * non-zero value for decorrelationSamples. In this case, it will invoke the
-         * the client provided scintillateFunk for an initial magnitude based on a nominal value.
+         * non-zero value for decorrelationSamples. If non-zero, it will invoke the
+         * the client provided scintillateFunk for an initial magnitude based on an expected value.
          *
          * @param resetParameters The reset parameters. @see CombGeneratorResetParameters for details.
-         * @param pMagVector This argument provides a series of magnitude values, of length numLines.
+         * @param pMagVector This argument provides a series of magnitude values, of length resetParameters.numLines.
          * The data pointed to is expected to persist between CombGenerator reset cycles.
          * CombGenerator does not make it's own copy and the data may be accessed during getEpoch invocations.
-         * @param pPhaseVector This argument provides a series of radian phase values, of length numLines.
+         * @param pPhaseVector This argument provides a series of radian phase values, of length resetParameters.numLines.
          * The data pointed to need not persist between CombGenerator reset cycles.
-         * CombGenerator only uses it during the reset call.
-         * @param scintillateFunk Observer interface for obtaining scintillated magnitude values.
+         * CombGenerator only uses it within the reset call and has no further use for it.
+         * @param scintillateFunk Observer interface for obtaining scintillated magnitude values from a client.
          */
         void reset( const CombGeneratorResetParameters & resetParameters,
                     const double * pMagVector, const double * pPhaseVector,
@@ -106,8 +105,9 @@ namespace TSG_NG
          * for magnitude values at the beginning of decorrelation periods, specifying a desired mean
          * (expected value) and a spectral line number hint.
          *
-         * @param scintillateFunk Observer interface for obtaining scintillated magnitude values.
-         * @return Returns a pointer to internal buffer space when an epoch's worth of harmonic
+         * @param scintillateFunk Observer interface for obtaining scintillated magnitude values from a client.
+         *
+         * @return Returns a pointer to an internal buffer where an epoch's worth of harmonic
          * spectrum, complex time series data, resides.
          */
         ReiserRT::Signal::FlyingPhasorElementBufferTypePtr getEpoch( const ScintillateFunkType & scintillateFunk );
