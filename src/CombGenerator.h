@@ -86,9 +86,17 @@ namespace TSG_NG
          * the client provided scintillateFunk for an initial magnitude based on a nominal value.
          *
          * @param resetParameters The reset parameters. @see CombGeneratorResetParameters for details.
+         * @param pMagVector This argument provides a series of magnitude values, of length numLines.
+         * The data pointed to is expected to persist between CombGenerator reset cycles.
+         * CombGenerator does not make it's own copy and the data may be accessed during getEpoch invocations.
+         * @param pPhaseVector This argument provides a series of radian phase values, of length numLines.
+         * The data pointed to need not persist between CombGenerator reset cycles.
+         * CombGenerator only uses it during the reset call.
          * @param scintillateFunk Observer interface for obtaining scintillated magnitude values.
          */
-        void reset( const CombGeneratorResetParameters & resetParameters, const ScintillateFunkType & scintillateFunk );
+        void reset( const CombGeneratorResetParameters & resetParameters,
+                    const double * pMagVector, const double * pPhaseVector,
+                    const ScintillateFunkType & scintillateFunk );
 
         /**
          * @brief The Get Epoch Operation
