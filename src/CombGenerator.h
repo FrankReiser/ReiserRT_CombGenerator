@@ -24,11 +24,12 @@ namespace TSG_NG
      *
      * The CombGenerator generates a harmonic spectrum in the form of a complex time series
      * of specified length. Internally it utilizes a batch of ReiserRT_FlyingPhasor instances
-     * set up at a specific harmonic spacing. The magnitudes and phases of each tone
+     * set up at a prescribed harmonic spacing. The magnitudes, phases of each tone, along with
+     * the harmonic spacing are specified at 'reset' time.
      * are to specified by the client during the reset operation along with other parameters.
      *
-     * The Comb Generator also provides support for scintillating each tone produced through
-     * a scintillation observer interface. @see ScintillateFunkType.
+     * The Comb Generator also provides support for individually scintillating the tones produced through
+     * a scintillation observer interface and decorrelation sample count. @see ScintillateFunkType.
      */
     class CombGenerator_EXPORT CombGenerator
     {
@@ -44,9 +45,9 @@ namespace TSG_NG
          *
          * The CombGenerator does not specify particular distribution for scintillating. It relies on the
          * client to provide those details at the beginning of decorrelation periods.
-         * We specify a functor that returns a double precision value and accepts for arguments, what the
-         * expected value should be and a spectral line number hint which may be useful to the client.
-         * This functor type is used in the reset and getEpoch operations.
+         * We specify a functor that returns a double precision value. This functor receives arguments for the
+         * expected magnitude value and a spectral line number hint which may be useful to the client.
+         * This functor type is required in the reset and getEpoch operations.
          */
         using ScintillateFunkType = std::function< double( double desiredMean, size_t lineNumberHint ) >;
 
@@ -61,8 +62,10 @@ namespace TSG_NG
         /**
          * @brief Qualified Constructor
          *
-         * This constructor allocates a batch of ReiserRT_FlyingPhasor instances for a maximum use case scenario.
-         * It also sets up the necessary buffers and logic for potential scintillation use cases.
+         * This constructor instantiates the implementation. This results in the creation of a
+         * batch of ReiserRT_FlyingPhasor instances for a the given, maximum use case scenario.
+         * It lso creates up the necessary buffer for the aggregations of signal data and state machine data
+         * for potential scintillation use cases.
          *
          * @param maxSpectralLines The maximum number of spectral lines that an instance will support.
          * @param epochSize The number of samples that make up an epoch.
@@ -92,6 +95,7 @@ namespace TSG_NG
          * The data pointed to need not persist between CombGenerator reset cycles.
          * CombGenerator only uses it within the reset call and has no further use for it.
          * @param scintillateFunk Observer interface for obtaining scintillated magnitude values from a client.
+         * This may be an empty (null) function object if resetParameters.decorrelationSamples is zero.
          */
         void reset( const CombGeneratorResetParameters & resetParameters,
                     const double * pMagVector, const double * pPhaseVector,
@@ -106,6 +110,7 @@ namespace TSG_NG
          * (expected value) and a spectral line number hint.
          *
          * @param scintillateFunk Observer interface for obtaining scintillated magnitude values from a client.
+         * This may be an empty (null) function object if resetParameters.decorrelationSamples is zero.
          *
          * @return Returns a pointer to an internal buffer where an epoch's worth of harmonic
          * spectrum, complex time series data, resides.
