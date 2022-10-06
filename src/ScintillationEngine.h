@@ -41,10 +41,8 @@ namespace TSG_NG
          * As already mentioned, the ScintillationEngine does not maintain state of its own.
          * It relies on the client to provide the state being managed when the ScintillationEngine
          * is run. This StateType is is simply a pair of doubles. The 'first' value represents the
-         * initial magnitude over the course of a decorrelation period. The 'second' value represents
+         * initial magnitude over the course of an epoch. The 'second' value represents
          * the change per sample in magnitude over the course of a decorrelation period.
-         * Values will only be muted at the beginning of decorrelation periods and are otherwise
-         * merely read.
          */
         using StateType = std::pair< double, double >;
 

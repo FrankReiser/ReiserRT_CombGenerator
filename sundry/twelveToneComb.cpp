@@ -3,7 +3,7 @@
 //
 
 #include "CombGenerator.h"
-#include "CombGeneratorDataTypes.h"
+#include "CombGeneratorResetParameters.h"
 #include "SubSeedGenerator.h"
 #include "RandomPhaseDistributor.h"
 #include "RayleighDistributor.h"

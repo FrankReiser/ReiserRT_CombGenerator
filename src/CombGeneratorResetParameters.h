@@ -1,13 +1,13 @@
 /**
- * @file CombGeneratorDataTypes.h
- * @brief The Specification File for Data Types used by the Comb Generator
+ * @file CombGeneratorResetParameters.h
+ * @brief The Specification File for Reset Parameters used by the Comb Generator
  * @authors Frank Reiser
  * @date Initiated September 1st, 2022
  */
 
 
-#ifndef TSG_NG_COMBGENERATOR_COMBGENERATORDATATYPES_H
-#define TSG_NG_COMBGENERATOR_COMBGENERATORDATATYPES_H
+#ifndef TSG_NG_COMBGENERATOR_COMBGENERATORRESETPARAMETERS_H
+#define TSG_NG_COMBGENERATOR_COMBGENERATORRESETPARAMETERS_H
 
 #include <utility>
 #include <cstdlib>
@@ -64,4 +64,4 @@ namespace TSG_NG
 
 
 
-#endif //TSG_NG_COMBGENERATOR_COMBGENERATORDATATYPES_H
+#endif //#ifdef TSG_NG_COMBGENERATOR_COMBGENERATORRESETPARAMETERS_H
