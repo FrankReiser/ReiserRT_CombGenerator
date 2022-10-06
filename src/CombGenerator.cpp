@@ -6,7 +6,7 @@
  */
 
 #include "CombGenerator.h"
-#include "CombGeneratorDataTypes.h"
+#include "CombGeneratorResetParameters.h"
 #include "FlyingPhasorToneGenerator.h"
 #include "ScintillationEngine.h"
 

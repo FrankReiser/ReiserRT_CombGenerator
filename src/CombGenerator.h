@@ -24,12 +24,11 @@ namespace TSG_NG
      *
      * The CombGenerator generates a harmonic spectrum in the form of a complex time series
      * of specified length. Internally it utilizes a batch of ReiserRT_FlyingPhasor instances
-     * set up at a prescribed harmonic spacing. The magnitudes, phases of each tone, along with
+     * set up at a prescribed harmonic spacing. The magnitudes and phases of each tone, along with
      * the harmonic spacing are specified at 'reset' time.
-     * are to specified by the client during the reset operation along with other parameters.
      *
-     * The Comb Generator also provides support for individually scintillating the tones produced through
-     * a scintillation observer interface and decorrelation sample count. @see ScintillateFunkType.
+     * The CombGenerator also provides support for individually scintillating the tones produced through
+     * a scintillation observer interface with specified decorrelation period. @see ScintillateFunkType.
      */
     class CombGenerator_EXPORT CombGenerator
     {

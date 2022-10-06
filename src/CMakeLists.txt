@@ -11,7 +11,7 @@ endif()
 
 # Specify all of our public headers for easy reference.
 set( _publicHeaders
-    "CombGeneratorDataTypes.h"
+    "CombGeneratorResetParameters.h"
     "CombGenerator.h"
     "SubSeedGenerator.h"
     "RayleighDistributor.h"
@@ -25,7 +25,7 @@ set( _privateHeaders
 
 # Specify our source files
 set( _sourceFiles
-    "CombGeneratorDataTypes.cpp"
+    "CombGeneratorResetParameters.cpp"
     "CombGenerator.cpp"
     "SubSeedGenerator.cpp"
     "RayleighDistributor.cpp"
