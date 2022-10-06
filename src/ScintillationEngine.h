@@ -41,8 +41,9 @@ namespace TSG_NG
          * As already mentioned, the ScintillationEngine does not maintain state of its own.
          * It relies on the client to provide the state being managed when the ScintillationEngine
          * is run. This StateType is is simply a pair of doubles. The 'first' value represents the
-         * initial magnitude over the course of an epoch. The 'second' value represents
+         * initial magnitude over the course of scintillation. The 'second' value represents
          * the change per sample in magnitude over the course of a decorrelation period.
+         * These values are managed (read and potentially written) during the course of a run.
          */
         using StateType = std::pair< double, double >;
 
@@ -56,6 +57,16 @@ namespace TSG_NG
          */
         using ScintillateFunkType = std::function< double() >;
 
+#if 1
+        /**
+         * @brief Default Construction
+         *
+         * The ScintillationEngine requires no information to instantiate. If fact, it is designed to
+         * be instance-less. It's only member function is declared static and operates strictly from
+         * arguments provided.
+         */
+        ScintillationEngine() = default;
+#else
         /**
          * @brief Default Construction is Disallowed
          *
@@ -79,6 +90,7 @@ namespace TSG_NG
                 , bufLen( theBufLen )
         {
         }
+#endif
 
         /**
          * @brief Default Destructor
@@ -88,12 +100,14 @@ namespace TSG_NG
         ~ScintillationEngine() = default;
 
         /**
-         * @brief The Run Operation
+         * @brief The Static Run Operation
          *
-         * Invoking this operation will generate scintillated magnitude values into the scintillation
-         * buffer provided during construction. It will invoke the client provided scintillateFunk
+         * Invoking this operation will generate scintillated magnitude values into a user provided
+         * buffer of the desired run length. It will invoke the client provided scintillateFunk
          * a the beginning of decorrelation periods.
          *
+         * @param pBuffer A buffer where scintillated magnitude values will be written to.
+         * @param runLen The number of scintillated magnitude values to write.
          * @param scintillateFunk Client provided functor interface that returns a scintillated magnitude value
          * when invoked. The distribution utilized is up to the client.
          * @param scintillationState The StateType to be used and potentially managed on start of decorrelation period.
@@ -102,14 +116,16 @@ namespace TSG_NG
          * @param decorrelationSamples The number of samples representing a decorrelation period.
          * @warning Invoking with decorrelationSamples of zero is a bad idea. Don't do it.
          */
-        void run( const ScintillateFunkType & scintillateFunk,
-                  StateType & scintillationState,
-                  size_t sampleCounter,
-                  size_t decorrelationSamples );
+        static void run( double * pBuffer,
+                         size_t runLen,
+                         const ScintillateFunkType & scintillateFunk,
+                         StateType & scintillationState,
+                         size_t sampleCounter,
+                         size_t decorrelationSamples );
 
     private:
-        double * const pScintillationBuffer;    //!< The Scintillation Buffer
-        const size_t bufLen;                    //!< The Scintillation Buffer Length
+//        double * const pScintillationBuffer;    //!< The Scintillation Buffer
+//        const size_t bufLen;                    //!< The Scintillation Buffer Length
     };
 
 

@@ -31,7 +31,7 @@ private:
       , spectralLineGenerators{ maxSpectralLines }
       , scintillationStates{maxSpectralLines, {0.0, 0.0 } }
       , scintillationBuffer{ new double[ epochSize ] }
-      , scintillationEngine{ scintillationBuffer.get(), epochSize }
+//      , scintillationEngine{ scintillationBuffer.get(), epochSize }
       , epochSampleBuffer{ new FlyingPhasorElementType[ epochSize ] }
     {
         std::memset( epochSampleBuffer.get(), 0, sizeof( FlyingPhasorElementType ) * epochSize );
@@ -119,7 +119,8 @@ private:
         // Our scintillation engine will manage (i.e., mute) the scintillation parameters we provide
         // to complete the scintillation state machine for our given 'line' number.
         auto & sParams = scintillationStates[ lineNum ];
-        scintillationEngine.run( std::ref( sFunk ), sParams, startingSampleCount, decorrelationSamples );
+        ScintillationEngine::run( scintillationBuffer.get(), epochSize,
+              std::ref( sFunk ), sParams, startingSampleCount, decorrelationSamples );
     }
 
     const size_t maxSpectralLines;
@@ -130,7 +131,7 @@ private:
     // Scintillation Engine
     std::vector< ScintillationEngine::StateType > scintillationStates;
     std::unique_ptr< double[] > scintillationBuffer;
-    ScintillationEngine scintillationEngine;
+//    ScintillationEngine scintillationEngine;
 
     std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer;
 
