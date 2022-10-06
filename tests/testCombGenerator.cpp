@@ -121,17 +121,17 @@ int main( int argc, char * argv[] )
         scintillationStates[ i ].second = 0.0;
     }
     std::unique_ptr< double[] > scintillationBuffer{ new double[ epochSize ] };
-    ScintillationEngine scintillationEngine{ scintillationBuffer.get(), epochSize };
+//    ScintillationEngine scintillationEngine{ scintillationBuffer.get(), epochSize };
 
-    // Scintillation Management Function, Invoked once per line, per epoch retrieved.
+    // Scintillation Management Function, invoked once per line, per epoch retrieved.
     size_t sampleCounter = 0;
     auto scintillationManagement =
-            [ &scintillationStates, &scintillationEngine, &svc, &cacheIndex, &resetParams ](
+            [ &scintillationStates, &scintillationBuffer, epochSize, &svc, &cacheIndex, &resetParams ](
             size_t lineNum, size_t startingSampleCount )
     {
         auto sFunk = [ &svc, &cacheIndex ]() { return svc[ cacheIndex++ ]; };
         auto & sParams = scintillationStates[ lineNum ];
-        scintillationEngine.run( std::ref( sFunk ), sParams,
+        ScintillationEngine::run( scintillationBuffer.get(), epochSize, std::ref( sFunk ), sParams,
            startingSampleCount, resetParams.decorrelationSamples );
     };
 
