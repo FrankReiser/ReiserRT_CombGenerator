@@ -8,7 +8,7 @@
 #ifndef TSG_NG_RAYLEIGHDISTRIBUTOR_H
 #define TSG_NG_RAYLEIGHDISTRIBUTOR_H
 
-#include "CombGeneratorExport.h"
+#include "TsgNgCombGeneratorExport.h"
 
 #include <cstdint>
 
@@ -22,7 +22,7 @@ namespace TSG_NG
      * is not sensitive to a low value of the expected. It is intended to be utilized as
      * a source of scintillated magnitude values for the CombGenerator.
      */
-    class CombGenerator_EXPORT RayleighDistributor
+    class TsgNgCombGenerator_EXPORT RayleighDistributor
     {
     private:
         /**

@@ -8,7 +8,7 @@
 #ifndef TSG_NG_RANDOMPHASEDISTRIBUTOR_H
 #define TSG_NG_RANDOMPHASEDISTRIBUTOR_H
 
-#include "CombGeneratorExport.h"
+#include "TsgNgCombGeneratorExport.h"
 
 #include <cstdint>
 
@@ -20,7 +20,7 @@ namespace TSG_NG
      * This class produces random phase values, uniformly distributed between positive and negative
      * pi. It is intended to be utilized as a source of random phase values for the CombGenerator.
      */
-    class CombGenerator_EXPORT RandomPhaseDistributor
+    class TsgNgCombGenerator_EXPORT RandomPhaseDistributor
     {
     private:
         /**
