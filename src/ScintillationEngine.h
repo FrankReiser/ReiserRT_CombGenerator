@@ -8,7 +8,7 @@
 #ifndef TSG_NG_SCINTILLATIONENGINE_H
 #define TSG_NG_SCINTILLATIONENGINE_H
 
-#include "CombGeneratorExport.h"
+#include "TsgNgCombGeneratorExport.h"
 
 #include <cstdlib>
 #include <functional>
@@ -27,7 +27,7 @@ namespace TSG_NG
      * It was specifically designed this way so that the logic of performing scintillation can be
      * tested with necessarily employing a random number distribution.
      */
-    class CombGenerator_EXPORT ScintillationEngine
+    class TsgNgCombGenerator_EXPORT ScintillationEngine
     {
     public:
         // The first value of the pair represents the initial scintillated magnitude over the course of a decorrelation

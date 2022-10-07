@@ -8,7 +8,7 @@
 #ifndef TSG_NG_SUBSEEDGENERATOR_H
 #define TSG_NG_SUBSEEDGENERATOR_H
 
-#include "CombGeneratorExport.h"
+#include "TsgNgCombGeneratorExport.h"
 
 #include <cstdint>
 
@@ -28,7 +28,7 @@ namespace TSG_NG
      * instance, nor type, for both the purposes of generating 'sub-seeds' and generating other random
      * number sequences. They must be different to avoid overlapping bit stream sequences from each.
      */
-    class CombGenerator_EXPORT SubSeedGenerator
+    class TsgNgCombGenerator_EXPORT SubSeedGenerator
     {
     private:
         /**

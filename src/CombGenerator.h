@@ -9,7 +9,7 @@
 #define TSG_NG_COMB_GENERATOR_H
 
 // Include Export Specification File
-#include "CombGeneratorExport.h"
+#include "TsgNgCombGeneratorExport.h"
 
 #include "FlyingPhasorToneGeneratorDataTypes.h"
 
@@ -30,7 +30,7 @@ namespace TSG_NG
      * The CombGenerator also provides support for individually scintillating the tones produced through
      * a scintillation observer interface with specified decorrelation period. @see ScintillateFunkType.
      */
-    class CombGenerator_EXPORT CombGenerator
+    class TsgNgCombGenerator_EXPORT CombGenerator
     {
     private:
         /**
@@ -89,10 +89,12 @@ namespace TSG_NG
          * @param resetParameters The reset parameters. @see CombGeneratorResetParameters for details.
          * @param pMagVector This argument provides a series of magnitude values, of length resetParameters.numLines.
          * The data pointed to is expected to persist between CombGenerator reset cycles.
+         * Passing a null pointer results in default magnitude of 1.0 for all lines.
          * CombGenerator does not make it's own copy and the data may be accessed during getEpoch invocations.
          * @param pPhaseVector This argument provides a series of radian phase values, of length resetParameters.numLines.
          * The data pointed to need not persist between CombGenerator reset cycles.
          * CombGenerator only uses it within the reset call and has no further use for it.
+         * Passing a null pointer results in default phase of 0.0 for all lines.
          * @param scintillateFunk Observer interface for obtaining scintillated magnitude values from a client.
          * This may be an empty (null) function object if resetParameters.decorrelationSamples is zero.
          */
