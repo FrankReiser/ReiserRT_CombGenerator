@@ -29,9 +29,8 @@ private:
       : maxSpectralLines( theMaxSpectralLines )
       , epochSize( theEpochSize )
       , spectralLineGenerators{ maxSpectralLines }
-      , scintillationStates{maxSpectralLines, {0.0, 0.0 } }
+      , scintillationStateVector{ maxSpectralLines, {0.0, 0.0 } }
       , scintillationBuffer{ new double[ epochSize ] }
-//      , scintillationEngine{ scintillationBuffer.get(), epochSize }
       , epochSampleBuffer{ new FlyingPhasorElementType[ epochSize ] }
     {
         std::memset( epochSampleBuffer.get(), 0, sizeof( FlyingPhasorElementType ) * epochSize );
@@ -62,13 +61,13 @@ private:
             // The slope will be adjusted immediately upon first getEpoch invocation after reset.
             if ( 0 != resetParameters.decorrelationSamples )
             {
-                scintillationStates[ i ].first = scintillateFunk( pMagVector ? *pMagVector++ : 1.0, i );
-                scintillationStates[ i ].second = 0.0;
+                scintillationStateVector[ i ].first = scintillateFunk(pMagVector ? *pMagVector++ : 1.0, i );
+                scintillationStateVector[ i ].second = 0.0;
             }
         }
     }
 
-    FlyingPhasorElementBufferTypePtr getEpoch( const ScintillateFunkType & scintillateFunk )
+    const FlyingPhasorElementBufferTypePtr getEpoch( const ScintillateFunkType & scintillateFunk )
     {
         // If no Scintillation.
         if ( !decorrelationSamples )
@@ -118,7 +117,7 @@ private:
 
         // Our scintillation engine will manage (i.e., mute) the scintillation parameters we provide
         // to complete the scintillation state machine for our given 'line' number.
-        auto & sParams = scintillationStates[ lineNum ];
+        auto & sParams = scintillationStateVector[ lineNum ];
         ScintillationEngine::run( scintillationBuffer.get(), epochSize,
               std::ref( sFunk ), sParams, startingSampleCount, decorrelationSamples );
     }
@@ -128,10 +127,10 @@ private:
     std::vector< FlyingPhasorToneGenerator > spectralLineGenerators;
     const double * pMagnitude{};
 
-    // Scintillation Engine
-    std::vector< ScintillationEngine::StateType > scintillationStates;
+    // Scintillation Engine Needs: A vector of states for each spectral line and
+    // a reusable buffer where varying scintillation magnitudes are cached per line
+    std::vector< ScintillationEngine::StateType > scintillationStateVector;
     std::unique_ptr< double[] > scintillationBuffer;
-//    ScintillationEngine scintillationEngine;
 
     std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer;
 
@@ -158,7 +157,7 @@ void CombGenerator::reset( const CombGeneratorResetParameters & resetParameters,
     pImple->reset( resetParameters, pMagVector, pPhaseVector, scintillateFunk );
 }
 
-FlyingPhasorElementBufferTypePtr CombGenerator::getEpoch( const ScintillateFunkType & scintillateFunk )
+const FlyingPhasorElementBufferTypePtr CombGenerator::getEpoch( const ScintillateFunkType & scintillateFunk )
 {
     return pImple->getEpoch( scintillateFunk );
 }

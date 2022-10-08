@@ -57,7 +57,6 @@ namespace TSG_NG
          */
         using ScintillateFunkType = std::function< double() >;
 
-#if 1
         /**
          * @brief Default Construction
          *
@@ -66,31 +65,6 @@ namespace TSG_NG
          * arguments provided.
          */
         ScintillationEngine() = default;
-#else
-        /**
-         * @brief Default Construction is Disallowed
-         *
-         * The ScintillationEngine requires a buffer space and its length. Use the qualified constructor.
-         */
-        ScintillationEngine() = delete;
-
-        /**
-         * @brief Qualified Constructor
-         *
-         * The ScintillationEngine requires buffer space and its length. It will operate
-         * on this buffer when run so it is expected to persist. It does not take ownership
-         * of this buffer. The ScintillationEngine is primarily a logic facility and maintains little
-         * state information of its own.
-         *
-         * @param pTheScintillationBuffer A buffer where scintillated magnitude values will be written when run.
-         * @param theBufLen The buffer length.
-         */
-        ScintillationEngine( double * pTheScintillationBuffer, size_t theBufLen )
-                : pScintillationBuffer( pTheScintillationBuffer )
-                , bufLen( theBufLen )
-        {
-        }
-#endif
 
         /**
          * @brief Default Destructor
@@ -123,9 +97,6 @@ namespace TSG_NG
                          size_t sampleCounter,
                          size_t decorrelationSamples );
 
-    private:
-//        double * const pScintillationBuffer;    //!< The Scintillation Buffer
-//        const size_t bufLen;                    //!< The Scintillation Buffer Length
     };
 
 
