@@ -116,7 +116,8 @@ namespace TSG_NG
          * @return Returns a pointer to an internal buffer where an epoch's worth of harmonic
          * spectrum, complex time series data, resides.
          */
-        ReiserRT::Signal::FlyingPhasorElementBufferTypePtr getEpoch( const ScintillateFunkType & scintillateFunk );
+        const ReiserRT::Signal::FlyingPhasorElementBufferTypePtr
+            getEpoch( const ScintillateFunkType & scintillateFunk );
 
     private:
         Imple * pImple;    //!< Pointer to hidden implementation.
