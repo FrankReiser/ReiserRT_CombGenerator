@@ -36,7 +36,7 @@ private:
         std::memset( epochSampleBuffer.get(), 0, sizeof( FlyingPhasorElementType ) * epochSize );
     }
 
-    void reset( const CombGeneratorResetParameters & resetParameters,
+    void  reset( const CombGeneratorResetParameters & resetParameters,
                 const double * pMagVector, const double * pPhaseVector,
                 const ScintillateFunkType & scintillateFunk )
     {
