@@ -109,7 +109,7 @@ int main()
     t1 = getClockMonotonic();
 
     std::cout
-        << "Performance for maxSpectralLines=" << maxSpectralLines
+        << "Performance for maxHarmonics=" << maxSpectralLines
         << ", epochSize=" << epochSize
         << " is " << t1-t0 << " seconds." << std::endl;
 

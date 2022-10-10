@@ -52,6 +52,18 @@ int main( int argc, char * argv[] )
 
     //////////// Non-Scintillated Test ////////////
 
+#if 1
+    CombGenerator::EnvelopeFunkType nullEnvelopeFunk{};
+
+    // Reset the Comb Generator
+    auto fundamentalRadiansPerSample = M_PI / 8.0;
+    combGenerator.reset( numLines, fundamentalRadiansPerSample,
+                         magnitudes.get(), phases.get(),
+                         std::ref( nullEnvelopeFunk ) );
+
+    // Get samples for non-scintillated harmonic series.
+    auto pSamples = combGenerator.getEpoch();
+#else
     // We will use a null Function (empty) when not scintillating. Invocations to it should throw.
     // However, we do not expect it to be invoked if we are not scintillating. I.e., decorrelation samples of zero.
     CombGenerator::ScintillateFunkType nullScintillateFunk{};
@@ -65,6 +77,7 @@ int main( int argc, char * argv[] )
 
     // Get samples for non-scintillated harmonic series.
     auto pSamples = combGenerator.getEpoch(std::ref(nullScintillateFunk));
+#endif
 
     // To Verify the non-scintillated samples produced. We will use a FlyingPhasor and attempt to remove the tones
     // generated. Since both use FlyingPhasors in the same order, we expect the delta to be exactly zero.
@@ -72,7 +85,7 @@ int main( int argc, char * argv[] )
     std::unique_ptr< FlyingPhasorElementType[] > compareSampleBuffer{new FlyingPhasorElementType[ epochSize ] };
     for ( size_t i = 0; numLines != i; ++i )
     {
-        spectralLineGenerators[i].reset( (i+1) * resetParams.spacingRadiansPerSample, phases[i] );
+        spectralLineGenerators[i].reset( (i+1) * fundamentalRadiansPerSample, phases[i] );
         if ( 0 == i )
             spectralLineGenerators[i].getSamplesScaled(compareSampleBuffer.get(), epochSize, magnitudes.get()[i] );
         else
@@ -95,9 +108,13 @@ int main( int argc, char * argv[] )
     // we will cache it in order to reproduce the data manually.
     RayleighDistributor rayleighDistributor{};
     std::vector< double > svc{};
-    resetParams.decorrelationSamples = epochSize * 3 / 8;
-    svc.reserve(numLines * epochSize / resetParams.decorrelationSamples );
+    auto decorrelationSamples = epochSize * 3 / 8;
+    svc.reserve(numLines * epochSize / decorrelationSamples );
     rayleighDistributor.reset( subSeedGenerator.getSubSeed() );
+    std::vector< ScintillationEngine::StateType > scintillationStateVector{ numLines };
+    std::unique_ptr< double[] > scintillationBuffer{ new double[ epochSize ] };
+
+    // For the ScintillateEngine Run Function when needed.
     auto scintillateFunk = [ &svc, &rayleighDistributor ]( double desiredMean, size_t lineNumberHint )
     {
         auto rv = rayleighDistributor.getValue( desiredMean );
@@ -105,10 +122,37 @@ int main( int argc, char * argv[] )
         return rv;
     };
 
-    // Reset the CombGenerator and get samples for scintillated harmonic series.
-    combGenerator.reset( resetParams,  magnitudes.get(), phases.get(), std::ref(scintillateFunk ) );
-    pSamples = combGenerator.getEpoch(std::ref(scintillateFunk));
+    // We have to initialize our starting scintillation initial magnitude to something valid (0 is not valid).
+    // The slope (second) gets set immediately on getEpoch invocation.
+    for ( size_t i = 0; numLines != i; ++i )
+    {
+        auto & ss = scintillationStateVector[i];
+        ss.first = scintillateFunk( magnitudes[i], i );
+        ss.second = 0.0;
+    }
 
+    // And now our CombGenerator Envelope Function which will wrap our Scintillate Function.
+    auto envelopeFunk =
+            [ &scintillationStateVector, &scintillationBuffer, epochSize, decorrelationSamples, &scintillateFunk ]
+            ( size_t nSample, size_t nHarmonic, double nominalMag )
+    {
+        auto & sParams = scintillationStateVector[ nHarmonic ];
+        auto sFunk = [ &scintillateFunk, nominalMag, nHarmonic ] ()
+                { return scintillateFunk( nominalMag, nHarmonic ); };
+
+        ScintillationEngine::run( scintillationBuffer.get(), epochSize,
+                                  std::ref( sFunk ), sParams, nSample, decorrelationSamples );
+
+        return scintillationBuffer.get();
+    };
+
+    // Reset the CombGenerator and get samples for scintillated harmonic series.
+    combGenerator.reset( numLines, fundamentalRadiansPerSample,
+                         magnitudes.get(), phases.get(),
+                         std::ref( envelopeFunk ) );
+    pSamples = combGenerator.getEpoch();
+
+#if 0
 
     // Now we need to manually create a scintillated 'compare' buffer.
     // We have to set the initial scintillated state for each line. This is only initial the scintillated magnitudes.
@@ -247,6 +291,6 @@ int main( int argc, char * argv[] )
             return 4;
         }
     }
-
+#endif
     return 0;
 }

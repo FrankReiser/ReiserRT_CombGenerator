@@ -39,6 +39,7 @@ namespace TSG_NG
         class Imple;
 
     public:
+#if 0
         /**
          * @brief The Scintillate Functor Type
          *
@@ -49,6 +50,24 @@ namespace TSG_NG
          * This functor type is required in the reset and getEpoch operations.
          */
         using ScintillateFunkType = std::function< double( double desiredMean, size_t lineNumberHint ) >;
+#endif
+
+        /**
+         * @brief The Envelope Functor Type
+         *
+         * The CombGenerator does not prescribe any particular form of envelope function.
+         * The client may require an particular envelope and, on a per harmonic basis.
+         * The parameters are all hints that the implementer might use.
+         *
+         * @param nSample The current running sample counter for the Nth harmonic.
+         * @param nHarmonic The zeroth based harmonic (0 being the fundamental).
+         * @param nominalMag The initial magnitude specified for the harmonic.
+         *
+         * @return Returns a pointer to a buffer of length epochSize specified during construction
+         * that contains the envelope to use.
+         */
+        using EnvelopeFunkType = std::function< const double * (
+                size_t nSample, size_t nHarmonic, double nominalMag ) >;
 
         /**
          * @brief Default Construction is Disallowed
@@ -66,10 +85,10 @@ namespace TSG_NG
          * It lso creates up the necessary buffer for the aggregations of signal data and state machine data
          * for potential scintillation use cases.
          *
-         * @param maxSpectralLines The maximum number of spectral lines that an instance will support.
+         * @param maxHarmonics The maximum number of harmonics that an instance will support (fundamental included).
          * @param epochSize The number of samples that make up an epoch.
          */
-        CombGenerator( size_t maxSpectralLines, size_t epochSize );
+        CombGenerator( size_t maxHarmonics, size_t epochSize );
 
         /**
          * @brief Destructor
@@ -98,9 +117,13 @@ namespace TSG_NG
          * @param scintillateFunk Observer interface for obtaining scintillated magnitude values from a client.
          * This may be an empty (null) function object if resetParameters.decorrelationSamples is zero.
          */
-        void reset( const CombGeneratorResetParameters & resetParameters,
-                    const double * pMagVector, const double * pPhaseVector,
-                    const ScintillateFunkType & scintillateFunk );
+//        void reset( const CombGeneratorResetParameters & resetParameters,
+//                    const double * pMagVector, const double * pPhaseVector,
+//                    const ScintillateFunkType & scintillateFunk );
+
+        void reset ( size_t numHarmonics, double fundamentalRadiansPerSample,
+                     const double * pMagVector, const double * pPhaseVector,
+                     const EnvelopeFunkType & envelopeFunk );
 
         /**
          * @brief The Get Epoch Operation
@@ -116,8 +139,11 @@ namespace TSG_NG
          * @return Returns a pointer to an internal buffer where an epoch's worth of harmonic
          * spectrum, complex time series data, resides.
          */
-        const ReiserRT::Signal::FlyingPhasorElementBufferTypePtr
-            getEpoch( const ScintillateFunkType & scintillateFunk );
+//        const ReiserRT::Signal::FlyingPhasorElementBufferTypePtr
+//            getEpoch( const ScintillateFunkType & scintillateFunk );
+
+        const ReiserRT::Signal::FlyingPhasorElementBufferTypePtr getEpoch();
+
 
     private:
         Imple * pImple;    //!< Pointer to hidden implementation.
