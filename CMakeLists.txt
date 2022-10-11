@@ -44,7 +44,6 @@ endforeach()
 
 add_subdirectory( src )
 
-add_subdirectory( testUtilities )
 add_subdirectory( sundry )
 
 enable_testing()

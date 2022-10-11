@@ -13,7 +13,7 @@
 using namespace TSG_NG;
 using namespace ReiserRT::Signal;
 
-constexpr size_t numLines = 2;
+constexpr size_t numHarmonics = 2;
 constexpr size_t epochSize = 4096;
 constexpr uint32_t seed = 0x3210dead;
 constexpr double fundamentalRadiansPerSample = M_PI / 8.0;
@@ -21,10 +21,10 @@ constexpr double fundamentalRadiansPerSample = M_PI / 8.0;
 int defaultMagPhaseNoEnvelope()
 {
     // Instantiate CombGenerator for a max of NLines and Epoch Size
-    CombGenerator combGenerator{ numLines, epochSize };
+    CombGenerator combGenerator{ numHarmonics, epochSize };
 
     // Reset the Comb Generator
-    combGenerator.reset( numLines, fundamentalRadiansPerSample,
+    combGenerator.reset( numHarmonics, fundamentalRadiansPerSample,
                          nullptr, nullptr );
 
     // Get samples for harmonic series.
@@ -34,7 +34,7 @@ int defaultMagPhaseNoEnvelope()
     // generated. Since both use FlyingPhasors in the same order, we expect the delta to be exactly zero.
     std::vector< FlyingPhasorToneGenerator > spectralLineGenerators{ epochSize };
     std::unique_ptr< FlyingPhasorElementType[] > compareSampleBuffer{new FlyingPhasorElementType[ epochSize ] };
-    for ( size_t i = 0; numLines != i; ++i )
+    for (size_t i = 0; numHarmonics != i; ++i )
     {
         spectralLineGenerators[i].reset( (i+1) * fundamentalRadiansPerSample, 0.0 );
         if ( 0 == i )
@@ -59,18 +59,18 @@ int defaultMagPhaseNoEnvelope()
 int specificMagPhaseNoEnvelope()
 {
     // Instantiate CombGenerator for a max of NLines and Epoch Size
-    CombGenerator combGenerator{ numLines, epochSize };
+    CombGenerator combGenerator{ numHarmonics, epochSize };
 
     // Initialize Mags and Phase. We will use a magnitude of 2.0 and an incrementally changing phase.
-    std::unique_ptr< double[] > magnitudes{ new double[ numLines ] };
-    std::unique_ptr< double[] > phases{ new double[ numLines ] };
-    for ( size_t i = 0; numLines != i; ++i )
+    std::unique_ptr< double[] > magnitudes{ new double[ numHarmonics ] };
+    std::unique_ptr< double[] > phases{ new double[ numHarmonics ] };
+    for (size_t i = 0; numHarmonics != i; ++i )
     {
         magnitudes[i] = 2.0;
         phases[i] = i * M_PI / 32;
     }
 
-    combGenerator.reset( numLines, fundamentalRadiansPerSample,
+    combGenerator.reset( numHarmonics, fundamentalRadiansPerSample,
                          magnitudes.get(), phases.get() );
 
     // Get samples for harmonic series.
@@ -80,7 +80,7 @@ int specificMagPhaseNoEnvelope()
     // generated. Since both use FlyingPhasors in the same order, we expect the delta to be exactly zero.
     std::vector< FlyingPhasorToneGenerator > spectralLineGenerators{ epochSize };
     std::unique_ptr< FlyingPhasorElementType[] > compareSampleBuffer{new FlyingPhasorElementType[ epochSize ] };
-    for ( size_t i = 0; numLines != i; ++i )
+    for (size_t i = 0; numHarmonics != i; ++i )
     {
         spectralLineGenerators[i].reset( (i+1) * fundamentalRadiansPerSample, phases[i] );
         if ( 0 == i )
@@ -105,7 +105,7 @@ int specificMagPhaseNoEnvelope()
 int defaultMagWithEnvelope()
 {
     // Instantiate CombGenerator for a max of NLines and Epoch Size
-    CombGenerator combGenerator{ numLines, epochSize };
+    CombGenerator combGenerator{ numHarmonics, epochSize };
 
     // We're going to use an exponential decay for this test.
     std::unique_ptr< double[] > envelopeBuffer{new double[ epochSize ] };
@@ -123,7 +123,7 @@ int defaultMagWithEnvelope()
     };
 
     // Reset the Comb Generator
-    combGenerator.reset( numLines, fundamentalRadiansPerSample,
+    combGenerator.reset( numHarmonics, fundamentalRadiansPerSample,
                          nullptr, nullptr, envelopeFunk );
 
     // Get samples for harmonic series.
@@ -133,7 +133,7 @@ int defaultMagWithEnvelope()
     // generated. Since both use FlyingPhasors in the same order, we expect the delta to be exactly zero.
     std::vector< FlyingPhasorToneGenerator > spectralLineGenerators{ epochSize };
     std::unique_ptr< FlyingPhasorElementType[] > compareSampleBuffer{new FlyingPhasorElementType[ epochSize ] };
-    for ( size_t i = 0; numLines != i; ++i )
+    for (size_t i = 0; numHarmonics != i; ++i )
     {
         auto pEnvelope = envelopeFunk( 0, i, 1.0 );
 
@@ -160,11 +160,11 @@ int defaultMagWithEnvelope()
 int specificMagWithEnvelope()
 {
     // Instantiate CombGenerator for a max of NLines and Epoch Size
-    CombGenerator combGenerator{ numLines, epochSize };
+    CombGenerator combGenerator{ numHarmonics, epochSize };
 
     // Initialize Mags. We will use a magnitude of 2.0.
-    std::unique_ptr< double[] > magnitudes{ new double[ numLines ] };
-    for ( size_t i = 0; numLines != i; ++i )
+    std::unique_ptr< double[] > magnitudes{ new double[ numHarmonics ] };
+    for (size_t i = 0; numHarmonics != i; ++i )
         magnitudes[i] = 2.0;
 
     // We're going to use an exponential decay for this test.
@@ -183,7 +183,7 @@ int specificMagWithEnvelope()
     };
 
     // Reset the Comb Generator
-    combGenerator.reset( numLines, fundamentalRadiansPerSample,
+    combGenerator.reset( numHarmonics, fundamentalRadiansPerSample,
                          magnitudes.get(), nullptr, envelopeFunk );
 
     // Get samples for harmonic series.
@@ -193,7 +193,7 @@ int specificMagWithEnvelope()
     // generated. Since both use FlyingPhasors in the same order, we expect the delta to be exactly zero.
     std::vector< FlyingPhasorToneGenerator > spectralLineGenerators{ epochSize };
     std::unique_ptr< FlyingPhasorElementType[] > compareSampleBuffer{new FlyingPhasorElementType[ epochSize ] };
-    for ( size_t i = 0; numLines != i; ++i )
+    for (size_t i = 0; numHarmonics != i; ++i )
     {
         auto pEnvelope = envelopeFunk( 0, i, 2.0 );
 
