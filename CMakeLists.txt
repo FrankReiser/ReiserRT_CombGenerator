@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(TsgNgCombGenerator
-        VERSION 1.5.2
+        VERSION 1.6.1
         DESCRIPTION "TSG Next Generation Comb Generator" )
 
 # Set up compiler requirements
@@ -45,7 +45,7 @@ endforeach()
 add_subdirectory( src )
 
 add_subdirectory( testUtilities )
-#add_subdirectory( sundry )
+add_subdirectory( sundry )
 
 enable_testing()
 add_subdirectory( tests )

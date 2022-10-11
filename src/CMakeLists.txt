@@ -9,18 +9,19 @@ if ( ReiserRT_FlyingPhasor_FOUND )
 	message( STATUS "Found ReiserRT_FlyingPhasor!" )
 endif()
 
+# WE ARE NOT DEPENDENT ON THIS FOR LIBRARY - TESTS, SUNDRY - PERHAPS
+#[[
 # We are dependent on TsgNgUtility shared library package.
 # Ensure we specify the Major.Minor version we want.
-# TODO FIX THIS with Envelope Function.
 find_package( TsgNgUtility 1.0 CONFIG REQUIRED )
 if ( TsgNgUtility_FOUND )
 	message( STATUS "Found TsgNgUtility!" )
 endif()
+#]]
 
 # Specify all of our public headers for easy reference.
 set( _publicHeaders
-    "CombGeneratorResetParameters.h"
-    "CombGenerator.h"
+		"CombGenerator.h"
     )
 
 # Specify all of our private headers for easy reference.
@@ -29,8 +30,7 @@ set( _privateHeaders
 
 # Specify our source files
 set( _sourceFiles
-    "CombGeneratorResetParameters.cpp"
-    "CombGenerator.cpp"
+		"CombGenerator.cpp"
     )
 
 # Specify Sources to be built into our library
@@ -46,7 +46,7 @@ target_include_directories( ${PROJECT_NAME}
 # We do not actually link at this time but, this creates a requirement that will eventually have to be satisfied.
 # Anything that links to 'Us', needs these libraries also.
 # TODO FIX THIS with Envelope Function.
-target_link_libraries( ${PROJECT_NAME} ReiserRT_FlyingPhasor::ReiserRT_FlyingPhasor TsgNgUtility::TsgNgUtility )
+target_link_libraries( ${PROJECT_NAME} ReiserRT_FlyingPhasor::ReiserRT_FlyingPhasor )
 
 # Change Default Visibility and Include Generated Header Files to the PUBLIC_HEADER property
 # so that it will get installed with all the other specified public headers.

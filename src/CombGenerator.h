@@ -17,8 +17,6 @@
 
 namespace TSG_NG
 {
-    struct CombGeneratorResetParameters;
-
     /**
      * @brief Comb Generator
      *
@@ -27,8 +25,8 @@ namespace TSG_NG
      * set up at a prescribed harmonic spacing. The magnitudes and phases of each tone, along with
      * the harmonic spacing are specified at 'reset' time.
      *
-     * The CombGenerator also provides support for individually scintillating the tones produced through
-     * a scintillation observer interface with specified decorrelation period. @see ScintillateFunkType.
+     * The CombGenerator also provides support for individually modulating the tones produced through
+     * an envelope functor interface. @see EnvelopeFunkType.
      */
     class TsgNgCombGenerator_EXPORT CombGenerator
     {
@@ -39,32 +37,19 @@ namespace TSG_NG
         class Imple;
 
     public:
-#if 0
-        /**
-         * @brief The Scintillate Functor Type
-         *
-         * The CombGenerator does not specify particular distribution for scintillating. It relies on the
-         * client to provide those details at the beginning of decorrelation periods.
-         * We specify a functor that returns a double precision value. This functor receives arguments for the
-         * expected magnitude value and a spectral line number hint which may be useful to the client.
-         * This functor type is required in the reset and getEpoch operations.
-         */
-        using ScintillateFunkType = std::function< double( double desiredMean, size_t lineNumberHint ) >;
-#endif
-
         /**
          * @brief The Envelope Functor Type
          *
          * The CombGenerator does not prescribe any particular form of envelope function.
-         * The client may require an particular envelope and, on a per harmonic basis.
-         * The parameters are all hints that the implementer might use.
+         * The client may require a particular envelope and, on a per tone basis.
+         * The parameters are all hints that the implementer might make use of.
          *
-         * @param nSample The current running sample counter for the Nth harmonic.
+         * @param nSample The current running sample counter for the Nth harmonic tone.
          * @param nHarmonic The zeroth based harmonic (0 being the fundamental).
-         * @param nominalMag The initial magnitude specified for the harmonic.
+         * @param nominalMag The default magnitude for the Nth harmonic, specified at reset time.
          *
-         * @return Returns a pointer to a buffer of length epochSize specified during construction
-         * that contains the envelope to use.
+         * @return Returns a pointer to a buffer of length epochSize (specified during CombGenerator construction),
+         * populated the envelope to apply for the Nth harmonic tone.
          */
         using EnvelopeFunkType = std::function< const double * (
                 size_t nSample, size_t nHarmonic, double nominalMag ) >;
@@ -82,7 +67,7 @@ namespace TSG_NG
          *
          * This constructor instantiates the implementation. This results in the creation of a
          * batch of ReiserRT_FlyingPhasor instances for a the given, maximum use case scenario.
-         * It lso creates up the necessary buffer for the aggregations of signal data and state machine data
+         * It also creates up the necessary buffer for the aggregations of signal data and state machine data
          * for potential scintillation use cases.
          *
          * @param maxHarmonics The maximum number of harmonics that an instance will support (fundamental included).
@@ -101,49 +86,39 @@ namespace TSG_NG
          * @brief The Reset Operation
          *
          * This operation prepares the CombGenerator for a subsequent series of getEpoch invocations.
-         * It will set the initial scintillated magnitudes if resetParameters specifies a
-         * non-zero value for decorrelationSamples. If non-zero, it will invoke the
-         * the client provided scintillateFunk for an initial magnitude based on an expected value.
+         * It sets N FlyingPhasors instances for the appropriate harmonic spacing based on the fundamental
+         * frequency in radians per sample at the specified starting phases. It will copy the user specified
+         * (or defaulted) envelope functor instance for subsequent use.
          *
-         * @param resetParameters The reset parameters. @see CombGeneratorResetParameters for details.
-         * @param pMagVector This argument provides a series of magnitude values, of length resetParameters.numLines.
-         * The data pointed to is expected to persist between CombGenerator reset cycles.
-         * Passing a null pointer results in default magnitude of 1.0 for all lines.
-         * CombGenerator does not make it's own copy and the data may be accessed during getEpoch invocations.
-         * @param pPhaseVector This argument provides a series of radian phase values, of length resetParameters.numLines.
+         * @param numHarmonics The number of harmonics to generate. Must be no greater than the maximum specified
+         * during construction.
+         * @param pMagVector This argument provides a series of magnitude values, of length N harmonics.
+         * Passing a null pointer results in default magnitude of 1.0 for all harmonics.
+         * Otherwise, the data pointed to is expected to persist between CombGenerator reset cycles.
+         * CombGenerator does not cache the data and is accessed during getEpoch invocations.
+         * @param pPhaseVector This argument provides a series of radian phase values, of length N harmonics.
+         * Passing a null pointer results in default phase of 0.0 for all harmonics.
          * The data pointed to need not persist between CombGenerator reset cycles.
-         * CombGenerator only uses it within the reset call and has no further use for it.
-         * Passing a null pointer results in default phase of 0.0 for all lines.
-         * @param scintillateFunk Observer interface for obtaining scintillated magnitude values from a client.
-         * This may be an empty (null) function object if resetParameters.decorrelationSamples is zero.
+         * CombGenerator only this data within the reset invocation and has no further use for it.
+         * @param envelopeFunk Functor interface for obtaining a magnitude envelop from a client.
+         * The default for this parameter is to utilize an empty (null) function object.
+         * In these cases, no envelope is applied.
          */
-//        void reset( const CombGeneratorResetParameters & resetParameters,
-//                    const double * pMagVector, const double * pPhaseVector,
-//                    const ScintillateFunkType & scintillateFunk );
-
         void reset ( size_t numHarmonics, double fundamentalRadiansPerSample,
                      const double * pMagVector, const double * pPhaseVector,
-                     const EnvelopeFunkType & envelopeFunk );
+                     const EnvelopeFunkType & envelopeFunk = EnvelopeFunkType{} );
 
         /**
          * @brief The Get Epoch Operation
          *
-         * This operation returns a pointer to internal buffer space when an epoch's worth of harmonic
-         * spectrum, complex time series data, resides. It will invoke the client provided scintillateFunk
-         * for magnitude values at the beginning of decorrelation periods, specifying a desired mean
-         * (expected value) and a spectral line number hint.
-         *
-         * @param scintillateFunk Observer interface for obtaining scintillated magnitude values from a client.
-         * This may be an empty (null) function object if resetParameters.decorrelationSamples is zero.
+         * This operation returns a pointer to internal buffer space where an epoch's worth of harmonic
+         * spectrum, complex time series data, resides. It will invoke the client provided envelopeFunk (if non-null)
+         * for each N harmonics specified during reset, for an envelope to use.
          *
          * @return Returns a pointer to an internal buffer where an epoch's worth of harmonic
          * spectrum, complex time series data, resides.
          */
-//        const ReiserRT::Signal::FlyingPhasorElementBufferTypePtr
-//            getEpoch( const ScintillateFunkType & scintillateFunk );
-
         const ReiserRT::Signal::FlyingPhasorElementBufferTypePtr getEpoch();
-
 
     private:
         Imple * pImple;    //!< Pointer to hidden implementation.
