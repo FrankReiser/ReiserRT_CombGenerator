@@ -40,9 +40,10 @@ namespace TSG_NG
         /**
          * @brief The Envelope Functor Type
          *
-         * The CombGenerator does not prescribe any particular form of envelope function.
+         * The CombGenerator does not prescribe any particular form of envelope other than constant 1.0.
          * The client may require a particular envelope and, on a per tone basis.
-         * The parameters are all hints that the implementer might make use of.
+         * This functor type allows the client to provide specific envelopes to each tone.
+         * The parameters are all hints that the client might make use of in generating an envelope.
          *
          * @param nSample The current running sample counter for the Nth harmonic tone.
          * @param nHarmonic The zeroth based harmonic (0 being the fundamental).
