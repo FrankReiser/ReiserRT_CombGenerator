@@ -9,16 +9,6 @@ if ( ReiserRT_FlyingPhasor_FOUND )
 	message( STATUS "Found ReiserRT_FlyingPhasor!" )
 endif()
 
-# WE ARE NOT DEPENDENT ON THIS FOR LIBRARY - TESTS, SUNDRY - PERHAPS
-#[[
-# We are dependent on TsgNgUtility shared library package.
-# Ensure we specify the Major.Minor version we want.
-find_package( TsgNgUtility 1.0 CONFIG REQUIRED )
-if ( TsgNgUtility_FOUND )
-	message( STATUS "Found TsgNgUtility!" )
-endif()
-#]]
-
 # Specify all of our public headers for easy reference.
 set( _publicHeaders
 		"CombGenerator.h"
