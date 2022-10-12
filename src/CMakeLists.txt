@@ -45,7 +45,6 @@ target_include_directories( ${PROJECT_NAME}
 
 # We do not actually link at this time but, this creates a requirement that will eventually have to be satisfied.
 # Anything that links to 'Us', needs these libraries also.
-# TODO FIX THIS with Envelope Function.
 target_link_libraries( ${PROJECT_NAME} ReiserRT_FlyingPhasor::ReiserRT_FlyingPhasor )
 
 # Change Default Visibility and Include Generated Header Files to the PUBLIC_HEADER property
