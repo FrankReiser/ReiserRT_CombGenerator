@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(TsgNgCombGenerator
-        VERSION 1.6.2
+        VERSION 1.7.1
         DESCRIPTION "TSG Next Generation Comb Generator" )
 
 # Set up compiler requirements

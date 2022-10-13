@@ -11,13 +11,12 @@
 // Include Export Specification File
 #include "TsgNgCombGeneratorExport.h"
 
+#include "CombGeneratorDataTypes.h"
 #include "FlyingPhasorToneGeneratorDataTypes.h"
-
-#include <functional>
 
 namespace TSG_NG
 {
-    /**
+     /**
      * @brief Comb Generator
      *
      * The CombGenerator generates a harmonic spectrum in the form of a complex time series
@@ -26,7 +25,7 @@ namespace TSG_NG
      * the harmonic spacing are specified at 'reset' time.
      *
      * The CombGenerator also provides support for individually modulating the tones produced through
-     * an envelope functor interface. @see EnvelopeFunkType.
+     * an envelope functor interface. @see CombGeneratorEnvelopeFunkType.
      */
     class TsgNgCombGenerator_EXPORT CombGenerator
     {
@@ -37,24 +36,6 @@ namespace TSG_NG
         class Imple;
 
     public:
-        /**
-         * @brief The Envelope Functor Type
-         *
-         * The CombGenerator does not prescribe any particular form of envelope other than constant 1.0.
-         * The client may require a particular envelope and, on a per tone basis.
-         * This functor type allows the client to provide specific envelopes to each tone.
-         * The parameters are all hints that the client might make use of in generating an envelope.
-         *
-         * @param nSample The current running sample counter for the Nth harmonic tone.
-         * @param nHarmonic The zeroth based harmonic (0 being the fundamental).
-         * @param nominalMag The default magnitude for the Nth harmonic, specified at reset time.
-         *
-         * @return Returns a pointer to a buffer of length epochSize (specified during CombGenerator construction),
-         * populated the envelope to apply for the Nth harmonic tone.
-         */
-        using EnvelopeFunkType = std::function< const double * (
-                size_t nSample, size_t nHarmonic, double nominalMag ) >;
-
         /**
          * @brief Default Construction is Disallowed
          *
@@ -107,7 +88,7 @@ namespace TSG_NG
          */
         void reset ( size_t numHarmonics, double fundamentalRadiansPerSample,
                      const double * pMagVector, const double * pPhaseVector,
-                     const EnvelopeFunkType & envelopeFunk = EnvelopeFunkType{} );
+                     const CombGeneratorEnvelopeFunkType & envelopeFunk = CombGeneratorEnvelopeFunkType{} );
 
         /**
          * @brief The Get Epoch Operation
