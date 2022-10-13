@@ -34,7 +34,7 @@ private:
 
     void reset ( size_t theNumHarmonics, double fundamentalRadiansPerSample,
                  const double * pMagVector, const double * pPhaseVector,
-                 const EnvelopeFunkType & theEnvelopeFunk )
+                 const CombGeneratorEnvelopeFunkType & theEnvelopeFunk )
     {
         // Ensure that the user has not specified more lines than they constructed us to handle.
         if ( maxHarmonics < theNumHarmonics )
@@ -102,7 +102,7 @@ private:
     std::vector< FlyingPhasorToneGenerator > harmonicGenerators;
     const double * pMagnitude{};
 
-    EnvelopeFunkType envelopeFunkType{};
+    CombGeneratorEnvelopeFunkType envelopeFunkType{};
 
     std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer;
 
@@ -121,7 +121,7 @@ CombGenerator::~CombGenerator()
 
 void CombGenerator::reset ( size_t numHarmonics, double fundamentalRadiansPerSample,
                             const double * pMagVector, const double * pPhaseVector,
-                            const EnvelopeFunkType & envelopeFunk )
+                            const CombGeneratorEnvelopeFunkType & envelopeFunk )
 {
     pImple->reset(numHarmonics, fundamentalRadiansPerSample,
                   pMagVector, pPhaseVector, envelopeFunk );
