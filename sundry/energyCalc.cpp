@@ -59,5 +59,27 @@ int main()
     calcEnergy *= epochSize;
     std::cout << "Calc Energy: " << calcEnergy << " (rmsMag^2*samples)" << std::endl;
 
+
+    // Some Noise Calculations
+    // We will start by specifying a desired SNR for our signal over a "Band Of Interest" arbitrarily set.
+    const auto snr = 25.0;
+    const auto noiseVRatio = std::pow( 10.0, snr/20.0);
+    std::cout << "Noise Voltage Ratio: " << noiseVRatio << std::endl;
+
+    // SNR is defined over a Band of Interest (BOI). This BOI over the Sample Rate sets up
+    // what we will refer to as Band Of Interest to Sample Rate (f sub s) Ratio.
+    // For this test, we will arbitrarily set this to ratio.
+    const double bandOfInterestFsRatio = 0.1;
+
+    // Total Noise Energy is the number of samples for a period of the fundamental which for us is the same
+    // as epoch size here but, this may not always the case.
+    const double periodSamples = epochSize;
+
+    // Sigma Calculation
+    // The times 2 in the formula is because we will incorporate sigma into both I and Q at the end of the day.
+    const auto sigma = std::sqrt( calcEnergy / ( 2 * periodSamples * bandOfInterestFsRatio ) ) / noiseVRatio;
+    std::cout << "Sigma: " << sigma << std::endl;
+
+
     return 0;
 }
