@@ -31,7 +31,7 @@ int main()
 
     // Now for the fundamental frequency (first harmonic), we want it to fill the epoch period
     // with one complete cycle. The harmonics will naturally have more than one cycle.
-    // That is the purpose of this experiment, to determine the energy and prove an
+    // That is the purpose of this experiment, to determine the energy of one fundamental period and prove an
     // algebraic calculation is all that is required (we know the integral).
     const auto fundamental = M_PI * 2 / epochSize;
 
@@ -46,18 +46,18 @@ int main()
         auto sample = *pSamples++;
         realEnergy += sample.real() * sample.real();
     }
-    std::cout << "Real Energy: " << realEnergy << std::endl;
+    std::cout << "Real Energy: " << realEnergy << " (mag^2*samples)" << std::endl;
 
     // Now calculate the same algebraically using RMS value of sinusoids and epoch size.
     const auto sqrt2over2 = std::sqrt( 2.0 ) / 2.0;
     double calcEnergy = 0;
     for ( size_t i = 0; i != numHarmonics; ++i )
     {
-        auto rmsV = magnitudes[i] * sqrt2over2;
-        calcEnergy += rmsV * rmsV;
+        auto rmsMag = magnitudes[i] * sqrt2over2;
+        calcEnergy += rmsMag * rmsMag;
     }
     calcEnergy *= epochSize;
-    std::cout << "Calc Energy: " << calcEnergy << std::endl;
+    std::cout << "Calc Energy: " << calcEnergy << " (rmsMag^2*samples)" << std::endl;
 
     return 0;
 }
