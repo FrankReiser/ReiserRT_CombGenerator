@@ -17,7 +17,11 @@ int main()
 
     // Instantiate Comb Generator for number of harmonics and epoch size.
     // Note: Max and Number of Harmonics same for this experiment.
-    TSG_NG::CombGenerator combGenerator{numHarmonics, epochSize };
+    TSG_NG::CombGenerator combGenerator{ numHarmonics };
+
+    /// @todo write a better description for buffer
+    std::unique_ptr< ReiserRT::Signal::FlyingPhasorElementType[] > epochSampleBuffer{new ReiserRT::Signal::FlyingPhasorElementType [ epochSize ] };
+    ReiserRT::Signal:: FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
 
     // We want a decreasing magnitude for each harmonic.
     // Each harmonic has the reciprocal amplitude of its position (classic sawtooth).
@@ -37,13 +41,13 @@ int main()
 
     // Reset Comb Generator and fetch an epochs worth of data
     combGenerator.reset( numHarmonics, fundamental, magnitudes.get(), nullptr );
-    auto pSamples = combGenerator.getEpoch();
+    combGenerator.getSamples( pEpochSampleBuffer, epochSize );
 
     // Calculate the energy as the magnitude squared by the number of samples.
     double realEnergy = 0;
     for ( size_t i = 0; i != epochSize; ++i)
     {
-        auto sample = *pSamples++;
+        auto sample = *pEpochSampleBuffer++;
         realEnergy += sample.real() * sample.real();
     }
     std::cout << "Real Energy: " << realEnergy << " (mag^2*samples)" << std::endl;
