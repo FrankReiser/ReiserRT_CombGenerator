@@ -1,6 +1,9 @@
-//
-// Created by frank on 9/28/22.
-//
+/**
+ * @file testCombGenerator.cpp
+ * @brief Test Harness for Comb Generator Testing
+ * @authors Frank Reiser
+ * @date Initiated September 28th, 2022
+ */
 
 #include "CombGenerator.h"
 #include "FlyingPhasorToneGenerator.h"
@@ -21,14 +24,18 @@ constexpr double fundamentalRadiansPerSample = M_PI / 8.0;
 int defaultMagPhaseNoEnvelope()
 {
     // Instantiate CombGenerator for a max of NLines and Epoch Size
-    CombGenerator combGenerator{ numHarmonics, epochSize };
+    CombGenerator combGenerator{ numHarmonics };
 
     // Reset the Comb Generator
     combGenerator.reset( numHarmonics, fundamentalRadiansPerSample,
                          nullptr, nullptr );
 
+    ///@todo write a better comment
+    std::unique_ptr< ReiserRT::Signal::FlyingPhasorElementType[] > epochSampleBuffer{new ReiserRT::Signal::FlyingPhasorElementType [ epochSize ] };
+    ReiserRT::Signal:: FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
+
     // Get samples for harmonic series.
-    auto pSamples = combGenerator.getEpoch();
+    combGenerator.getSamples( pEpochSampleBuffer, epochSize );
 
     // To Verify the non-scintillated samples produced. We will use a FlyingPhasor and attempt to remove the tones
     // generated. Since both use FlyingPhasors in the same order, we expect the delta to be exactly zero.
@@ -45,7 +52,7 @@ int defaultMagPhaseNoEnvelope()
     std::unique_ptr< FlyingPhasorElementType[] > deltaSampleBuffer{new FlyingPhasorElementType[ epochSize ] };
     for ( size_t i = 0; epochSize != i; ++i )
     {
-        deltaSampleBuffer[i] = pSamples[i] - compareSampleBuffer[i];
+        deltaSampleBuffer[i] = pEpochSampleBuffer[i] - compareSampleBuffer[i];
         if ( 0.0 != deltaSampleBuffer[i] )
         {
             std::cout << "Failed Default Mag and Phase, No Envelope Test at epoch sample index " << i << "." << std::endl;
@@ -59,7 +66,7 @@ int defaultMagPhaseNoEnvelope()
 int specificMagPhaseNoEnvelope()
 {
     // Instantiate CombGenerator for a max of NLines and Epoch Size
-    CombGenerator combGenerator{ numHarmonics, epochSize };
+    CombGenerator combGenerator{ numHarmonics };
 
     // Initialize Mags and Phase. We will use a magnitude of 2.0 and an incrementally changing phase.
     std::unique_ptr< double[] > magnitudes{ new double[ numHarmonics ] };
@@ -73,8 +80,12 @@ int specificMagPhaseNoEnvelope()
     combGenerator.reset( numHarmonics, fundamentalRadiansPerSample,
                          magnitudes.get(), phases.get() );
 
+    ///@todo write a better comment
+    std::unique_ptr< ReiserRT::Signal::FlyingPhasorElementType[] > epochSampleBuffer{new ReiserRT::Signal::FlyingPhasorElementType [ epochSize ] };
+    ReiserRT::Signal:: FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
+
     // Get samples for harmonic series.
-    auto pSamples = combGenerator.getEpoch();
+    combGenerator.getSamples( pEpochSampleBuffer, epochSize );
 
     // To Verify the non-scintillated samples produced. We will use a FlyingPhasor and attempt to remove the tones
     // generated. Since both use FlyingPhasors in the same order, we expect the delta to be exactly zero.
@@ -91,7 +102,7 @@ int specificMagPhaseNoEnvelope()
     std::unique_ptr< FlyingPhasorElementType[] > deltaSampleBuffer{new FlyingPhasorElementType[ epochSize ] };
     for ( size_t i = 0; epochSize != i; ++i )
     {
-        deltaSampleBuffer[i] = pSamples[i] - compareSampleBuffer[i];
+        deltaSampleBuffer[i] = pEpochSampleBuffer[i] - compareSampleBuffer[i];
         if ( 0.0 != deltaSampleBuffer[i] )
         {
             std::cout << "Failed Specific Mag and Phase, No Envelope Test at epoch sample index " << i << "." << std::endl;
@@ -105,7 +116,7 @@ int specificMagPhaseNoEnvelope()
 int defaultMagWithEnvelope()
 {
     // Instantiate CombGenerator for a max of NLines and Epoch Size
-    CombGenerator combGenerator{ numHarmonics, epochSize };
+    CombGenerator combGenerator{ numHarmonics };
 
     // We're going to use an exponential decay for this test.
     std::unique_ptr< double[] > envelopeBuffer{new double[ epochSize ] };
@@ -126,8 +137,12 @@ int defaultMagWithEnvelope()
     combGenerator.reset( numHarmonics, fundamentalRadiansPerSample,
                          nullptr, nullptr, envelopeFunk );
 
+    ///@todo write a better comment
+    std::unique_ptr< ReiserRT::Signal::FlyingPhasorElementType[] > epochSampleBuffer{new ReiserRT::Signal::FlyingPhasorElementType [ epochSize ] };
+    ReiserRT::Signal:: FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
+
     // Get samples for harmonic series.
-    auto pSamples = combGenerator.getEpoch();
+    combGenerator.getSamples( pEpochSampleBuffer, epochSize );
 
     // To Verify the non-scintillated samples produced. We will use a FlyingPhasor and attempt to remove the tones
     // generated. Since both use FlyingPhasors in the same order, we expect the delta to be exactly zero.
@@ -146,7 +161,7 @@ int defaultMagWithEnvelope()
     std::unique_ptr< FlyingPhasorElementType[] > deltaSampleBuffer{new FlyingPhasorElementType[ epochSize ] };
     for ( size_t i = 0; epochSize != i; ++i )
     {
-        deltaSampleBuffer[i] = pSamples[i] - compareSampleBuffer[i];
+        deltaSampleBuffer[i] = pEpochSampleBuffer[i] - compareSampleBuffer[i];
         if ( 0.0 != deltaSampleBuffer[i] )
         {
             std::cout << "Failed Default Mag and Phase, With Envelope Test at epoch sample index " << i << "." << std::endl;
@@ -160,7 +175,7 @@ int defaultMagWithEnvelope()
 int specificMagWithEnvelope()
 {
     // Instantiate CombGenerator for a max of NLines and Epoch Size
-    CombGenerator combGenerator{ numHarmonics, epochSize };
+    CombGenerator combGenerator{ numHarmonics };
 
     // Initialize Mags. We will use a magnitude of 2.0.
     std::unique_ptr< double[] > magnitudes{ new double[ numHarmonics ] };
@@ -186,8 +201,12 @@ int specificMagWithEnvelope()
     combGenerator.reset( numHarmonics, fundamentalRadiansPerSample,
                          magnitudes.get(), nullptr, envelopeFunk );
 
+    ///@todo write a better comment
+    std::unique_ptr< ReiserRT::Signal::FlyingPhasorElementType[] > epochSampleBuffer{new ReiserRT::Signal::FlyingPhasorElementType [ epochSize ] };
+    ReiserRT::Signal:: FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
+
     // Get samples for harmonic series.
-    auto pSamples = combGenerator.getEpoch();
+    combGenerator.getSamples( pEpochSampleBuffer, epochSize );
 
     // To Verify the non-scintillated samples produced. We will use a FlyingPhasor and attempt to remove the tones
     // generated. Since both use FlyingPhasors in the same order, we expect the delta to be exactly zero.
@@ -207,7 +226,7 @@ int specificMagWithEnvelope()
     std::unique_ptr< FlyingPhasorElementType[] > deltaSampleBuffer{new FlyingPhasorElementType[ epochSize ] };
     for ( size_t i = 0; epochSize != i; ++i )
     {
-        deltaSampleBuffer[i] = pSamples[i] - compareSampleBuffer[i];
+        deltaSampleBuffer[i] = pEpochSampleBuffer[i] - compareSampleBuffer[i];
         if ( 0.0 != deltaSampleBuffer[i] )
         {
             std::cout << "Failed Specific Mag, With Envelope Test at epoch sample index " << i << "." << std::endl;

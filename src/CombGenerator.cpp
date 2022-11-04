@@ -9,7 +9,6 @@
 #include "FlyingPhasorToneGenerator.h"
 
 #include <vector>
-#include <memory>
 #include <stdexcept>
 #include <cstring>
 
@@ -23,13 +22,10 @@ private:
 
     Imple() = delete;
 
-    Imple( size_t theMaxHarmonics, size_t theEpochSize )
+    Imple( size_t theMaxHarmonics )
       : maxHarmonics( theMaxHarmonics )
-      , epochSize( theEpochSize )
       , harmonicGenerators{ maxHarmonics }
-      , epochSampleBuffer{ new FlyingPhasorElementType[ epochSize ] }
     {
-        std::memset( epochSampleBuffer.get(), 0, sizeof( FlyingPhasorElementType ) * epochSize );
     }
 
     void reset ( size_t theNumHarmonics, double fundamentalRadiansPerSample,
@@ -55,11 +51,9 @@ private:
             auto radiansPerSample = (i+1) * fundamentalRadiansPerSample;
             harmonicGenerators[ i ].reset(radiansPerSample, pPhaseVector ? *pPhaseVector++ : 0.0 );
         }
-
-        std::memset( epochSampleBuffer.get(), 0, sizeof( FlyingPhasorElementType ) * epochSize );
     }
 
-    const ReiserRT::Signal::FlyingPhasorElementBufferTypePtr getEpoch()
+    void getSamples( ReiserRT::Signal::FlyingPhasorElementBufferTypePtr pElementBuffer, size_t numSamples )
     {
         if ( !envelopeFunkType )
         {
@@ -70,9 +64,9 @@ private:
                 auto mag = pMag ? *pMag++ : 1.0;
                 // First line optimization, just get the samples. Accumulation not necessary.
                 if ( 0 == i )
-                    harmonicGenerators[ i ].getSamplesScaled(epochSampleBuffer.get(), epochSize, mag );
+                    harmonicGenerators[ i ].getSamplesScaled(pElementBuffer, numSamples, mag );
                 else
-                    harmonicGenerators[ i ].accumSamplesScaled(epochSampleBuffer.get(), epochSize, mag );
+                    harmonicGenerators[ i ].accumSamplesScaled(pElementBuffer, numSamples, mag );
             }
         }
         else
@@ -86,31 +80,26 @@ private:
 
                 // First line optimization, just get the scintillated samples. Accumulation not necessary.
                 if ( 0 == i )
-                    harmonicGenerators[ i ].getSamplesScaled(epochSampleBuffer.get(), epochSize,
+                    harmonicGenerators[ i ].getSamplesScaled(pElementBuffer, numSamples,
                                                              pEnvelope );
                 else
-                    harmonicGenerators[ i ].accumSamplesScaled(epochSampleBuffer.get(), epochSize,
+                    harmonicGenerators[ i ].accumSamplesScaled(pElementBuffer, numSamples,
                                                                pEnvelope );
             }
         }
-
-        return epochSampleBuffer.get();
     }
 
     const size_t maxHarmonics;
-    const size_t epochSize;
     std::vector< FlyingPhasorToneGenerator > harmonicGenerators;
     const double * pMagnitude{};
 
     CombGeneratorEnvelopeFunkType envelopeFunkType{};
 
-    std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer;
-
     size_t numHarmonics{};
 };
 
-CombGenerator::CombGenerator(size_t maxHarmonics , size_t epochSize )
-  : pImple{ new Imple{maxHarmonics, epochSize } }
+CombGenerator::CombGenerator(size_t maxHarmonics )
+  : pImple{ new Imple{maxHarmonics} }
 {
 }
 
@@ -127,7 +116,7 @@ void CombGenerator::reset ( size_t numHarmonics, double fundamentalRadiansPerSam
                   pMagVector, pPhaseVector, envelopeFunk );
 }
 
-const ReiserRT::Signal::FlyingPhasorElementBufferTypePtr CombGenerator::getEpoch()
+void CombGenerator::getSamples( ReiserRT::Signal::FlyingPhasorElementBufferTypePtr pElementBuffer, size_t numSamples )
 {
-    return pImple->getEpoch();
+    pImple->getSamples( pElementBuffer, numSamples );
 }
