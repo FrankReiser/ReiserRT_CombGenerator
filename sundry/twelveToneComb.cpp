@@ -1,6 +1,9 @@
-//
-// Created by frank on 8/25/22.
-//
+/**
+ * @file twelveToneComb.cpp
+ * @brief A Performance Check on Twelve Un-modulated Tones.
+ * @authors Frank Reiser
+ * @date Initiated August 25th, 2022
+ */
 
 #include "CombGenerator.h"
 

@@ -1,6 +1,9 @@
-//
-// Created by frank on 10/21/22.
-//
+/**
+ * @file energyCalc.cpp
+ * @brief A Simple Proof that RMS Voltage Can Be Used Over Numerical Integration
+ * @authors Frank Reiser
+ * @date Initiated October 21st, 2022
+ */
 
 #include "CombGenerator.h"
 

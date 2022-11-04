@@ -1,6 +1,9 @@
-//
-// Created by frank on 9/28/22.
-//
+/**
+ * @file testCombGenerator.cpp
+ * @brief Test Harness for Comb Generator Testing
+ * @authors Frank Reiser
+ * @date Initiated September 28th, 2022
+ */
 
 #include "CombGenerator.h"
 #include "FlyingPhasorToneGenerator.h"

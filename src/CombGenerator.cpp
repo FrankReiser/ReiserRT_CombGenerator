@@ -9,7 +9,6 @@
 #include "FlyingPhasorToneGenerator.h"
 
 #include <vector>
-#include <memory>
 #include <stdexcept>
 #include <cstring>
 
