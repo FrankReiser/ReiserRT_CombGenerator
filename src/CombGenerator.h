@@ -94,7 +94,6 @@ namespace TSG_NG
          * @brief Get Samples Operation
          *
          * This operation delivers 'N' number samples from the Comb Generator into the user provided buffer.
-         * The samples are unscaled (i.e., a magnitude of one).
          *
          * @param pElementBuffer User provided buffer large enough to hold the requested number of samples.
          * @param numSamples The number of samples to be delivered.
