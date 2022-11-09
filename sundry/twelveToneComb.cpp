@@ -1,6 +1,9 @@
-//
-// Created by frank on 8/25/22.
-//
+/**
+ * @file twelveToneComb.cpp
+ * @brief A Performance Check on Twelve Un-modulated Tones.
+ * @authors Frank Reiser
+ * @date Initiated August 25th, 2022
+ */
 
 #include "CombGenerator.h"
 
@@ -60,13 +63,17 @@ int main()
     // This will be the number of samples we will fetch at a time.
     constexpr size_t epochSize = 2048;
 
+    // This will be the buffer that we use
+    std::unique_ptr< ReiserRT::Signal::FlyingPhasorElementType[] > epochSampleBuffer{new ReiserRT::Signal::FlyingPhasorElementType [ epochSize ] };
+    ReiserRT::Signal:: FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
+
     // Instantiate our Comb Generator
-    CombGenerator combGenerator{ maxSpectralLines, epochSize };
+    CombGenerator combGenerator{ maxSpectralLines };
     combGenerator.reset( maxSpectralLines, M_PI / 16,  nullptr, nullptr );
 
     double t0, t1;
     t0 = getClockMonotonic();
-    combGenerator.getEpoch();
+    combGenerator.getSamples( pEpochSampleBuffer, epochSize );
     t1 = getClockMonotonic();
 
     std::cout
