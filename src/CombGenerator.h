@@ -55,7 +55,7 @@ namespace TSG_NG
          * @param maxHarmonics The maximum number of harmonics that an instance will support (fundamental included).
          * @param epochSize The number of samples that make up an epoch.
          */
-        CombGenerator( size_t maxHarmonics, size_t epochSize );
+        CombGenerator( size_t maxHarmonics );
 
         /**
          * @brief Destructor
@@ -91,16 +91,14 @@ namespace TSG_NG
                      const CombGeneratorEnvelopeFunkType & envelopeFunk = CombGeneratorEnvelopeFunkType{} );
 
         /**
-         * @brief The Get Epoch Operation
+         * @brief Get Samples Operation
          *
-         * This operation returns a pointer to internal buffer space where an epoch's worth of harmonic
-         * spectrum, complex time series data, resides. It will invoke the client provided envelopeFunk (if non-null)
-         * for each N harmonics specified during reset, for an envelope to use.
+         * This operation delivers 'N' number samples from the Comb Generator into the user provided buffer.
          *
-         * @return Returns a pointer to an internal buffer where an epoch's worth of harmonic
-         * spectrum, complex time series data, resides.
+         * @param pElementBuffer User provided buffer large enough to hold the requested number of samples.
+         * @param numSamples The number of samples to be delivered.
          */
-        const ReiserRT::Signal::FlyingPhasorElementBufferTypePtr getEpoch();
+        void getSamples( ReiserRT::Signal::FlyingPhasorElementBufferTypePtr pElementBuffer, size_t numSamples );
 
     private:
         Imple * pImple;    //!< Pointer to hidden implementation.
