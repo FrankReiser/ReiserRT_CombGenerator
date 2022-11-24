@@ -11,22 +11,23 @@ endif()
 
 # Specify all of our public headers for easy reference.
 set( _publicHeaders
-		"CombGenerator.h"
-		"CombGeneratorDataTypes.h"
+    CombGenerator.h
+    CombGeneratorDataTypes.h
     )
 
 # Specify all of our private headers for easy reference.
 set( _privateHeaders
+      ""
     )
 
 # Specify our source files
 set( _sourceFiles
-		"CombGenerator.cpp"
-		"CombGeneratorDataTypes.cpp"
+    CombGenerator.cpp
+    CombGeneratorDataTypes.cpp
     )
 
 # Specify Sources to be built into our library
-target_sources( ${PROJECT_NAME} PRIVATE ${_sourceFiles}	)
+target_sources( ${PROJECT_NAME} PRIVATE ${_sourceFiles} )
 
 # Specify our target interfaces for ourself and external clients post installation
 target_include_directories( ${PROJECT_NAME}
@@ -39,8 +40,8 @@ target_include_directories( ${PROJECT_NAME}
 # Anything that links to 'Us', needs these libraries also.
 target_link_libraries( ${PROJECT_NAME} ReiserRT_FlyingPhasor::ReiserRT_FlyingPhasor )
 
-# Change Default Visibility and Include Generated Header Files to the PUBLIC_HEADER property
-# so that it will get installed with all the other specified public headers.
+# Specify Shared Object used Position Independent Code Major, the Major Version, Debug Prefix and Public Headers.
+# NOTE: Additional properties set or overridden after Export Header generated below.
 set_target_properties( ${PROJECT_NAME}
         PROPERTIES
         POSITION_INDEPENDENT_CODE 1
@@ -63,9 +64,9 @@ generate_export_header( ${PROJECT_NAME}
         DEFINE_NO_DEPRECATED
         )
 
-# We want to add this export header file to the public headers specification so that it gets installed
-# with the rest of the headers that get install. Additionally, we want to hide any API functions
-# that are not explicitly exported.
+# Since we have an EXPORT file, hide everything that isn't explicitly exported.
+# Additionally, rewrite public headers appending the Export File. All of these includes need
+# be part of the installation.
 get_target_property( _tmp ${PROJECT_NAME} PUBLIC_HEADER )
 set_target_properties( ${PROJECT_NAME}
         PROPERTIES
@@ -74,8 +75,8 @@ set_target_properties( ${PROJECT_NAME}
         PUBLIC_HEADER "${_tmp};${CMAKE_BINARY_DIR}/${INSTALL_INCLUDEDIR}/${PROJECT_NAME}Export.h"
         )
 
-# Process CMake configuration input file which dynamically generates the output CMake configuration files
-# that aide development with other CMake client projects that use us.
+# Process CMake configuration input file which dynamically generates the output CMake configuration files.
+# This aides the integration with other CMake client projects that use this project.
 # The first part specifies version compatibility for clients and the the second part generates the CMake
 # configuration for the development purposes.
 include(CMakePackageConfigHelpers)
