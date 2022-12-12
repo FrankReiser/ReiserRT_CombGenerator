@@ -5,14 +5,15 @@
  * @date Initiated August 22nd, 2022
  */
 
-#ifndef TSG_NG_COMB_GENERATOR_H
-#define TSG_NG_COMB_GENERATOR_H
+#ifndef REISER_RT_COMB_GENERATOR_H
+#define REISER_RT_COMB_GENERATOR_H
 
 // Include Export Specification File
-#include "TsgNgCombGeneratorExport.h"
+#include "ReiserRT_CombGeneratorExport.h"
 
 #include "CombGeneratorDataTypes.h"
 #include "FlyingPhasorToneGeneratorDataTypes.h"
+
 
 namespace TSG_NG
 {
@@ -27,7 +28,7 @@ namespace TSG_NG
      * The CombGenerator also provides support for individually modulating the tones produced through
      * an envelope functor interface. @see CombGeneratorEnvelopeFunkType.
      */
-    class TsgNgCombGenerator_EXPORT CombGenerator
+    class ReiserRT_CombGenerator_EXPORT CombGenerator
     {
     private:
         /**
@@ -105,5 +106,5 @@ namespace TSG_NG
     };
 }
 
-#endif // #ifndef TSG_NG_COMB_GENERATOR_H
+#endif // #ifndef REISER_RT_COMB_GENERATOR_H
 
