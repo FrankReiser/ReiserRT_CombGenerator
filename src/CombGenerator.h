@@ -54,7 +54,7 @@ namespace ReiserRT
              *
              * @param maxHarmonics The maximum number of harmonics that an instance will support (fundamental included).
              */
-            CombGenerator( size_t maxHarmonics );
+            explicit CombGenerator( size_t maxHarmonics );
 
             /**
              * @brief Destructor
