@@ -10,26 +10,29 @@
 
 #include <functional>
 
-namespace TSG_NG {
-    /**
-     * @brief The Comb Generator Envelope Functor Type
-     *
-     * The CombGenerator does not prescribe any particular form of envelope other than constant
-     * magnitude of 1.0 by default for every tone.
-     * However, a client may require a particular envelope and, on a per tone basis.
-     * This functor type provides a mechanism for clients to apply envelopes to each tone.
-     * The parameters are all hints that the client might make use of in generating and
-     * applying an envelope.
-     *
-     * @param currentSampleCount The current running sample counter for the Nth harmonic tone.
-     * @param nHarmonic The zeroth based harmonic (0 being the fundamental).
-     * @param nominalMag The default magnitude for the Nth harmonic, specified at reset time.
-     *
-     * @return Returns a pointer to a buffer of length epochSize (specified during CombGenerator construction),
-     * populated the envelope to apply for the Nth harmonic tone.
-     */
-    using CombGeneratorEnvelopeFunkType =
-    std::function< const double *( size_t currentSampleCount, size_t nHarmonic, double nominalMag ) >;
-
+namespace ReiserRT
+{
+    namespace Signal
+    {
+        /**
+         * @brief The Comb Generator Envelope Functor Type
+         *
+         * The CombGenerator does not prescribe any particular form of envelope other than constant
+         * magnitude of 1.0 by default for every tone.
+         * However, a client may require a particular envelope and, on a per tone basis.
+         * This functor type provides a mechanism for clients to apply envelopes to each tone.
+         * The parameters are all hints that the client might make use of in generating and
+         * applying an envelope.
+         *
+         * @param currentSampleCount The current running sample counter for the Nth harmonic tone.
+         * @param nHarmonic The zeroth based harmonic (0 being the fundamental).
+         * @param nominalMag The default magnitude for the Nth harmonic, specified at reset time.
+         *
+         * @return Returns a pointer to a buffer of length epochSize (specified during CombGenerator construction),
+         * populated the envelope to apply for the Nth harmonic tone.
+         */
+        using CombGeneratorEnvelopeFunkType =
+                std::function< const double *( size_t currentSampleCount, size_t nHarmonic, double nominalMag ) >;
+    }
 }
 #endif //TSG_NG_COMBGENERATORDATATYPES_H

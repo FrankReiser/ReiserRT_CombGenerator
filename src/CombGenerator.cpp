@@ -12,7 +12,6 @@
 #include <stdexcept>
 #include <cstring>
 
-using namespace TSG_NG;
 using namespace ReiserRT::Signal;
 
 class CombGenerator::Imple
