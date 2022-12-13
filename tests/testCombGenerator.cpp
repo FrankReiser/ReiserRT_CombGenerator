@@ -13,7 +13,6 @@
 #include <cmath>
 #include <vector>
 
-using namespace TSG_NG;
 using namespace ReiserRT::Signal;
 
 constexpr size_t numHarmonics = 2;
@@ -31,8 +30,8 @@ int defaultMagPhaseNoEnvelope()
                          nullptr, nullptr );
 
     ///@todo write a better comment
-    std::unique_ptr< ReiserRT::Signal::FlyingPhasorElementType[] > epochSampleBuffer{new ReiserRT::Signal::FlyingPhasorElementType [ epochSize ] };
-    ReiserRT::Signal:: FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
+    std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer{new FlyingPhasorElementType [ epochSize ] };
+    FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
 
     // Get samples for harmonic series.
     combGenerator.getSamples( pEpochSampleBuffer, epochSize );
@@ -81,8 +80,8 @@ int specificMagPhaseNoEnvelope()
                          magnitudes.get(), phases.get() );
 
     ///@todo write a better comment
-    std::unique_ptr< ReiserRT::Signal::FlyingPhasorElementType[] > epochSampleBuffer{new ReiserRT::Signal::FlyingPhasorElementType [ epochSize ] };
-    ReiserRT::Signal:: FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
+    std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer{new FlyingPhasorElementType [ epochSize ] };
+    FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
 
     // Get samples for harmonic series.
     combGenerator.getSamples( pEpochSampleBuffer, epochSize );
@@ -138,8 +137,8 @@ int defaultMagWithEnvelope()
                          nullptr, nullptr, envelopeFunk );
 
     ///@todo write a better comment
-    std::unique_ptr< ReiserRT::Signal::FlyingPhasorElementType[] > epochSampleBuffer{new ReiserRT::Signal::FlyingPhasorElementType [ epochSize ] };
-    ReiserRT::Signal:: FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
+    std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer{new FlyingPhasorElementType [ epochSize ] };
+    FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
 
     // Get samples for harmonic series.
     combGenerator.getSamples( pEpochSampleBuffer, epochSize );
@@ -202,8 +201,8 @@ int specificMagWithEnvelope()
                          magnitudes.get(), nullptr, envelopeFunk );
 
     ///@todo write a better comment
-    std::unique_ptr< ReiserRT::Signal::FlyingPhasorElementType[] > epochSampleBuffer{new ReiserRT::Signal::FlyingPhasorElementType [ epochSize ] };
-    ReiserRT::Signal:: FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
+    std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer{new FlyingPhasorElementType [ epochSize ] };
+    FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
 
     // Get samples for harmonic series.
     combGenerator.getSamples( pEpochSampleBuffer, epochSize );

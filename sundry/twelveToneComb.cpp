@@ -12,7 +12,7 @@
 #include <iostream>
 #include <cstring>
 
-using namespace TSG_NG;
+using namespace ReiserRT::Signal;
 
 void setupScheduling()
 {
@@ -64,8 +64,8 @@ int main()
     constexpr size_t epochSize = 2048;
 
     // This will be the buffer that we use
-    std::unique_ptr< ReiserRT::Signal::FlyingPhasorElementType[] > epochSampleBuffer{new ReiserRT::Signal::FlyingPhasorElementType [ epochSize ] };
-    ReiserRT::Signal:: FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
+    std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer{new FlyingPhasorElementType [ epochSize ] };
+    FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
 
     // Instantiate our Comb Generator
     CombGenerator combGenerator{ maxSpectralLines };

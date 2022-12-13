@@ -10,6 +10,8 @@
 #include <memory>
 #include <iostream>
 
+using namespace ReiserRT::Signal;
+
 int main()
 {
     // This will be our both our maximum and also the number we will use.
@@ -20,11 +22,11 @@ int main()
 
     // Instantiate Comb Generator for number of harmonics and epoch size.
     // Note: Max and Number of Harmonics same for this experiment.
-    TSG_NG::CombGenerator combGenerator{ numHarmonics };
+    CombGenerator combGenerator{ numHarmonics };
 
     /// @todo write a better description for buffer
-    std::unique_ptr< ReiserRT::Signal::FlyingPhasorElementType[] > epochSampleBuffer{new ReiserRT::Signal::FlyingPhasorElementType [ epochSize ] };
-    ReiserRT::Signal:: FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
+    std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer{new FlyingPhasorElementType [ epochSize ] };
+    FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
 
     // We want a decreasing magnitude for each harmonic.
     // Each harmonic has the reciprocal amplitude of its position (classic sawtooth).
