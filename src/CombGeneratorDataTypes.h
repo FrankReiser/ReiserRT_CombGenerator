@@ -8,22 +8,8 @@
 #ifndef REISER_RT_COMBGENERATORDATATYPES_H
 #define REISER_RT_COMBGENERATORDATATYPES_H
 
+#include <memory>
 #include <functional>
-
-/**
- * @brief Forward Declaration of standard namespace
- */
-namespace std
-{
-    /**
-     * @brief Forward Declaration of Standard Shared Pointer Type
-     *
-     * We will use shared pointer types in our CombGenerator API as our data type
-     * for vectors of scalars used to specify nominal magnitudes and initial phases.
-     */
-    template < typename T >
-    class shared_ptr;
-}
 
 namespace ReiserRT
 {
@@ -37,7 +23,7 @@ namespace ReiserRT
          * operation. Using a shared pointer allows the information to be 'read' by
          * multiple components simultaneously.
          */
-        using SharedScalarVectorType = std::shared_ptr< const double >;
+        using SharedScalarVectorType = std::shared_ptr< const double[] >;
 
         /**
          * @brief The Comb Generator Envelope Functor Type
@@ -55,7 +41,8 @@ namespace ReiserRT
          * @param nominalMag The default magnitude for the Nth harmonic, specified at reset time.
          *
          * @return Returns a pointer to a buffer of length epochSize (specified during CombGenerator construction),
-         * populated the envelope to apply for the Nth harmonic tone.
+         * populated with the envelope to apply for the Nth harmonic tone.
+         * @warning Failure to return the appropriate length of epochSize may result in undefined behaviour.
          */
         using CombGeneratorEnvelopeFunkType =
                 std::function< const double *( size_t currentSampleCount, size_t nHarmonic, double nominalMag ) >;

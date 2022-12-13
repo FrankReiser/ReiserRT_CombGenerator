@@ -26,10 +26,10 @@ int defaultMagPhaseNoEnvelope()
     CombGenerator combGenerator{ numHarmonics };
 
     // Reset the Comb Generator
-    combGenerator.reset( numHarmonics, fundamentalRadiansPerSample,
-                         nullptr, nullptr );
+    combGenerator.reset( numHarmonics, fundamentalRadiansPerSample );
 
-    ///@todo write a better comment
+    // We need a buffer to store signal data provided by the CombGenerator getSamples .
+    // This buffer needs to be large enough for the maximum number of samples we will be retrieving.
     std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer{new FlyingPhasorElementType [ epochSize ] };
     FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
 
@@ -42,7 +42,7 @@ int defaultMagPhaseNoEnvelope()
     std::unique_ptr< FlyingPhasorElementType[] > compareSampleBuffer{new FlyingPhasorElementType[ epochSize ] };
     for (size_t i = 0; numHarmonics != i; ++i )
     {
-        spectralLineGenerators[i].reset( (i+1) * fundamentalRadiansPerSample, 0.0 );
+        spectralLineGenerators[i].reset( double(i+1) * fundamentalRadiansPerSample, 0.0 );
         if ( 0 == i )
             spectralLineGenerators[i].getSamplesScaled(compareSampleBuffer.get(), epochSize, 1.0 );
         else
@@ -73,13 +73,15 @@ int specificMagPhaseNoEnvelope()
     for (size_t i = 0; numHarmonics != i; ++i )
     {
         magnitudes[i] = 2.0;
-        phases[i] = i * M_PI / 32;
+        phases[i] = double(i) * M_PI / 32;
     }
-
+    SharedScalarVectorType sharedMagnitudes{ std::move( magnitudes ) };
+    SharedScalarVectorType sharedPhases{ std::move( phases ) };
     combGenerator.reset( numHarmonics, fundamentalRadiansPerSample,
-                         magnitudes.get(), phases.get() );
+                         sharedMagnitudes, sharedPhases );
 
-    ///@todo write a better comment
+    // We need a buffer to store signal data provided by the CombGenerator getSamples .
+    // This buffer needs to be large enough for the maximum number of samples we will be retrieving.
     std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer{new FlyingPhasorElementType [ epochSize ] };
     FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
 
@@ -92,11 +94,14 @@ int specificMagPhaseNoEnvelope()
     std::unique_ptr< FlyingPhasorElementType[] > compareSampleBuffer{new FlyingPhasorElementType[ epochSize ] };
     for (size_t i = 0; numHarmonics != i; ++i )
     {
-        spectralLineGenerators[i].reset( (i+1) * fundamentalRadiansPerSample, phases[i] );
+        spectralLineGenerators[i].reset( double(i+1) * fundamentalRadiansPerSample,
+                                         sharedPhases[ std::ptrdiff_t(i) ] );
         if ( 0 == i )
-            spectralLineGenerators[i].getSamplesScaled(compareSampleBuffer.get(), epochSize, magnitudes.get()[i] );
+            spectralLineGenerators[i].getSamplesScaled(compareSampleBuffer.get(), epochSize,
+                                                       sharedMagnitudes[ std::ptrdiff_t(i) ] );
         else
-            spectralLineGenerators[i].accumSamplesScaled(compareSampleBuffer.get(), epochSize, magnitudes.get()[i] );
+            spectralLineGenerators[i].accumSamplesScaled(compareSampleBuffer.get(), epochSize,
+                                                         sharedMagnitudes[ std::ptrdiff_t(i) ] );
     }
     std::unique_ptr< FlyingPhasorElementType[] > deltaSampleBuffer{new FlyingPhasorElementType[ epochSize ] };
     for ( size_t i = 0; epochSize != i; ++i )
@@ -125,7 +130,7 @@ int defaultMagWithEnvelope()
         auto pMag = envelopeBuffer.get();
         for ( size_t i = 0; epochSize != i; ++i )
         {
-            auto env = nominalMag * std::exp( nSample++ / -tau );
+            auto env = nominalMag * std::exp( double( nSample++) / -tau );
             *pMag++ = env;
         }
 
@@ -136,7 +141,8 @@ int defaultMagWithEnvelope()
     combGenerator.reset( numHarmonics, fundamentalRadiansPerSample,
                          nullptr, nullptr, envelopeFunk );
 
-    ///@todo write a better comment
+    // We need a buffer to store signal data provided by the CombGenerator getSamples .
+    // This buffer needs to be large enough for the maximum number of samples we will be retrieving.
     std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer{new FlyingPhasorElementType [ epochSize ] };
     FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
 
@@ -151,7 +157,7 @@ int defaultMagWithEnvelope()
     {
         auto pEnvelope = envelopeFunk( 0, i, 1.0 );
 
-        spectralLineGenerators[i].reset( (i+1) * fundamentalRadiansPerSample, 0.0 );
+        spectralLineGenerators[i].reset( double(i+1) * fundamentalRadiansPerSample, 0.0 );
         if ( 0 == i )
             spectralLineGenerators[i].getSamplesScaled(compareSampleBuffer.get(), epochSize, pEnvelope );
         else
@@ -180,6 +186,7 @@ int specificMagWithEnvelope()
     std::unique_ptr< double[] > magnitudes{ new double[ numHarmonics ] };
     for (size_t i = 0; numHarmonics != i; ++i )
         magnitudes[i] = 2.0;
+    SharedScalarVectorType sharedMagnitudes{ std::move( magnitudes ) };
 
     // We're going to use an exponential decay for this test.
     std::unique_ptr< double[] > envelopeBuffer{new double[ epochSize ] };
@@ -189,7 +196,7 @@ int specificMagWithEnvelope()
         auto pMag = envelopeBuffer.get();
         for ( size_t i = 0; epochSize != i; ++i )
         {
-            auto env = nominalMag * std::exp( nSample++ / -tau );
+            auto env = nominalMag * std::exp( double( nSample++ ) / -tau );
             *pMag++ = env;
         }
 
@@ -198,9 +205,10 @@ int specificMagWithEnvelope()
 
     // Reset the Comb Generator
     combGenerator.reset( numHarmonics, fundamentalRadiansPerSample,
-                         magnitudes.get(), nullptr, envelopeFunk );
+                         sharedMagnitudes, nullptr, envelopeFunk );
 
-    ///@todo write a better comment
+    // We need a buffer to store signal data provided by the CombGenerator getSamples .
+    // This buffer needs to be large enough for the maximum number of samples we will be retrieving.
     std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer{new FlyingPhasorElementType [ epochSize ] };
     FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
 
@@ -215,7 +223,7 @@ int specificMagWithEnvelope()
     {
         auto pEnvelope = envelopeFunk( 0, i, 2.0 );
 
-        spectralLineGenerators[i].reset( (i+1) * fundamentalRadiansPerSample, 0.0 );
+        spectralLineGenerators[i].reset( double(i+1) * fundamentalRadiansPerSample, 0.0 );
         if ( 0 == i )
             spectralLineGenerators[i].getSamplesScaled(compareSampleBuffer.get(), epochSize, pEnvelope );
         else
@@ -236,12 +244,10 @@ int specificMagWithEnvelope()
     return 0;
 }
 
-int main( int argc, char * argv[] )
+int main()
 {
-    int testResult = 0;
-
     // Test Number 1.
-    testResult = defaultMagPhaseNoEnvelope();
+    int testResult = defaultMagPhaseNoEnvelope();
     if ( 0 != testResult ) return testResult;
 
     // Test Number 2.

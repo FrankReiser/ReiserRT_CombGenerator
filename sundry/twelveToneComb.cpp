@@ -20,7 +20,7 @@ void setupScheduling()
     ///We will simply attempt to enable SCHED_FIFO and potentially set a minor level priority.
     ///Other threads may need prioritization of there own.
 
-    sched_param schedParam;
+    sched_param schedParam{};
     int policy;
     if ( pthread_getschedparam( pthread_self(), &policy, &schedParam ) )
     {
@@ -69,7 +69,7 @@ int main()
 
     // Instantiate our Comb Generator
     CombGenerator combGenerator{ maxSpectralLines };
-    combGenerator.reset( maxSpectralLines, M_PI / 16,  nullptr, nullptr );
+    combGenerator.reset( maxSpectralLines, M_PI / 16 );
 
     double t0, t1;
     t0 = getClockMonotonic();
