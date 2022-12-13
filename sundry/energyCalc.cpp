@@ -24,7 +24,8 @@ int main()
     // Note: Max and Number of Harmonics same for this experiment.
     CombGenerator combGenerator{ numHarmonics };
 
-    /// @todo write a better description for buffer
+    // We need a buffer to store signal data provided by the CombGenerator getSamples .
+    // This buffer needs to be large enough for the maximum number of samples we will be retrieving.
     std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer{new FlyingPhasorElementType [ epochSize ] };
     FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
 
@@ -62,12 +63,11 @@ int main()
     double calcEnergy = 0;
     for ( size_t i = 0; i != numHarmonics; ++i )
     {
-        auto rmsMag = magnitudes[i] * sqrt2over2;
+        auto rmsMag = magnitudes[ std::ptrdiff_t(i) ] * sqrt2over2;
         calcEnergy += rmsMag * rmsMag;
     }
     calcEnergy *= epochSize;
     std::cout << "Calc Energy: " << calcEnergy << " (rmsMag^2*samples)" << std::endl;
-
 
     // Some Noise Calculations
     // We will start by specifying a desired SNR for our signal over a "Band Of Interest" arbitrarily set.
@@ -88,7 +88,6 @@ int main()
     // The times 2 in the formula is because we will incorporate sigma into both I and Q at the end of the day.
     const auto sigma = std::sqrt( calcEnergy / ( 2 * periodSamples * bandOfInterestFsRatio ) ) / noiseVRatio;
     std::cout << "Sigma: " << sigma << std::endl;
-
 
     return 0;
 }

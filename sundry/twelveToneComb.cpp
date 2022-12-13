@@ -20,7 +20,7 @@ void setupScheduling()
     ///We will simply attempt to enable SCHED_FIFO and potentially set a minor level priority.
     ///Other threads may need prioritization of there own.
 
-    sched_param schedParam;
+    sched_param schedParam{};
     int policy;
     if ( pthread_getschedparam( pthread_self(), &policy, &schedParam ) )
     {
