@@ -16,12 +16,15 @@ using namespace ReiserRT::Signal;
 
 class CombGenerator::Imple
 {
+// Deleted Operations Should be `public`
+public:
+    Imple() = delete;
+
+// Everything else is private but accessible by our nested class.
 private:
     friend class CombGenerator;
 
-    Imple() = delete;
-
-    Imple( size_t theMaxHarmonics )
+    explicit Imple( size_t theMaxHarmonics )
       : maxHarmonics( theMaxHarmonics )
       , harmonicGenerators{ maxHarmonics }
     {
@@ -41,20 +44,21 @@ private:
         // Record the Magnitude vector for later use by getSamples.
         pMagnitude = pMagVector;
 
-        // Record the Envelope Function which could be NULL.
+        // Record the Envelope Function which could be empty.
         envelopeFunkType = theEnvelopeFunk;
 
         // For each Spectral Line
         for (size_t i = 0; i != numHarmonics; ++i )
         {
             // Reset Spectral Line Tone Generator
-            auto radiansPerSample = (i+1) * fundamentalRadiansPerSample;
+            auto radiansPerSample = double(i+1) * fundamentalRadiansPerSample;
             harmonicGenerators[ i ].reset(radiansPerSample, pPhaseVector ? *pPhaseVector++ : 0.0 );
         }
     }
 
     void getSamples( FlyingPhasorElementBufferTypePtr pElementBuffer, size_t numSamples )
     {
+        // If no envelope functor
         if ( !envelopeFunkType )
         {
             // For, each spectral line accumulate its samples.
@@ -69,16 +73,19 @@ private:
                     harmonicGenerators[ i ].accumSamplesScaled( pElementBuffer, numSamples, mag );
             }
         }
+        // Else, envelope functor
         else
         {
             auto pMag = pMagnitude;
             auto nSample = harmonicGenerators[0].getSampleCount();  // All the same
             for ( size_t i = 0; i != numHarmonics; ++i )
             {
+                // Invoke the non-empty envelope functor for this harmonic
+                // to obtain its modulation envelop.
                 auto mag = pMag ? *pMag++ : 1.0;
-                auto pEnvelope = envelopeFunkType( nSample, i, mag );
+                auto pEnvelope = envelopeFunkType( nSample, numSamples, i, mag );
 
-                // First line optimization, just get the scintillated samples. Accumulation not necessary.
+                // First line optimization, just get the modulated samples. Accumulation not necessary.
                 if ( 0 == i )
                     harmonicGenerators[ i ].getSamplesScaled( pElementBuffer, numSamples, pEnvelope );
                 else
