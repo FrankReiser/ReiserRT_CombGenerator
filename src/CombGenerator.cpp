@@ -31,7 +31,7 @@ private:
     }
 
     void reset ( size_t theNumHarmonics, double fundamentalRadiansPerSample,
-                 const double * pMagVector, const double * pPhaseVector,
+                 const SharedScalarVectorType & theMagVector, const SharedScalarVectorType & thePhaseVector,
                  const CombGeneratorEnvelopeFunkType & theEnvelopeFunk )
     {
         // Ensure that the user has not specified more lines than they constructed us to handle.
@@ -42,17 +42,18 @@ private:
         numHarmonics = theNumHarmonics;
 
         // Record the Magnitude vector for later use by getSamples.
-        pMagnitude = pMagVector;
+        magVector = theMagVector;
 
         // Record the Envelope Function which could be empty.
         envelopeFunkType = theEnvelopeFunk;
 
         // For each Spectral Line
+        auto pPhase = thePhaseVector.get();
         for (size_t i = 0; i != numHarmonics; ++i )
         {
             // Reset Spectral Line Tone Generator
             auto radiansPerSample = double(i+1) * fundamentalRadiansPerSample;
-            harmonicGenerators[ i ].reset(radiansPerSample, pPhaseVector ? *pPhaseVector++ : 0.0 );
+            harmonicGenerators[ i ].reset(radiansPerSample, pPhase ? *pPhase++ : 0.0 );
         }
     }
 
@@ -62,7 +63,7 @@ private:
         if ( !envelopeFunkType )
         {
             // For, each spectral line accumulate its samples.
-            auto pMag = pMagnitude;
+            auto pMag = magVector.get();
             for ( size_t i = 0; i != numHarmonics; ++i )
             {
                 auto mag = pMag ? *pMag++ : 1.0;
@@ -76,7 +77,7 @@ private:
         // Else, envelope functor
         else
         {
-            auto pMag = pMagnitude;
+            auto pMag = magVector.get();
             auto nSample = harmonicGenerators[0].getSampleCount();  // All the same
             for ( size_t i = 0; i != numHarmonics; ++i )
             {
@@ -96,7 +97,7 @@ private:
 
     const size_t maxHarmonics;
     std::vector< FlyingPhasorToneGenerator > harmonicGenerators;
-    const double * pMagnitude{};
+    SharedScalarVectorType magVector{};
     CombGeneratorEnvelopeFunkType envelopeFunkType{};
     size_t numHarmonics{};
 };
@@ -112,11 +113,11 @@ CombGenerator::~CombGenerator()
 }
 
 void CombGenerator::reset ( size_t numHarmonics, double fundamentalRadiansPerSample,
-                            const double * pMagVector, const double * pPhaseVector,
+                            const SharedScalarVectorType & magVector, const SharedScalarVectorType & phaseVector,
                             const CombGeneratorEnvelopeFunkType & envelopeFunk )
 {
     pImple->reset(numHarmonics, fundamentalRadiansPerSample,
-                  pMagVector, pPhaseVector, envelopeFunk );
+                  magVector, phaseVector, envelopeFunk );
 }
 
 void CombGenerator::getSamples( FlyingPhasorElementBufferTypePtr pElementBuffer, size_t numSamples )

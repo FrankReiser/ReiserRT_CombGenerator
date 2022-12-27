@@ -20,12 +20,7 @@ int main()
     // This will be the number of samples we will fetch.
     constexpr size_t epochSize = 4096;
 
-    // Instantiate Comb Generator for number of harmonics and epoch size.
-    // Note: Max and Number of Harmonics same for this experiment.
-    CombGenerator combGenerator{ numHarmonics };
-
-    // We need a buffer to store signal data provided by the CombGenerator getSamples .
-    // This buffer needs to be large enough for the maximum number of samples we will be retrieving.
+    /// @todo write a better description for buffer
     std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer{new FlyingPhasorElementType [ epochSize ] };
     FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
 
@@ -39,14 +34,21 @@ int main()
         *pMag++ = mag;
     }
 
+    // Transfer managed memory in shared pointer type for CombGenerator reset operation.
+    SharedScalarVectorType sharedMagnitudes{ std::move( magnitudes ) };
+
     // Now for the fundamental frequency (first harmonic), we want it to fill the epoch period
     // with one complete cycle. The harmonics will naturally have more than one cycle.
     // That is the purpose of this experiment, to determine the energy of one fundamental period and prove an
     // algebraic calculation is all that is required (we know the integral).
     const auto fundamental = M_PI * 2 / epochSize;
 
+    // Instantiate Comb Generator for number of harmonics and epoch size.
+    // Note: Max and Number of Harmonics same for this experiment.
+    CombGenerator combGenerator{ numHarmonics };
+
     // Reset Comb Generator and fetch an epochs worth of data
-    combGenerator.reset( numHarmonics, fundamental, magnitudes.get(), nullptr );
+    combGenerator.reset( numHarmonics, fundamental, sharedMagnitudes );
     combGenerator.getSamples( pEpochSampleBuffer, epochSize );
 
     // Calculate the energy as the magnitude squared by the number of samples.
@@ -63,7 +65,7 @@ int main()
     double calcEnergy = 0;
     for ( size_t i = 0; i != numHarmonics; ++i )
     {
-        auto rmsMag = magnitudes[ std::ptrdiff_t(i) ] * sqrt2over2;
+        auto rmsMag = sharedMagnitudes[std::ptrdiff_t(i)] * sqrt2over2;
         calcEnergy += rmsMag * rmsMag;
     }
     calcEnergy *= epochSize;
