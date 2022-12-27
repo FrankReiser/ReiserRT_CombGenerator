@@ -11,8 +11,11 @@
 // Include Export Specification File
 #include "ReiserRT_CombGeneratorExport.h"
 
-#include "CombGeneratorDataTypes.h"
+#include "SharedScalarVectorTypeFwd.h"
+#include "CombGeneratorEnvelopeFunkType.h"
 #include "FlyingPhasorToneGeneratorDataTypes.h"
+
+#include <memory>
 
 namespace ReiserRT
 {

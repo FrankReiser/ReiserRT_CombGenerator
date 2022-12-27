@@ -6,11 +6,13 @@
  */
 
 #include "CombGenerator.h"
+#include "SharedScalarVectorTypeFwd.h"
 #include "FlyingPhasorToneGenerator.h"
 
 #include <vector>
 #include <stdexcept>
 #include <cstring>
+#include <memory>
 
 using namespace ReiserRT::Signal;
 

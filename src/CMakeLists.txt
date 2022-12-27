@@ -11,8 +11,9 @@ endif()
 
 # Specify all of our public headers for easy reference.
 set( _publicHeaders
+    SharedScalarVectorTypeFwd.h
     CombGenerator.h
-    CombGeneratorDataTypes.h
+    CombGeneratorEnvelopeFunkType.h
     )
 
 # Specify all of our private headers for easy reference.
@@ -22,8 +23,9 @@ set( _privateHeaders
 
 # Specify our source files
 set( _sourceFiles
+    SharedScalarVectorTypeFwd.cpp
     CombGenerator.cpp
-    CombGeneratorDataTypes.cpp
+    CombGeneratorEnvelopeFunkType.cpp
     )
 
 # Specify Sources to be built into our library
