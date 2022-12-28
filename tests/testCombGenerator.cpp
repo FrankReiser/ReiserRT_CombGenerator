@@ -27,7 +27,7 @@ int defaultMagPhaseNoEnvelope()
     // Reset the Comb Generator
     combGenerator.reset( numHarmonics, fundamentalRadiansPerSample );
 
-    // We need a buffer to store signal data provided by the CombGenerator getSamples .
+    // We need a buffer to store signal data provided by the CombGenerator getSamples.
     // This buffer needs to be large enough for the maximum number of samples we will be retrieving.
     std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer{new FlyingPhasorElementType [ maxEpochSize ] };
     FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
@@ -79,7 +79,7 @@ int specificMagPhaseNoEnvelope()
     combGenerator.reset( numHarmonics, fundamentalRadiansPerSample,
                          sharedMagnitudes, sharedPhases );
 
-    // We need a buffer to store signal data provided by the CombGenerator getSamples .
+    // We need a buffer to store signal data provided by the CombGenerator getSamples.
     // This buffer needs to be large enough for the maximum number of samples we will be retrieving.
     std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer{new FlyingPhasorElementType [ maxEpochSize ] };
     FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
@@ -141,7 +141,7 @@ int defaultMagWithEnvelope()
     combGenerator.reset( numHarmonics, fundamentalRadiansPerSample,
                          nullptr, nullptr, envelopeFunk );
 
-    // We need a buffer to store signal data provided by the CombGenerator getSamples .
+    // We need a buffer to store signal data provided by the CombGenerator getSamples.
     // This buffer needs to be large enough for the maximum number of samples we will be retrieving.
     std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer{new FlyingPhasorElementType [ maxEpochSize ] };
     FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
@@ -208,7 +208,7 @@ int specificMagWithEnvelope()
     combGenerator.reset( numHarmonics, fundamentalRadiansPerSample,
                          sharedMagnitudes, nullptr, envelopeFunk );
 
-    // We need a buffer to store signal data provided by the CombGenerator getSamples .
+    // We need a buffer to store signal data provided by the CombGenerator getSamples.
     // This buffer needs to be large enough for the maximum number of samples we will be retrieving.
     std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer{new FlyingPhasorElementType [ maxEpochSize ] };
     FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
