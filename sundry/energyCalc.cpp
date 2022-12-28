@@ -20,7 +20,6 @@ int main()
     // This will be the number of samples we will fetch.
     constexpr size_t epochSize = 4096;
 
-    /// @todo write a better description for buffer
     std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer{new FlyingPhasorElementType [ epochSize ] };
     FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
 

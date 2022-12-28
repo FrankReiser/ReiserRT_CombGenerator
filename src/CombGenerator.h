@@ -74,8 +74,6 @@ namespace ReiserRT
              * frequency in radians per sample at the specified starting phases. It will copy the user specified
              * (or defaulted) envelope functor instance for subsequent use.
              *
-             * @todo Have this use Shared Pointers from Block Pool like MultiThreaded Version Does.
-             *
              * @param numHarmonics The number of harmonics to generate. Must be less than or equal to
              * the maximum specified during construction.
              * @param pMagVector This argument provides a series of magnitude values, of length N harmonics.
