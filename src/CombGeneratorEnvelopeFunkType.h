@@ -5,8 +5,8 @@
  * @date Initiated October 13th, 2022
  */
 
-#ifndef REISER_RT_COMBGENERATORDATATYPES_H
-#define REISER_RT_COMBGENERATORDATATYPES_H
+#ifndef REISER_RT_COMBGENERATORENVELOPEFUNKTYPE_H
+#define REISER_RT_COMBGENERATORENVELOPEFUNKTYPE_H
 
 #include <functional>
 
@@ -18,31 +18,32 @@ namespace ReiserRT
          * @brief The Comb Generator Envelope Functor Type
          *
          * The CombGenerator does not prescribe any particular form of envelope other than that
-         * of a constant magnitude for each tone.
-         * However, a client may require a particular envelope and, on a per tone basis.
-         * This functor type provides a mechanism for clients to provide envelopes
-         * for each tone.
-         * The parameters are all hints that the client may make use of in generation of
-         * envelopes.
+         * of a constant magnitude for each harmonic generated.
+         * If a client requires specific envelopes this functor type may be used to
+         * register a callback operation to will deliver envelopes.
+         * Functor instances are to be registered with `CombGenerator::reset` and
+         * notified during subsequent `CombGenerator::getSamples` invocations.
+         *
+         * The parameters provided to the client during callback are all hints
+         * that the client may use of in generation of envelopes.
          *
          * @param currentSample The current running sample counter for the Nth harmonic tone.
          * @param numSamples The number of samples of envelope to generate. This number is passed
          * down directly from a `CombGenerator::getSamples` invocation.
-         * @note The client is expected to provide the necessary buffering for the generation of envelopes.
-         * Envelope data will be incorporated immediately after functor invocation and the client
-         * may safely reuse the buffer for subsequent functor invocations of any additional harmonics.
+         * @note The client is expected to provide the necessary buffering for the generation of envelopes
+         * up to some predetermined maximum length.
          * @param nHarmonic The zeroth based harmonic (0 being the fundamental).
          * @param nominalMag The default magnitude for the Nth harmonic, specified at reset time.
          *
          * @return Returns a pointer to a buffer of length numSamples, populated with the envelope to apply
          * for the Nth harmonic tone.
-         * @warning Failure to return the length of numSamples may result in undefined behaviour.
-         * The data should linger until next invocation but will be consumed immediately.
+         * Envelope data will be incorporated immediately after functor invocation
+         * and the buffer may be safely reused for subsequent functor invocations.
+         * @warning Failure to provide valid data of length numSamples can result in undefined behaviour.
          */
         using CombGeneratorEnvelopeFunkType =
                 std::function< const double *( size_t currentSample, size_t numSamples,
                                                size_t nHarmonic, double nominalMag ) >;
     }
 }
-#endif //REISER_RT_COMBGENERATORDATATYPES_H
-
+#endif //REISER_RT_COMBGENERATORENVELOPEFUNKTYPE_H

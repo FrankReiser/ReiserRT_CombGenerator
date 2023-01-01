@@ -5,8 +5,8 @@
  * @date Initiated August 22nd, 2022
  */
 
-#ifndef REISER_RT_COMB_GENERATOR_H
-#define REISER_RT_COMB_GENERATOR_H
+#ifndef REISER_RT_COMBGENERATOR_H
+#define REISER_RT_COMBGENERATOR_H
 
 // Include Export Specification File
 #include "ReiserRT_CombGeneratorExport.h"
@@ -24,9 +24,9 @@ namespace ReiserRT
         /**
          * @brief Comb Generator
          *
-         * The CombGenerator generates a harmonic spectrum in the form of a complex time series
-         * of specified length. Internally it utilizes a batch of ReiserRT_FlyingPhasor instances
-         * set up at a prescribed harmonic spacing. The initial magnitudes and phases of each tone, along with
+         * The CombGenerator generates a harmonic spectrum in the form of a complex time series.
+         * Internally it utilizes a batch of ReiserRT_FlyingPhasor instances set up at a
+         * prescribed harmonic spacing. The initial magnitudes and phases of each tone, along with
          * their harmonic spacing are specified at 'reset' time.
          *
          * The CombGenerator also provides support for individually modulating the tones produced through
@@ -70,32 +70,31 @@ namespace ReiserRT
              * @brief The Reset Operation
              *
              * This operation prepares the CombGenerator for a subsequent series of `getSamples` invocations.
-             * It sets N FlyingPhasor instances for the appropriate harmonic spacing based on the fundamental
-             * frequency in radians per sample at the specified starting phases. It will copy the user specified
-             * (or defaulted) envelope functor instance for subsequent use.
+             * It sets 'N' FlyingPhasor instances for the appropriate harmonic spacing based on the fundamental
+             * frequency and initial phases. It will copy the user specified envelope functor instance
+             * for subsequent use.
              *
              * @param numHarmonics The number of harmonics to generate. Must be less than or equal to
              * the maximum specified during construction.
-             * @param pMagVector This argument provides a series of magnitude values, of length N harmonics.
+             * @param pMagVector This argument provides a series of magnitude values, of length 'N' harmonics.
              * The argument type is that of a constant shared pointer reference, which may be empty (null pointer).
              * Passing a null pointer (the default) results in a magnitude of 1.0 for all harmonic tones.
-             * This data is expected to persist between CombGenerator reset cycles as it will be referenced
-             * during subsequent `getSamples` invocations.
-             * @warning Not providing the appropriate length of N harmonics, for a non-null vector
-             * may result in undefined behavior.
+             * @warning Not providing the appropriate length of 'N' harmonics, for a non-null vector
+             * can result in undefined behavior.
              * @param pPhaseVector This argument provides a series of starting phase values,
-             * in radians, of length N harmonics.
+             * in radians, of length 'N' harmonics.
              * The argument type is that of a constant shared pointer reference, which may be empty (null pointer).
              * Passing a null pointer (the default) results in an initial phase of 0.0 for all harmonic tones.
-             * @warning Not providing the appropriate length of N harmonics, for a non-null vector
+             * @warning Not providing the appropriate length of 'N' harmonics, for a non-null vector
              * may result in undefined behavior.
-             * @param envelopeFunk Functor interface for obtaining a magnitude envelop from a client.
+             * @param envelopeFunk Functor interface for hooking the magnitude envelope applied during
+             * harmonic tone generator.
              * The default for this parameter is to utilize an empty (null) function object.
-             * In these cases, no envelope is applied.
+             * In these cases, the magnitude specified in the pMagVector alone will be used.
              *
-             * @throw Throws `std::length_error` if numHarmonics exceeds the maximum specified during construction.
+             * @throw std::length_error If numHarmonics exceeds the maximum specified during construction.
              */
-            void reset ( size_t numHarmonics, double fundamentalRadiansPerSample,
+            void reset( size_t numHarmonics, double fundamentalRadiansPerSample,
                          const SharedScalarVectorType & magVector = nullptr,
                          const SharedScalarVectorType & phaseVector = nullptr,
                          const CombGeneratorEnvelopeFunkType & envelopeFunk = CombGeneratorEnvelopeFunkType{} );
@@ -103,9 +102,9 @@ namespace ReiserRT
             /**
              * @brief Get Samples Operation
              *
-             * This operation delivers 'N' number samples from the Comb Generator into the user provided buffer.
-             * If the user specified a non-empty envelope function during the `reset` operation. The function
-             * will be invoked once per harmonic tone being accumulated, to obtain envelopes to modulate the tones.
+             * This operation delivers 'N' number samples from the CombGenerator into the user provided buffer.
+             * If the user specified a non-empty envelope functor during the `reset` operation. That functor
+             * will be invoked once per harmonic tone being accumulated.
              *
              * @param pElementBuffer User provided buffer large enough to hold the requested number of samples.
              * @param numSamples The number of samples to be delivered.
@@ -118,5 +117,5 @@ namespace ReiserRT
     }
 }
 
-#endif // #ifndef REISER_RT_COMB_GENERATOR_H
+#endif // #ifndef REISER_RT_COMBGENERATOR_H
 
