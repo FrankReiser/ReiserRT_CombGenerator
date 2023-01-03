@@ -20,7 +20,8 @@ public:
     CombScintillationEnvelopeFunctor( const CombScintillationEnvelopeFunctor & another ) = delete;
     CombScintillationEnvelopeFunctor & operator =( const CombScintillationEnvelopeFunctor & another ) = delete;
 
-    void reset( size_t numHarmonics, size_t decorrelationSamples, const ReiserRT::Signal::SharedScalarVectorType & pNominalMagnitudes, uint32_t seed );
+    void reset( size_t numHarmonics, size_t decorrelationSamples,
+                const ReiserRT::Signal::SharedScalarVectorType & pNominalMagnitudes, uint32_t seed );
 
     const double * operator()( size_t currentSampleCount, size_t numSamples, size_t nHarmonic, double nominalMag );
 
