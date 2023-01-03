@@ -6,6 +6,7 @@
 #include "SubSeedGenerator.h"
 #include "RandomPhaseDistributor.h"
 #include "FlyingPhasorToneGeneratorDataTypes.h"
+#include "CombScintillationEnvelopeFunctor.h"
 
 #include <iostream>
 
@@ -90,6 +91,11 @@ int main( int argc, char * argv[] )
     for (size_t i = 0; i != numHarmonics; ++i )
         pPhases[i] = randomPhaseDistributor.getValue();
 
+    // We may, or may not use our Comb Scintillation Envelope Functor, but we will instantiate it
+    // regardless.
+    auto epochSize = cmdLineParser.getEpochSize();
+    CombScintillationEnvelopeFunctor combScintillationEnvelopeFunctor{ MAX_HARMONICS, epochSize };
+
     // Reset the Comb Generator for the job at hand
     const auto harmonicSpacing = cmdLineParser.getSpacingRadsPerSample();
     const auto decorrelationSamples = cmdLineParser.getDecorrelSamples();
@@ -100,11 +106,19 @@ int main( int argc, char * argv[] )
     }
     else
     {
-        ///@todo Enable Envelop Modulation Feature.
+        // We are going to share magnitudes between our Comb Generator and our Comb Scintillation Envelope Functor
+        ReiserRT::Signal::SharedScalarVectorType sharedMagnitudes{ std::move( pMagnitudes ) };
+
+       // Reset our Comb Scintillation Envelope Functor
+       combScintillationEnvelopeFunctor.reset( numHarmonics, decorrelationSamples, sharedMagnitudes,
+                                               subSeedGenerator.getSubSeed() );
+
+       // Reset our Comb Generator
+       combGenerator.reset( numHarmonics, harmonicSpacing, sharedMagnitudes,
+                            std::move( pPhases ), std::ref( combScintillationEnvelopeFunctor ) );
     }
 
     // Now we need a buffer to acquire samples into.
-    auto epochSize = cmdLineParser.getEpochSize();
     using FlyingPhasorElementType = ReiserRT::Signal::FlyingPhasorElementType;
     std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer{ new FlyingPhasorElementType [ epochSize ] };
 
@@ -119,7 +133,6 @@ int main( int argc, char * argv[] )
         const auto & sample = epochSampleBuffer[n];
         std::cout << sample.real() << " " << sample.imag() << std::endl;
     }
-
 
     return 0;
 }
