@@ -27,8 +27,8 @@ namespace ReiserRT
          *
          * @note Container `std::vector` was considered for this purpose. However, the
          * usage of this data, in a larger real-time use case, called more for
-         * the semantics of `std::shared_ptr` over `std::vector` and more straight forward
-         * to use with memory pools.
+         * the semantics of shared pointer over a vector. It is more straight forward
+         * convertible from a memory pool or the standard heap.
          */
         using SharedScalarVectorType = std::shared_ptr< const double[] >;
     }
