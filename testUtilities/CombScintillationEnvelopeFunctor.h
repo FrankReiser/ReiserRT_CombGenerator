@@ -17,6 +17,7 @@ public:
     CombScintillationEnvelopeFunctor( size_t maxHarmonics, size_t maxEpochSize );
     ~CombScintillationEnvelopeFunctor();
 
+    // Not Copyable. Use a `std::ref` wrapper to pass along.
     CombScintillationEnvelopeFunctor( const CombScintillationEnvelopeFunctor & another ) = delete;
     CombScintillationEnvelopeFunctor & operator =( const CombScintillationEnvelopeFunctor & another ) = delete;
 

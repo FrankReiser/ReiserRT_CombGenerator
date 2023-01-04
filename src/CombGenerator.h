@@ -67,6 +67,20 @@ namespace ReiserRT
             ~CombGenerator();
 
             /**
+             * @brief Copy Construction is Disallowed
+             *
+             * The CombGenerator cannot be instantiated as a copy of another.
+             */
+            CombGenerator( const CombGenerator & another ) = delete;
+
+            /**
+             * @brief Copy Assignment is Disallowed
+             *
+             * The CombGenerator cannot be assigned from a copy of another.
+             */
+            CombGenerator & operator =( const CombGenerator & another ) = delete;
+
+            /**
              * @brief The Reset Operation
              *
              * This operation prepares the CombGenerator for a subsequent series of `getSamples` invocations.
