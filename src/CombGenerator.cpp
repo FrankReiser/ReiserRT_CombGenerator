@@ -31,7 +31,7 @@ private:
     }
 
     void reset ( size_t theNumHarmonics, double fundamentalRadiansPerSample,
-                 const double * pMagVector, const double * pPhaseVector,
+                 const SharedScalarVectorType & theMagVector, const SharedScalarVectorType & thePhaseVector,
                  const CombGeneratorEnvelopeFunkType & theEnvelopeFunk )
     {
         // Ensure that the user has not specified more lines than they constructed us to handle.
@@ -42,61 +42,71 @@ private:
         numHarmonics = theNumHarmonics;
 
         // Record the Magnitude vector for later use by getSamples.
-        pMagnitude = pMagVector;
+        magVector = theMagVector;
 
         // Record the Envelope Function which could be empty.
         envelopeFunkType = theEnvelopeFunk;
 
-        // For each Spectral Line
-        for (size_t i = 0; i != numHarmonics; ++i )
+        // Reset each Spectral Line Tone Generator
+        auto pPhase = thePhaseVector.get();
+        size_t i = 0;
+        for ( auto & hg : harmonicGenerators )
         {
-            // Reset Spectral Line Tone Generator
-            auto radiansPerSample = double(i+1) * fundamentalRadiansPerSample;
-            harmonicGenerators[ i ].reset(radiansPerSample, pPhaseVector ? *pPhaseVector++ : 0.0 );
+            auto radiansPerSample = double(++i) * fundamentalRadiansPerSample;
+            hg.reset(radiansPerSample, pPhase ? *pPhase++ : 0.0 );
         }
     }
 
     void getSamples( FlyingPhasorElementBufferTypePtr pElementBuffer, size_t numSamples )
     {
+        // Local flag/counter depending on presence of non-empty envelope functor.
+        size_t i = 0;
+
         // If no envelope functor
         if ( !envelopeFunkType )
         {
             // For, each spectral line accumulate its samples.
-            auto pMag = pMagnitude;
-            for ( size_t i = 0; i != numHarmonics; ++i )
+            auto pMag = magVector.get();
+            for ( auto & hg : harmonicGenerators )
             {
                 auto mag = pMag ? *pMag++ : 1.0;
+
                 // First line optimization, just get the samples. Accumulation not necessary.
+                // Also note, we use local `i` as a flag here. We are not counting it as we
+                // do not need to know.
                 if ( 0 == i )
-                    harmonicGenerators[ i ].getSamplesScaled( pElementBuffer, numSamples, mag );
+                {
+                    ++i;
+                    hg.getSamplesScaled( pElementBuffer, numSamples, mag );
+                }
                 else
-                    harmonicGenerators[ i ].accumSamplesScaled( pElementBuffer, numSamples, mag );
+                    hg.accumSamplesScaled( pElementBuffer, numSamples, mag );
             }
         }
         // Else, envelope functor
         else
         {
-            auto pMag = pMagnitude;
+            // For, each spectral line accumulate its envelope modulated samples
+            auto pMag = magVector.get();
             auto nSample = harmonicGenerators[0].getSampleCount();  // All the same
-            for ( size_t i = 0; i != numHarmonics; ++i )
+            for ( auto & hg : harmonicGenerators )
             {
-                // Invoke the non-empty envelope functor for this harmonic
-                // to obtain its modulation envelop.
+                // Invoke the envelope functor for this harmonic to obtain its modulation envelop.
                 auto mag = pMag ? *pMag++ : 1.0;
                 auto pEnvelope = envelopeFunkType( nSample, numSamples, i, mag );
 
                 // First line optimization, just get the modulated samples. Accumulation not necessary.
-                if ( 0 == i )
-                    harmonicGenerators[ i ].getSamplesScaled( pElementBuffer, numSamples, pEnvelope );
+                if ( 1 == ++i )
+                    hg.getSamplesScaled( pElementBuffer, numSamples, pEnvelope );
                 else
-                    harmonicGenerators[ i ].accumSamplesScaled( pElementBuffer, numSamples, pEnvelope );
+                    hg.accumSamplesScaled( pElementBuffer, numSamples, pEnvelope );
             }
         }
     }
 
     const size_t maxHarmonics;
     std::vector< FlyingPhasorToneGenerator > harmonicGenerators;
-    const double * pMagnitude{};
+    SharedScalarVectorType magVector{};
     CombGeneratorEnvelopeFunkType envelopeFunkType{};
     size_t numHarmonics{};
 };
@@ -111,12 +121,12 @@ CombGenerator::~CombGenerator()
     delete pImple;
 }
 
-void CombGenerator::reset ( size_t numHarmonics, double fundamentalRadiansPerSample,
-                            const double * pMagVector, const double * pPhaseVector,
+void CombGenerator::reset( size_t numHarmonics, double fundamentalRadiansPerSample,
+                            const SharedScalarVectorType & magVector, const SharedScalarVectorType & phaseVector,
                             const CombGeneratorEnvelopeFunkType & envelopeFunk )
 {
-    pImple->reset(numHarmonics, fundamentalRadiansPerSample,
-                  pMagVector, pPhaseVector, envelopeFunk );
+    pImple->reset( numHarmonics, fundamentalRadiansPerSample,
+                   magVector, phaseVector, envelopeFunk );
 }
 
 void CombGenerator::getSamples( FlyingPhasorElementBufferTypePtr pElementBuffer, size_t numSamples )

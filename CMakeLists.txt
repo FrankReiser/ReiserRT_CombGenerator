@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 
 project(ReiserRT_CombGenerator
         VERSION 2.1.1
-	DESCRIPTION "Frank Reiser's Complex Harmonic Comb Generator" )
+        DESCRIPTION "Frank Reiser's Complex Harmonic Comb Generator" )
 
 # Set up compiler requirements
 set(CMAKE_CXX_STANDARD 11)
@@ -44,6 +44,7 @@ endforeach()
 
 add_subdirectory( src )
 
+add_subdirectory( testUtilities )
 add_subdirectory( sundry )
 
 enable_testing()

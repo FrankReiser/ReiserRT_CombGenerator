@@ -69,7 +69,7 @@ int main()
 
     // Instantiate our Comb Generator
     CombGenerator combGenerator{ maxSpectralLines };
-    combGenerator.reset( maxSpectralLines, M_PI / 16,  nullptr, nullptr );
+    combGenerator.reset( maxSpectralLines, M_PI / 16 );
 
     double t0, t1;
     t0 = getClockMonotonic();
