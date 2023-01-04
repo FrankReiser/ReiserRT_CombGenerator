@@ -5,4 +5,7 @@ target_sources( TestUtilities PRIVATE
         RandomPhaseDistributor.cpp
         RayleighDistributor.cpp
         ScintillationEngine.cpp
+        CombScintillationEnvelopeFunctor.cpp
     )
+# Added to accommodate the CombScintillationEnvelopFunctor.
+target_include_directories( TestUtilities PUBLIC ../src )
