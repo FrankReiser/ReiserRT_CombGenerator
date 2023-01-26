@@ -1,8 +1,13 @@
 # ReiserRT_CombGenerator
 
-Frank Reiser's C++11 implementation of a fast and accurate harmonic series, waveform generator.
+Frank Reiser's C++17 implementation of a fast and accurate harmonic series, waveform generator.
 The data produced is complex in nature, delivering both in-phase and quadrature components.
 This library component is dependent on the ReiserRT_FlyingPhasor shared object library.
+Interface files are not reliably usable from C++11 compiles. However, 
+this is dependent on the actual compiler used. The test harness will not compile with
+gcc 4.8.5 using the c++11 standard. However, the test harness will compile with gcc 8.5.0
+using the c++11 standard. It is recommended that you use this library with c++17 or higher
+compilation. The compiled library code is built using the c++17 standard.
 
 ## Overview
 
