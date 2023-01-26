@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.15)
 
 project(ReiserRT_CombGenerator
-        VERSION 2.1.1
+        VERSION 2.1.2
         DESCRIPTION "Frank Reiser's Complex Harmonic Comb Generator" )
 
 # Set up compiler requirements
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
