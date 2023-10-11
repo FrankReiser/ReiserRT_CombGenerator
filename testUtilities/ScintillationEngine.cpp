@@ -15,7 +15,7 @@ void ScintillationEngine::run( double * pBuffer,
                                size_t decorrelationSamples )
 {
     // Compute Scintillated Magnitude over the Buffer Length.
-    for ( int i = 0; i != runLen; ++i )
+    for ( size_t i = 0; i != runLen; ++i )
     {
         // Set scintillation buffer magnitude value for sample i.
         // This is the current magnitude value (first) plus the change in magnitude per sample (second).
