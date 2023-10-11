@@ -122,9 +122,10 @@ int defaultMagWithEnvelope()
     CombGenerator combGenerator{ numHarmonics };
 
     // We're going to use an exponential decay for this test.
+    ///@note We do not utilize the `nHarmonic` parameter.
     std::unique_ptr< double[] > envelopeBuffer{new double[ maxEpochSize ] };
     auto envelopeFunk = [ &envelopeBuffer ]( size_t nSample,
-            size_t numSamples, size_t nHarmonic, double nominalMag )
+            size_t numSamples, size_t /*nHarmonic*/, double nominalMag )
     {
         auto tau = maxEpochSize / 2.0;
         auto pMag = envelopeBuffer.get();
@@ -189,9 +190,10 @@ int specificMagWithEnvelope()
     SharedScalarVectorType sharedMagnitudes{ std::move( magnitudes ) };
 
     // We're going to use an exponential decay for this test.
+    ///@note We do not utilize the `nHarmonic` parameter.
     std::unique_ptr< double[] > envelopeBuffer{new double[ maxEpochSize ] };
     auto envelopeFunk = [ &envelopeBuffer ](size_t nSample,
-            size_t numSamples, size_t nHarmonic, double nominalMag )
+            size_t numSamples, size_t /*nHarmonic*/, double nominalMag )
     {
         auto tau = maxEpochSize / 2.0;
         auto pMag = envelopeBuffer.get();
