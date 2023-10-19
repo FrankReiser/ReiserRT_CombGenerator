@@ -30,7 +30,7 @@ namespace ReiserRT
          * their harmonic spacing are specified at `reset` time.
          *
          * The CombGenerator also provides support for individually modulating the tones produced through
-         * an envelope functor interface also specified at `reset` time. @see CombGeneratorEnvelopeFunkType
+         * an envelope functor interface also specified at `reset` time.
          */
         class ReiserRT_CombGenerator_EXPORT CombGenerator
         {
@@ -89,8 +89,8 @@ namespace ReiserRT
              *
              * This operation prepares the CombGenerator for a subsequent series of `getSamples` invocations.
              * It sets 'N' ReiserRT_FlyingPhasor instances for the appropriate harmonic spacing based on the fundamental
-             * frequency, and sets initial phases. It will copy the user specified envelope functor instance
-             * for subsequent use. This is by default, a 'do nothing' envelope.
+             * frequency. It also establishes the magnitudes and initial phase angle of each harmonic tone.
+             * Lastly, if magnitude envelop control is required, a callback functor may be registered.
              *
              * @note We specify a shared pointer interface for the passing of scalar vectors
              * for this operation although we allow for nullptr defaults.
@@ -99,29 +99,32 @@ namespace ReiserRT
              * operation that is primarily leveraged. It is the `getSamples` operation
              * that actually makes use of any magnitude vector we register here.
              * By specifying a shared pointer type, we are ensuring a reference count on it.
-             * This is not actually necessary for the phase vector we don't want different semantics
-             * for it.
+             * Anticipated use cases of CombGenerator called for shared magnitude vectors.
+             * The phase vector does not have the same requirements but, we don't want
+             * to use different semantics for it.
+             * @see SharedScalarVectorType
              *
              * @param numHarmonics The number of harmonics to generate. Must be less than or equal to
              * the maximum specified during construction.
-             * @param pMagVector This argument provides a series of magnitude values, of length `numHarmonics`.
+             * @param pMagVector This argument provides a series of magnitude values, of minimum length `numHarmonics`.
              * The argument type is that of a constant shared pointer reference, which may be empty (null pointer).
              * Passing a null pointer (the default) results in a magnitude of 1.0 for all harmonic tones.
-             * @warning Not providing the appropriate length of `numHarmonics`, for a non-null vector,
+             * @warning Not providing the minimum length of `numHarmonics`, for a non-null vector,
              * results in undefined behavior.
              * @param pPhaseVector This argument provides a series of starting phase values,
-             * quantified in radians, of length `numHarmonics`.
+             * quantified in radians, of minimum length `numHarmonics`.
              * The argument type is that of a constant shared pointer reference, which may be empty (null pointer).
              * Passing a null pointer (the default) results in an initial phase of 0.0 for all harmonic tones.
-             * @warning Not providing the appropriate length of 'N' harmonics, for a non-null vector
+             * @warning Not providing the minimum length of `numHarmonics` harmonics, for a non-null vector
              * results in undefined behavior.
-             * @param envelopeFunk Functor interface for hooking the magnitude envelope applied during
-             * harmonic tone generator.
-             * The default for this parameter is to utilize an empty (null) function object.
+             * @param envelopeFunk Callback functor interface for hooking magnitude envelopes applied during
+             * harmonic tone generation. The default for this parameter is to utilize an empty function object.
              * In these cases, the magnitude specified in the pMagVector alone will be used.
-             * A non-null `envelopeFunk` will be invoked for each harmonic tone generated.
-             * This single instance `envelopeFunk` will be provided adequate information
-             * through the CombGeneratorEnvelopeFunkType interface.
+             * @warning Functor `envelopeFunk` will be copied for subsequent usage by `getSamples` and must
+             * remain valid until subsequently `reset`.
+             * @note Non-empty `envelopeFunk` will be invoked for each harmonic tone generated during a `getSamples`
+             * invocation. Adequate information is provided through the CombGeneratorEnvelopeFunkType interface.
+             * @see CombGeneratorEnvelopeFunkType
              *
              * @throw std::length_error If numHarmonics exceeds the maximum specified during construction.
              */
