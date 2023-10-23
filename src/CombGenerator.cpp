@@ -38,7 +38,7 @@ private:
         if ( maxHarmonics < theNumHarmonics )
             throw std::length_error{ "The number of harmonics exceeds the maximum allocated during construction!" };
 
-        // Record number of lines and decorrelation samples
+        // Record number of lines and de-correlation samples
         numHarmonics = theNumHarmonics;
 
         // Record the Magnitude vector for later use by getSamples.
