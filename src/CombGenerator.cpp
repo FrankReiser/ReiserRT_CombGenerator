@@ -38,7 +38,7 @@ private:
         if ( maxHarmonics < theNumHarmonics )
             throw std::length_error{ "The number of harmonics exceeds the maximum allocated during construction!" };
 
-        // Record number of lines and decorrelation samples
+        // Record number of lines and de-correlation samples
         numHarmonics = theNumHarmonics;
 
         // Record the Magnitude vector for later use by getSamples.
@@ -47,59 +47,60 @@ private:
         // Record the Envelope Function which could be empty.
         envelopeFunkType = theEnvelopeFunk;
 
-        // Reset each Spectral Line Tone Generator
+        // Reset each Harmonic Tone Generator specified.
         auto pPhase = thePhaseVector.get();
-        size_t i = 0;
-        for ( auto & hg : harmonicGenerators )
+        for ( size_t i = 0; numHarmonics != i; ++i )
         {
-            auto radiansPerSample = double(++i) * fundamentalRadiansPerSample;
-            hg.reset(radiansPerSample, pPhase ? *pPhase++ : 0.0 );
+            const auto radiansPerSample = double(i+1) * fundamentalRadiansPerSample;
+            harmonicGenerators[i].reset( radiansPerSample, pPhase ? *pPhase++ : 0.0 );
         }
+
+        // Reset the excess harmonic generators. We do not want them to contain garbage.
+        for (size_t i = numHarmonics; maxHarmonics != i; ++i )
+            harmonicGenerators[i].reset();
     }
 
     void getSamples( FlyingPhasorElementBufferTypePtr pElementBuffer, size_t numSamples )
     {
-        // Local flag/counter depending on presence of non-empty envelope functor.
-        size_t i = 0;
+        // Get pointer to harmonic magnitudes. This is allowed to be nullptr.
+        auto pMag = magVector.get();
 
-        // If no envelope functor
+        // If no envelope functor, we use a constant magnitude.
         if ( !envelopeFunkType )
         {
-            // For, each spectral line accumulate its samples.
-            auto pMag = magVector.get();
-            for ( auto & hg : harmonicGenerators )
+            // For each harmonic tone specified last reset, accumulate its samples.
+            for ( size_t i = 0; numHarmonics != i; ++i )
             {
+                // Get the nth harmonic magnitude or default to unity gain.
                 auto mag = pMag ? *pMag++ : 1.0;
 
-                // First line optimization, just get the samples. Accumulation not necessary.
-                // Also note, we use local `i` as a flag here. We are not counting it as we
-                // do not need to know.
+                // Fundamental tone optimization: We just store the samples. Otherwise, we accumulate.
                 if ( 0 == i )
-                {
-                    ++i;
-                    hg.getSamplesScaled( pElementBuffer, numSamples, mag );
-                }
+                    harmonicGenerators[i].getSamplesScaled( pElementBuffer, numSamples, mag );
                 else
-                    hg.accumSamplesScaled( pElementBuffer, numSamples, mag );
+                    harmonicGenerators[i].accumSamplesScaled( pElementBuffer, numSamples, mag );
             }
         }
-        // Else, envelope functor
+        // Else, we have an envelope functor. We will utilize it
         else
         {
             // For, each spectral line accumulate its envelope modulated samples
-            auto pMag = magVector.get();
             auto nSample = harmonicGenerators[0].getSampleCount();  // All the same
-            for ( auto & hg : harmonicGenerators )
+
+            // For each harmonic tone specified last reset, accumulate its samples.
+            for ( size_t i = 0; numHarmonics != i; ++i )
             {
-                // Invoke the envelope functor for this harmonic to obtain its modulation envelop.
+                // Get the nth harmonic magnitude or default to unity gain.
                 auto mag = pMag ? *pMag++ : 1.0;
+
+                // Invoke the envelope functor for this harmonic to obtain its modulation envelope.
                 auto pEnvelope = envelopeFunkType( nSample, numSamples, i, mag );
 
-                // First line optimization, just get the modulated samples. Accumulation not necessary.
-                if ( 1 == ++i )
-                    hg.getSamplesScaled( pElementBuffer, numSamples, pEnvelope );
+                // Fundamental tone optimization: We just store the samples. Otherwise, we accumulate.
+                if ( 0 == i )
+                    harmonicGenerators[i].getSamplesScaled( pElementBuffer, numSamples, pEnvelope );
                 else
-                    hg.accumSamplesScaled( pElementBuffer, numSamples, pEnvelope );
+                    harmonicGenerators[i].accumSamplesScaled( pElementBuffer, numSamples, pEnvelope );
             }
         }
     }

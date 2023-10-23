@@ -15,6 +15,7 @@
 
 using namespace ReiserRT::Signal;
 
+constexpr size_t maxHarmonics = 4;
 constexpr size_t numHarmonics = 2;
 constexpr size_t maxEpochSize = 4096;
 constexpr double fundamentalRadiansPerSample = M_PI / 8.0;
@@ -22,7 +23,7 @@ constexpr double fundamentalRadiansPerSample = M_PI / 8.0;
 int defaultMagPhaseNoEnvelope()
 {
     // Instantiate CombGenerator for a max of NLines and Epoch Size
-    CombGenerator combGenerator{ numHarmonics };
+    CombGenerator combGenerator{ maxHarmonics };
 
     // Reset the Comb Generator
     combGenerator.reset( numHarmonics, fundamentalRadiansPerSample );
@@ -64,7 +65,7 @@ int defaultMagPhaseNoEnvelope()
 int specificMagPhaseNoEnvelope()
 {
     // Instantiate CombGenerator for a max of NLines and Epoch Size
-    CombGenerator combGenerator{ numHarmonics };
+    CombGenerator combGenerator{ maxHarmonics };
 
     // Initialize Mags and Phase. We will use a magnitude of 2.0 and an incrementally changing phase.
     std::unique_ptr< double[] > magnitudes{ new double[ numHarmonics ] };
@@ -119,7 +120,7 @@ int specificMagPhaseNoEnvelope()
 int defaultMagWithEnvelope()
 {
     // Instantiate CombGenerator for a max of NLines and Epoch Size
-    CombGenerator combGenerator{ numHarmonics };
+    CombGenerator combGenerator{ maxHarmonics };
 
     // We're going to use an exponential decay for this test.
     ///@note We do not utilize the `nHarmonic` parameter.
@@ -181,7 +182,7 @@ int defaultMagWithEnvelope()
 int specificMagWithEnvelope()
 {
     // Instantiate CombGenerator for a max of NLines and Epoch Size
-    CombGenerator combGenerator{ numHarmonics };
+    CombGenerator combGenerator{ maxHarmonics };
 
     // Initialize Mags. We will use a magnitude of 2.0.
     std::unique_ptr< double[] > magnitudes{ new double[ numHarmonics ] };
