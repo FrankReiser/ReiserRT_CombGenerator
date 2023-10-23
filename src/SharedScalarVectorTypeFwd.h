@@ -8,6 +8,9 @@
 #ifndef REISERRT_COMBGENERATOR_SHAREDSCALARVECTORTYPEFWD_H
 #define REISERRT_COMBGENERATOR_SHAREDSCALARVECTORTYPEFWD_H
 
+/**
+ * @brief Forward declaration of standard shared pointer.
+ */
 namespace std
 {
     template < typename T > class shared_ptr;
