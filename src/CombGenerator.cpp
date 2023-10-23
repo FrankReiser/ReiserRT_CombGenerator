@@ -49,7 +49,6 @@ private:
 
         // Reset each Harmonic Tone Generator specified.
         auto pPhase = thePhaseVector.get();
-#if 1
         for ( size_t i = 0; numHarmonics != i; ++i )
         {
             const auto radiansPerSample = double(i+1) * fundamentalRadiansPerSample;
@@ -59,14 +58,6 @@ private:
         // Reset the excess harmonic generators. We do not want them to contain garbage.
         for (size_t i = numHarmonics; maxHarmonics != i; ++i )
             harmonicGenerators[i].reset();
-#else
-        size_t i = 0;
-        for ( auto & hg : harmonicGenerators )
-        {
-            auto radiansPerSample = double(++i) * fundamentalRadiansPerSample;
-            hg.reset(radiansPerSample, pPhase ? *pPhase++ : 0.0 );
-        }
-#endif
     }
 
     void getSamples( FlyingPhasorElementBufferTypePtr pElementBuffer, size_t numSamples )
