@@ -99,9 +99,12 @@ namespace ReiserRT
              * operation that is primarily leveraged. It is the `getSamples` operation
              * that actually makes use of any magnitude vector we register here.
              * By specifying a shared pointer type, we are ensuring a reference count on it.
-             * Anticipated use cases of CombGenerator called for shared magnitude vectors.
+             * Anticipated use cases of CombGenerator called for reuse of magnitude vectors.
+             * Other design choices were considered such as copying the const data at registration time but,
+             * this seemed wasteful. Also considered was just storing the data address and trusting the client
+             * to maintain the storage but, this seemed unsafe. Reference counting seemed the best choice.
              * The phase vector does not have the same requirements but, we don't want
-             * to use different semantics for it.
+             * to use different semantics for it. That would be confusing.
              * @see SharedScalarVectorType
              *
              * @param numHarmonics The number of harmonics to generate. Must be less than or equal to

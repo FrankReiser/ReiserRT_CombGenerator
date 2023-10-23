@@ -4,12 +4,12 @@ Frank Reiser's C++17 implementation of a fast and accurate harmonic series, wave
 The data produced is complex in nature, delivering both in-phase and quadrature components.
 This library component is dependent on the ReiserRT_FlyingPhasor shared object library.
 
-It is possible to use this library from C++11 compiles. However,   
+It is possible to use this library from C++11 compiles. However, 
 this is dependent on the actual compiler used. The test harness will not compile with
 gcc 4.8.5 using the c++11 standard but will compile with gcc 8.5.0.
-This is because the shared "block" pointer syntax is not adequately defined in the c++11 standard.
-This was rectified in c++17. It is recommended that you use this library with c++17 or higher
-compilation. The compiled library code is built using the c++17 standard.
+This is because the shared "block" pointer syntax, used by the interface, is not adequately defined
+in the c++11 standard. This was rectified in c++17. It is recommended that you use this library
+with c++17 or higher compilation. The compiled library code is built using the c++17 standard.
 
 ## Overview
 
@@ -28,18 +28,23 @@ be requested for an application. Once instantiated, it requires a `reset` operat
 It is at `reset` time, where initial phases and magnitudes are set. Additionally, an
 envelope modulator may be hooked up at `reset` time.
 
-As discussed at the top of this README, CombGenerator requires shared "block" pointer interfaces
+As discussed at the top of this README, CombGenerator requires a shared "block" pointer interface
 for specifying magnitude and starting phase for the harmonic tones. A `nullptr` may be used for
 default values. This shared "block" pointer interface was a design decision. It is anticipated that
 CombGenerator instances are seldom `reset` and that it would be the `getSamples`
 operation that is primarily leveraged. It is the `getSamples` operation
 that actually makes use of any magnitude vector we register with `reset`.
 By specifying a shared pointer type, we are ensuring a reference count on it.
-The below snippet shows how this may be accomplished.
+Anticipated use cases of CombGenerator call for a sharing of magnitude vectors.
+Other design choices were considered such as copying the const data at registration time but,
+this seemed wasteful. Also considered was just storing the data address and trusting the client
+to maintain the storage but, this seemed unsafe. Reference counting seemed the best choice.
+The below snippet shows how this shared "block" pointer may be accomplished.
 
    ```
    // Allocate block of doubles and encapsulate in a unique pointer.
-   // Note the 'array' syntax. This is required.
+   // Note the 'array' syntax. This is required and is only reliably 
+   // supported by the C++17 standard.
    const size_t numHarmonics = 12;
    std::unique_ptr< double[] > magnitudes{ new double[ numHarmonics ] };
    
@@ -47,26 +52,26 @@ The below snippet shows how this may be accomplished.
    ...
    
    // Move unique pointer into shared pointer which may be referenced numerous times.
-   // This SharedScalarVectorType also makes the data constant. Mutliple references are read only.
+   // This SharedScalarVectorType also makes the data constant.
+   // Mutliple references are read only.
    SharedScalarVectorType sharedMagnitudes{ std::move( magnitudes ) };
    
    // Reset a CombGenerator instance. It will increment the reference count on this data
-   // and maintain it until reset once again, or destroyed.
-   // In this particular example, we are accepting defaults for starting phases of 0
+   // and maintain it until reset with new data, or destroyed.
+   // In this particular example, we are accepting defaults for starting phases
    // and an empty envelope functor.
    const double fundamentalRadiansPerSample = 0.1;
    combGenerator.reset( numHarmonics, fundamentalRadiansPerSample, sharedMagnitudes );
    ```
 
-
 Samples are obtained by invoking the `getSamples` operation. If an envelope modulator
-is hooked up, it will be notified once per harmonic. This notification comes with
+is hooked up, it will be notified once per `numHarmonics`. This notification comes with
 numerous 'hints' that the observer may utilize in returning an envelope. These are,
 the current sample offset (a count), the number of samples of envelope to return,
 the current harmonic (0=fundamental), and the nominal magnitude for the harmonic.
 Additional state data may be managed by the observer instance.
 
-Do see the test harness and sundry applications for additional details.
+Please refer to the test harness and sundry applications for additional details.
 
 ## Thread Safety
 This CombGenerator is NOT "thread safe". There are no concurrent access mechanisms
