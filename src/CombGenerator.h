@@ -148,6 +148,8 @@ namespace ReiserRT
              */
             void getSamples( FlyingPhasorElementBufferTypePtr pElementBuffer, size_t numSamples );
 
+            void accumSamples( FlyingPhasorElementBufferTypePtr pElementBuffer, size_t numSamples );
+
         private:
             Imple * pImple;    //!< Pointer to hidden implementation.
         };

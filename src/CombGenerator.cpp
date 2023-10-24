@@ -10,7 +10,6 @@
 
 #include <vector>
 #include <stdexcept>
-#include <cstring>
 
 using namespace ReiserRT::Signal;
 
@@ -74,14 +73,15 @@ private:
                 // Get the nth harmonic magnitude or default to unity gain.
                 auto mag = pMag ? *pMag++ : 1.0;
 
-                // Fundamental tone optimization: We just store the samples. Otherwise, we accumulate.
-                if ( 0 == i )
-                    harmonicGenerators[i].getSamplesScaled( pElementBuffer, numSamples, mag );
-                else
+                // Fundamental tone optimization: If NOT fundamental tone, accumulate.
+                // Otherwise, we just get and store.
+                if ( i )
                     harmonicGenerators[i].accumSamplesScaled( pElementBuffer, numSamples, mag );
+                else
+                    harmonicGenerators[i].getSamplesScaled( pElementBuffer, numSamples, mag );
             }
         }
-        // Else, we have an envelope functor. We will utilize it
+        // Else, we have an envelope functor, we will utilize it
         else
         {
             // For, each spectral line accumulate its envelope modulated samples
@@ -96,11 +96,51 @@ private:
                 // Invoke the envelope functor for this harmonic to obtain its modulation envelope.
                 auto pEnvelope = envelopeFunkType( nSample, numSamples, i, mag );
 
-                // Fundamental tone optimization: We just store the samples. Otherwise, we accumulate.
-                if ( 0 == i )
-                    harmonicGenerators[i].getSamplesScaled( pElementBuffer, numSamples, pEnvelope );
-                else
+                // Fundamental tone optimization: If NOT fundamental tone, accumulate.
+                // Otherwise, we just get and store.
+                if ( i )
                     harmonicGenerators[i].accumSamplesScaled( pElementBuffer, numSamples, pEnvelope );
+                else
+                    harmonicGenerators[i].getSamplesScaled( pElementBuffer, numSamples, pEnvelope );
+            }
+        }
+    }
+
+    void accumSamples( FlyingPhasorElementBufferTypePtr pElementBuffer, size_t numSamples )
+    {
+        // Get pointer to harmonic magnitudes. This is allowed to be nullptr.
+        auto pMag = magVector.get();
+
+        // If no envelope functor, we use a constant magnitude.
+        if ( !envelopeFunkType )
+        {
+            // For each harmonic tone specified last reset, accumulate its samples.
+            for ( size_t i = 0; numHarmonics != i; ++i )
+            {
+                // Get the nth harmonic magnitude or default to unity gain.
+                auto mag = pMag ? *pMag++ : 1.0;
+
+                // Accumulate nth harmonic samples into the buffer
+                harmonicGenerators[i].accumSamplesScaled( pElementBuffer, numSamples, mag );
+            }
+        }
+        // Else, we have an envelope functor, we will utilize it
+        else
+        {
+            // For, each spectral line accumulate its envelope modulated samples
+            auto nSample = harmonicGenerators[0].getSampleCount();  // All the same
+
+            // For each harmonic tone specified last reset, accumulate its samples.
+            for ( size_t i = 0; numHarmonics != i; ++i )
+            {
+                // Get the nth harmonic magnitude or default to unity gain.
+                auto mag = pMag ? *pMag++ : 1.0;
+
+                // Invoke the envelope functor for this harmonic to obtain its modulation envelope.
+                auto pEnvelope = envelopeFunkType( nSample, numSamples, i, mag );
+
+                // Accumulate nth harmonic samples into the buffer
+                harmonicGenerators[i].accumSamplesScaled( pElementBuffer, numSamples, pEnvelope );
             }
         }
     }
@@ -133,4 +173,9 @@ void CombGenerator::reset( size_t numHarmonics, double fundamentalRadiansPerSamp
 void CombGenerator::getSamples( FlyingPhasorElementBufferTypePtr pElementBuffer, size_t numSamples )
 {
     pImple->getSamples( pElementBuffer, numSamples );
+}
+
+void CombGenerator::accumSamples( FlyingPhasorElementBufferTypePtr pElementBuffer, size_t numSamples )
+{
+    pImple->accumSamples( pElementBuffer, numSamples );
 }
