@@ -73,11 +73,12 @@ private:
                 // Get the nth harmonic magnitude or default to unity gain.
                 auto mag = pMag ? *pMag++ : 1.0;
 
-                // Fundamental tone optimization: We just store the samples. Otherwise, we accumulate.
-                if ( 0 == i )
-                    harmonicGenerators[i].getSamplesScaled( pElementBuffer, numSamples, mag );
-                else
+                // Fundamental tone optimization: If NOT fundamental tone, accumulate.
+                // Otherwise, we just get and store.
+                if ( i )
                     harmonicGenerators[i].accumSamplesScaled( pElementBuffer, numSamples, mag );
+                else
+                    harmonicGenerators[i].getSamplesScaled( pElementBuffer, numSamples, mag );
             }
         }
         // Else, we have an envelope functor, we will utilize it
@@ -95,11 +96,12 @@ private:
                 // Invoke the envelope functor for this harmonic to obtain its modulation envelope.
                 auto pEnvelope = envelopeFunkType( nSample, numSamples, i, mag );
 
-                // Fundamental tone optimization: We just store the samples. Otherwise, we accumulate.
-                if ( 0 == i )
-                    harmonicGenerators[i].getSamplesScaled( pElementBuffer, numSamples, pEnvelope );
-                else
+                // Fundamental tone optimization: If NOT fundamental tone, accumulate.
+                // Otherwise, we just get and store.
+                if ( i )
                     harmonicGenerators[i].accumSamplesScaled( pElementBuffer, numSamples, pEnvelope );
+                else
+                    harmonicGenerators[i].getSamplesScaled( pElementBuffer, numSamples, pEnvelope );
             }
         }
     }
