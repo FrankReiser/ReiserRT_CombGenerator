@@ -37,14 +37,14 @@ private:
         if ( maxHarmonics < theNumHarmonics )
             throw std::length_error{ "The number of harmonics exceeds the maximum allocated during construction!" };
 
-        // Record number of lines and de-correlation samples
+        // Record number of harmonics
         numHarmonics = theNumHarmonics;
 
         // Record the Magnitude vector for later use by getSamples.
         magVector = theMagVector;
 
         // Record the Envelope Function which could be empty.
-        envelopeFunkType = theEnvelopeFunk;
+        envelopeFunk = theEnvelopeFunk;
 
         // Reset each Harmonic Tone Generator specified.
         auto pPhase = thePhaseVector.get();
@@ -65,7 +65,7 @@ private:
         auto pMag = magVector.get();
 
         // If no envelope functor, we use a constant magnitude.
-        if ( !envelopeFunkType )
+        if ( !envelopeFunk )
         {
             // For each harmonic tone specified last reset, accumulate its samples.
             for ( size_t i = 0; numHarmonics != i; ++i )
@@ -94,7 +94,7 @@ private:
                 auto mag = pMag ? *pMag++ : 1.0;
 
                 // Invoke the envelope functor for this harmonic to obtain its modulation envelope.
-                auto pEnvelope = envelopeFunkType( nSample, numSamples, i, mag );
+                auto pEnvelope = envelopeFunk(nSample, numSamples, i, mag );
 
                 // Fundamental tone optimization: If NOT fundamental tone, accumulate.
                 // Otherwise, we just get and store.
@@ -112,7 +112,7 @@ private:
         auto pMag = magVector.get();
 
         // If no envelope functor, we use a constant magnitude.
-        if ( !envelopeFunkType )
+        if ( !envelopeFunk )
         {
             // For each harmonic tone specified last reset, accumulate its samples.
             for ( size_t i = 0; numHarmonics != i; ++i )
@@ -137,7 +137,7 @@ private:
                 auto mag = pMag ? *pMag++ : 1.0;
 
                 // Invoke the envelope functor for this harmonic to obtain its modulation envelope.
-                auto pEnvelope = envelopeFunkType( nSample, numSamples, i, mag );
+                auto pEnvelope = envelopeFunk(nSample, numSamples, i, mag );
 
                 // Accumulate nth harmonic samples into the buffer
                 harmonicGenerators[i].accumSamplesScaled( pElementBuffer, numSamples, pEnvelope );
@@ -145,10 +145,22 @@ private:
         }
     }
 
+    void reset()
+    {
+        // Reset all harmonic generators. We do not want them to contain garbage.
+        for (size_t i = 0; maxHarmonics != i; ++i )
+            harmonicGenerators[i].reset();
+
+        // Reset other attributes as if just constructed
+        numHarmonics = 0;
+        magVector = nullptr;
+        envelopeFunk = CombGeneratorEnvelopeFunkType{};
+    }
+
     const size_t maxHarmonics;
     std::vector< FlyingPhasorToneGenerator > harmonicGenerators;
     SharedScalarVectorType magVector{};
-    CombGeneratorEnvelopeFunkType envelopeFunkType{};
+    CombGeneratorEnvelopeFunkType envelopeFunk{};
     size_t numHarmonics{};
 };
 
@@ -178,4 +190,9 @@ void CombGenerator::getSamples( FlyingPhasorElementBufferTypePtr pElementBuffer,
 void CombGenerator::accumSamples( FlyingPhasorElementBufferTypePtr pElementBuffer, size_t numSamples )
 {
     pImple->accumSamples( pElementBuffer, numSamples );
+}
+
+void CombGenerator::reset()
+{
+    pImple->reset();
 }
