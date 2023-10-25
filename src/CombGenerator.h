@@ -139,7 +139,7 @@ namespace ReiserRT
             /**
              * @brief Get Samples Operation
              *
-             * This operation delivers 'N' number samples from the CombGenerator into the user provided buffer.
+             * This operation delivers 'N' number of samples from the CombGenerator into the user provided buffer.
              * If the user specified a non-null envelope functor during the `reset` operation. That functor
              * will be invoked once per harmonic tone being accumulated over the `numSamples` epoch.
              *
@@ -148,6 +148,17 @@ namespace ReiserRT
              */
             void getSamples( FlyingPhasorElementBufferTypePtr pElementBuffer, size_t numSamples );
 
+            /**
+             * @brief Accumulate Samples Operation.
+             *
+             * This operation accumulates 'N' number of samples from the CombGenerator onto the user provided buffer.
+             * This affords the ability to collect the output of multiple CombGenerator instances.
+             * If the user specified a non-null envelope functor during the `reset` operation. That functor
+             * will be invoked once per harmonic tone being accumulated over the `numSamples` epoch.
+             *
+             * @param pElementBuffer User provided buffer large enough to hold the requested number of samples.
+             * @param numSamples The number of samples to be delivered.
+             */
             void accumSamples( FlyingPhasorElementBufferTypePtr pElementBuffer, size_t numSamples );
 
         private:
