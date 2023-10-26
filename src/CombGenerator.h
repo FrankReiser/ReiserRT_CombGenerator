@@ -41,15 +41,6 @@ namespace ReiserRT
             class Imple;
 
         public:
-#if 0
-            /**
-             * @brief Default Construction is Disallowed
-             *
-             * The CombGenerator requires a maximum number of harmonics to be specified.
-             * Use the qualified constructor.
-             */
-            CombGenerator() = delete;
-#endif
             /**
              * @brief Qualified Constructor
              *
@@ -58,13 +49,14 @@ namespace ReiserRT
              * of the instance during its lifetime. This `maxHarmonics` is inclusive of any fundamental frequency.
              *
              * @note A newly constructed instance will produce a series of zeros should the `getSamples`
-             * operation be invoked prior to a `reset` invocation with specific parameters..
+             * operation be invoked prior to a `reset` invocation with specific harmonic series generation parameters.
              *
              * @param maxHarmonics The maximum number of harmonics that an instance will support (fundamental included)
              * during its lifetime.
              * @note Accepting the default value of zero instantiates a relatively useless CombGenerator instance.
-             * It cannot be `reset` to generate any tones without throwing an exception. The only reason we allow this
-             * is so that another instance can be "moved" into such a defaulted instance.
+             * It cannot be `reset` to generate any tones without throwing an exception. The reasons we allow this
+             * is so that another instance can be "moved" into such a defaulted instance. It also helps get past
+             * some issues should you try to reserve vector space for CombGenerator instances.
              */
             explicit CombGenerator( size_t maxHarmonics = 0 );
 
@@ -89,13 +81,32 @@ namespace ReiserRT
              */
             CombGenerator & operator =( const CombGenerator & another ) = delete;
 
-            ///@note DEFAULT IMPLEMENTATIONS DO NOT WORK.
+            /**
+             * @brief Move Constructor
+             *
+             * This Constructor moves the "Implementation Pointer" out of another instance
+             * resulting in a nullptr for said instance.
+             * @note Moving raw pointer `pImple` requires a non-default move constructor implementation
+             * as the compiler default treats it the same as a copy.
+             *
+             * @param another Another instance being moved from.
+             */
             CombGenerator( CombGenerator && another ) noexcept;
-            CombGenerator & operator =( CombGenerator && another ) noexcept;
-
 
             /**
-             * @brief The Reset Operation
+             * @brief Move Assignment Operator0
+             *
+             * This Assignment operator deletes its current "Implementation Pointer" and
+             * moves the the one out of the other instance resulting in a nullptr for said instance.
+             * @note Moving raw pointer `pImple` requires a non-default assignment operator implementation
+             * as the compiler default treats it the same as a copy.
+             *
+             * @param another Another instance being moved from.
+             */
+            CombGenerator & operator =( CombGenerator && another ) noexcept;
+
+            /**
+             * @brief The Reset Operation with Specific Generation Parameters
              *
              * This operation prepares the CombGenerator for a subsequent series of `getSamples` invocations.
              * It sets 'N' ReiserRT_FlyingPhasor instances for the appropriate harmonic spacing based on the fundamental
@@ -173,10 +184,19 @@ namespace ReiserRT
              */
             void accumSamples( FlyingPhasorElementBufferTypePtr pElementBuffer, size_t numSamples );
 
+            /**
+             * @brief The Reset Operation No Generation Parameters (Pure Reset)
+             *
+             * This "pure reset" operation exists to return an instance to its freshly constructed state.
+             * A CombGenerator in this state will produce a "zero signal". This is useful for a larger use case
+             * where a bank of CombGenerator instances may exist and contain contaminated state from a previous
+             * generation run. If only some of a bank will be required on a subsequent generation run, a "pure reset"
+             * on reserved instances ensures that so you don't leave trash laying around.
+             */
             void reset();
 
         private:
-            Imple * pImple;    //!< Pointer to hidden implementation.
+            Imple * pImple{};    //!< Pointer to hidden implementation.
         };
     }
 }
