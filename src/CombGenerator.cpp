@@ -24,12 +24,14 @@ private:
     friend class CombGenerator;
 
     explicit Imple( size_t theMaxHarmonics )
-      : maxHarmonics( theMaxHarmonics )
+      : maxHarmonics{ theMaxHarmonics }
       , harmonicGenerators{ maxHarmonics }
     {
     }
 
-    void reset ( size_t theNumHarmonics, double fundamentalRadiansPerSample,
+    ~Imple() = default;
+
+    void reset( size_t theNumHarmonics, double fundamentalRadiansPerSample,
                  const SharedScalarVectorType & theMagVector, const SharedScalarVectorType & thePhaseVector,
                  const CombGeneratorEnvelopeFunkType & theEnvelopeFunk )
     {
@@ -164,14 +166,31 @@ private:
     size_t numHarmonics{};
 };
 
-CombGenerator::CombGenerator(size_t maxHarmonics )
-  : pImple{ new Imple{maxHarmonics} }
+CombGenerator::CombGenerator( size_t maxHarmonics )
+  : pImple{ new Imple{ maxHarmonics } }
 {
 }
 
 CombGenerator::~CombGenerator()
 {
     delete pImple;
+}
+
+CombGenerator::CombGenerator( CombGenerator && another ) noexcept
+  : pImple{ another.pImple }
+{
+    another.pImple = nullptr;
+}
+
+CombGenerator & CombGenerator::operator =( CombGenerator && another ) noexcept
+{
+    if ( this != &another )
+    {
+        delete pImple;
+        pImple = another.pImple;
+        another.pImple = nullptr;
+    }
+    return *this;
 }
 
 void CombGenerator::reset( size_t numHarmonics, double fundamentalRadiansPerSample,

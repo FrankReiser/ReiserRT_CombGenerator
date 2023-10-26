@@ -41,6 +41,7 @@ namespace ReiserRT
             class Imple;
 
         public:
+#if 0
             /**
              * @brief Default Construction is Disallowed
              *
@@ -48,7 +49,7 @@ namespace ReiserRT
              * Use the qualified constructor.
              */
             CombGenerator() = delete;
-
+#endif
             /**
              * @brief Qualified Constructor
              *
@@ -57,11 +58,15 @@ namespace ReiserRT
              * of the instance during its lifetime. This `maxHarmonics` is inclusive of any fundamental frequency.
              *
              * @note A newly constructed instance will produce a series of zeros should the `getSamples`
-             * operation be invoked prior to a `reset` invocation.
+             * operation be invoked prior to a `reset` invocation with specific parameters..
              *
-             * @param maxHarmonics The maximum number of harmonics that an instance will support (fundamental included).
+             * @param maxHarmonics The maximum number of harmonics that an instance will support (fundamental included)
+             * during its lifetime.
+             * @note Accepting the default value of zero instantiates a relatively useless CombGenerator instance.
+             * It cannot be `reset` to generate any tones without throwing an exception. The only reason we allow this
+             * is so that another instance can be "moved" into such a defaulted instance.
              */
-            explicit CombGenerator( size_t maxHarmonics );
+            explicit CombGenerator( size_t maxHarmonics = 0 );
 
             /**
              * @brief Destructor
@@ -83,6 +88,11 @@ namespace ReiserRT
              * The CombGenerator cannot be assigned from a copy of another.
              */
             CombGenerator & operator =( const CombGenerator & another ) = delete;
+
+            ///@note DEFAULT IMPLEMENTATIONS DO NOT WORK.
+            CombGenerator( CombGenerator && another ) noexcept;
+            CombGenerator & operator =( CombGenerator && another ) noexcept;
+
 
             /**
              * @brief The Reset Operation
@@ -130,6 +140,8 @@ namespace ReiserRT
              * @see CombGeneratorEnvelopeFunkType
              *
              * @throw std::length_error If numHarmonics exceeds the maximum specified during construction.
+             * @note It is not recommended that you use this operation on default constructed CombGenerator instance
+             * as a `numHarmonics` value of merely 1 will throw.
              */
             void reset( size_t numHarmonics, double fundamentalRadiansPerSample,
                          const SharedScalarVectorType & magVector = nullptr,

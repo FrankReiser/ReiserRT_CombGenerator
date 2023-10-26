@@ -9,6 +9,10 @@
  * We also test that exceeding max harmonics throws an exception and both `getSamples` and
  * `accumSamples` operations under these default conditions.
  *
+ * Latest Addition is a default constructed CombGenerator which is relatively useless.
+ * However, it better supports vector usage. This also brought about move semantics
+ * which are tested here.
+ *
  * @authors Frank Reiser
  * @date Initiated October 24th, 2023
  */
@@ -27,7 +31,7 @@ int testThrowOnExceedingMaxHarmonics()
     constexpr size_t maxHarmonics = 4;
     CombGenerator combGenerator{ maxHarmonics };
 
-    // Reset the generator with a requested number of harmonics which exceeds the maximum
+    // Attempt to reset the generator with a requested number of harmonics which exceeds the maximum
     // specified during construction. This should throw `std::length_error`.
     int retCode = 0;
     try
@@ -163,6 +167,88 @@ int testAccumSamples()
     return 0;
 }
 
+int testDefaultConstructAndMove()
+{
+    // Create a default constructed object.
+    CombGenerator combGenerator{};
+
+    // We need a buffer to store signal data provided by the CombGenerator getSamples.
+    // This buffer needs to be large enough for the maximum number of samples we will be retrieving.
+    constexpr size_t maxEpochSize = 4096;
+    std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer{ new FlyingPhasorElementType [ maxEpochSize ] };
+    FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
+
+    // Get samples for harmonic series.
+    combGenerator.getSamples( pEpochSampleBuffer, maxEpochSize );
+
+    // The buffer should contain all zeros
+    for ( size_t i = 0; maxEpochSize != i; ++i )
+    {
+        const auto sample = pEpochSampleBuffer[i];
+        if ( 0.0 != sample )
+        {
+            std::cout << "Failed Pure Reset Test at epoch sample index " << i << "." << std::endl;
+            return 41;
+        }
+    }
+
+    // Attempt to reset the generator with a requested number of harmonics which exceeds the maximum
+    // specified during construction. This should throw `std::length_error`.
+    bool fail = true;
+    try
+    {
+        combGenerator.reset( 1, M_PI / 8.0 );
+        std::cout << "Failed to detect exception for exceeding maxHarmonics during reset invocation!" << std::endl;
+    }
+    catch ( const std::length_error & )
+    {
+        fail = false;
+    }
+    if ( fail ) return 42;
+
+    // Now we will try to move a useful CombGenerator into the useless one via "move" assignment.
+    // And if we can reset it without it throwing. It worked.
+    constexpr size_t maxHarmonics = 4;
+    combGenerator = CombGenerator{ maxHarmonics };
+
+    // Attempt to reset the generator with a requested number of harmonics now that we've reassigned it.
+    fail = false;
+    try
+    {
+        combGenerator.reset( 1, M_PI / 8.0 );
+    }
+    catch ( const std::length_error & )
+    {
+        fail = true;
+        std::cout << "Failed to with exception thrown after reassignment!" << std::endl;
+    }
+    if ( fail ) return 43;
+
+    // Now move construct another CombGenerator from the one we've been working with.
+    CombGenerator combGenerator2{ std::move( combGenerator ) };
+
+    // Attempt to get samples from it
+    // Get samples for harmonic series.
+    combGenerator2.getSamples( pEpochSampleBuffer, maxEpochSize );
+
+    // Buffer should contain non-zero data. That's all we need to verify as we've extensively tested
+    // already elsewhere.
+    bool nonZeroData = false;
+    for ( size_t i = 0; maxEpochSize != i; ++i )
+    {
+        const auto sample = pEpochSampleBuffer[i];
+        if ( 0.0 != sample )
+            nonZeroData = true;
+    }
+    if ( !nonZeroData )
+    {
+        std::cout << "Failed Pure Reset Test. Zero signal data detected before pure reset." << std::endl;
+        return 44;
+    }
+
+    return 0;
+}
+
 int main()
 {
     // Test 1 - Verify we throw if we exceed maxHarmonics during `reset` operation
@@ -179,6 +265,11 @@ int main()
 
     // Test 4 - Test the `accumSamples` operation after `reset` with default parameters.
     testResult = testAccumSamples();
+    if ( 0 != testResult ) return testResult;
+
+    // Test 5 - Test the default construct and move features. This was added after the fact,
+    // so we will test it after the above.
+    testResult = testDefaultConstructAndMove();
     if ( 0 != testResult ) return testResult;
 
     return 0;

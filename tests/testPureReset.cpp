@@ -40,7 +40,8 @@ int testPureReset()
     // Now perform a "pure" reset which should set us up as if we have just been constructed.
     combGenerator.reset();
 
-    // Buffer should contain non-zero data. That's all we need to verify as we've extensively tested already.
+    // Buffer should contain non-zero data. That's all we need to verify as we've extensively tested
+    // already elsewhere.
     bool nonZeroData = false;
     for ( size_t i = 0; maxEpochSize != i; ++i )
     {
