@@ -63,6 +63,16 @@ private:
 
     void getSamples( FlyingPhasorElementBufferTypePtr pElementBuffer, size_t numSamples )
     {
+        // Special case of numHarmonics equal zero.
+        // Since we are "getting" samples, and not accumulating samples. We need to
+        // ensure we write zeros to the buffer if numHarmonics is zero.
+        if ( !numHarmonics )
+        {
+            for ( size_t i = 0; numSamples != i; ++i )
+                *pElementBuffer++ = FlyingPhasorElementType{};
+            return;
+        }
+
         // Get pointer to harmonic magnitudes. This is allowed to be nullptr.
         auto pMag = magVector.get();
 

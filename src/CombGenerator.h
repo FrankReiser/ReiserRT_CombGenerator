@@ -94,7 +94,7 @@ namespace ReiserRT
             CombGenerator( CombGenerator && another ) noexcept;
 
             /**
-             * @brief Move Assignment Operator0
+             * @brief Move Assignment Operator
              *
              * This Assignment operator deletes its current "Implementation Pointer" and
              * moves the the one out of the other instance resulting in a nullptr for said instance.

@@ -178,6 +178,10 @@ int testDefaultConstructAndMove()
     std::unique_ptr< FlyingPhasorElementType[] > epochSampleBuffer{ new FlyingPhasorElementType [ maxEpochSize ] };
     FlyingPhasorElementBufferTypePtr pEpochSampleBuffer = epochSampleBuffer.get();
 
+    // Stuff something into the epochSampleBuffer, so we can ensure it gets overwritten.
+    pEpochSampleBuffer[0] = FlyingPhasorElementType{ 1.0, 1.0 };
+    pEpochSampleBuffer[maxEpochSize-1] = FlyingPhasorElementType{ 1.0, 1.0 };
+
     // Get samples for harmonic series.
     combGenerator.getSamples( pEpochSampleBuffer, maxEpochSize );
 
@@ -220,7 +224,7 @@ int testDefaultConstructAndMove()
     catch ( const std::length_error & )
     {
         fail = true;
-        std::cout << "Failed to with exception thrown after reassignment!" << std::endl;
+        std::cout << "Failed with exception thrown after move reassignment!" << std::endl;
     }
     if ( fail ) return 43;
 
@@ -242,7 +246,7 @@ int testDefaultConstructAndMove()
     }
     if ( !nonZeroData )
     {
-        std::cout << "Failed Pure Reset Test. Zero signal data detected before pure reset." << std::endl;
+        std::cout << "Failed move construct test. Zero signal data detected." << std::endl;
         return 44;
     }
 
