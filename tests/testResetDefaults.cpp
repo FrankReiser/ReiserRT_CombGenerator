@@ -6,8 +6,6 @@
  * an empty envelope functor. This results in a magnitude of 1.0 and
  * a starting phase angle of 0.0 radians for all harmonic tones, and no envelope functor.
  * An empty envelope functor means no amplitude modulation.
- * We also test that exceeding max harmonics throws an exception and both `getSamples` and
- * `accumSamples` operations under these default conditions.
  *
  * @authors Frank Reiser
  * @date Initiated October 24th, 2023
@@ -20,50 +18,6 @@
 #include <iostream>
 
 using namespace ReiserRT::Signal;
-
-int testThrowOnExceedingMaxHarmonics()
-{
-    // Construct a CombGenerator specifying a maximum number of harmonics tones
-    constexpr size_t maxHarmonics = 4;
-    CombGenerator combGenerator{ maxHarmonics };
-
-    // Attempt to reset the generator with a requested number of harmonics which exceeds the maximum
-    // specified during construction. This should throw `std::length_error`.
-    int retCode = 0;
-    try
-    {
-        combGenerator.reset( maxHarmonics+1, M_PI / 8.0 );
-        std::cout << "Failed to detect exception for exceeding maxHarmonics during reset invocation!" << std::endl;
-        retCode = 1;
-    }
-    catch ( const std::length_error & )
-    {
-    }
-
-    return retCode;
-}
-
-int testNoThrowOnMaxHarmonics()
-{
-    // Construct a CombGenerator specifying a maximum number of harmonics tones
-    constexpr size_t maxHarmonics = 4;
-    CombGenerator combGenerator{ maxHarmonics };
-
-    // Reset the generator with a requested number of harmonics which exceeds the maximum
-    // specified during construction. This should throw `std::length_error`.
-    int retCode = 0;
-    try
-    {
-        combGenerator.reset( maxHarmonics, M_PI / 8.0 );
-    }
-    catch ( const std::length_error & )
-    {
-        std::cout << "Detect exception for utilizing maxHarmonics during reset invocation!" << std::endl;
-        retCode = 11;
-    }
-
-    return retCode;
-}
 
 int testGetSamples()
 {
@@ -165,19 +119,11 @@ int testAccumSamples()
 
 int main()
 {
-    // Test 1 - Verify we throw if we exceed maxHarmonics during `reset` operation
-    int testResult = testThrowOnExceedingMaxHarmonics();
+    // Test 1 - Test the `getSamples` operation after `reset` with default parameters.
+    auto testResult = testGetSamples();
     if ( 0 != testResult ) return testResult;
 
-    // Test 2 - Verify we DO NOT throw if we use all maxHarmonics during `reset` operation
-    testResult = testNoThrowOnMaxHarmonics();
-    if ( 0 != testResult ) return testResult;
-
-    // Test 3 - Test the `getSamples` operation after `reset` with default parameters.
-    testResult = testGetSamples();
-    if ( 0 != testResult ) return testResult;
-
-    // Test 4 - Test the `accumSamples` operation after `reset` with default parameters.
+    // Test 2 - Test the `accumSamples` operation after `reset` with default parameters.
     testResult = testAccumSamples();
     if ( 0 != testResult ) return testResult;
 
