@@ -225,3 +225,8 @@ void CombGenerator::reset()
 {
     pImple->reset();
 }
+
+size_t CombGenerator::getNumHarmonics() const
+{
+    return pImple->numHarmonics;
+}

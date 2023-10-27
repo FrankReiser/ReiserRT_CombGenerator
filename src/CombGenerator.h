@@ -195,6 +195,18 @@ namespace ReiserRT
              */
             void reset();
 
+            /**
+             * @brief Query the Current Number of Harmonics
+             *
+             * This operation returns the current number of harmonic tones that will be produced
+             * (fundamental included), within the signal data  delivered via a `getsamples` invocation.
+             * This is primarily useful for verification purposes as the return value shall be zero right
+             * after construction and potentially non-zero after a `reset` invocation.
+             *
+             * @return The number of harmonics
+             */
+            [[nodiscard]] size_t getNumHarmonics() const;
+
         private:
             Imple * pImple{};    //!< Pointer to hidden implementation.
         };
