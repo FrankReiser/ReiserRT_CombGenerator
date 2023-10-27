@@ -14,6 +14,7 @@
 #include "CombGenerator.h"
 #include "FlyingPhasorToneGenerator.h"
 
+#include <memory>
 #include <stdexcept>
 #include <iostream>
 
@@ -28,7 +29,7 @@ int testGetSamples()
     // Reset the Comb Generator specifying less than the maximum number of harmonic tones.
     constexpr size_t numHarmonics = 2;
     constexpr double fundamentalRadiansPerSample = M_PI / 8.0;
-    combGenerator.reset( numHarmonics, fundamentalRadiansPerSample );
+    combGenerator.reset( numHarmonics, fundamentalRadiansPerSample, nullptr, nullptr );
 
     // We need a buffer to store signal data provided by the CombGenerator getSamples.
     // This buffer needs to be large enough for the maximum number of samples we will be retrieving.
@@ -74,7 +75,7 @@ int testAccumSamples()
     // Reset the Comb Generator specifying less than the maximum number of harmonic tones.
     constexpr size_t numHarmonics = 2;
     constexpr double fundamentalRadiansPerSample = M_PI / 8.0;
-    combGenerator.reset( numHarmonics, fundamentalRadiansPerSample );
+    combGenerator.reset( numHarmonics, fundamentalRadiansPerSample, nullptr, nullptr );
 
     // We need a buffer to store signal data provided by the CombGenerator accumSamples.
     // This buffer needs to be large enough for the maximum number of samples we will be retrieving.

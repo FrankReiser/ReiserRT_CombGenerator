@@ -8,6 +8,7 @@
 #include "FlyingPhasorToneGeneratorDataTypes.h"
 #include "CombScintillationEnvelopeFunctor.h"
 
+#include <memory>
 #include <iostream>
 
 int main( int argc, char * argv[] )

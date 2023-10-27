@@ -15,8 +15,6 @@
 #include "CombGeneratorEnvelopeFunkType.h"
 #include "FlyingPhasorToneGeneratorDataTypes.h"
 
-#include <memory>
-
 namespace ReiserRT
 {
     namespace Signal
@@ -155,8 +153,8 @@ namespace ReiserRT
              * as a `numHarmonics` value of merely 1 will throw.
              */
             void reset( size_t numHarmonics, double fundamentalRadiansPerSample,
-                         const SharedScalarVectorType & magVector = nullptr,
-                         const SharedScalarVectorType & phaseVector = nullptr,
+                         const SharedScalarVectorType & magVector,
+                         const SharedScalarVectorType & phaseVector,
                          const CombGeneratorEnvelopeFunkType & envelopeFunk = CombGeneratorEnvelopeFunkType{} );
 
             /**

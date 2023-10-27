@@ -8,6 +8,7 @@
 #include "CombGenerator.h"
 #include "FlyingPhasorToneGenerator.h"
 
+#include <memory>
 #include <vector>
 #include <stdexcept>
 

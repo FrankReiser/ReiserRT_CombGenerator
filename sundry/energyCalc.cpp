@@ -47,7 +47,7 @@ int main()
     CombGenerator combGenerator{ numHarmonics };
 
     // Reset Comb Generator and fetch an epochs worth of data
-    combGenerator.reset( numHarmonics, fundamental, sharedMagnitudes );
+    combGenerator.reset( numHarmonics, fundamental, sharedMagnitudes, nullptr, nullptr );
     combGenerator.getSamples( pEpochSampleBuffer, epochSize );
 
     // Calculate the energy as the magnitude squared by the number of samples.

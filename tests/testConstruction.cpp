@@ -21,8 +21,10 @@
 #include "CombGenerator.h"
 #include "FlyingPhasorToneGenerator.h"
 
+#include <memory>
 #include <stdexcept>
 #include <iostream>
+
 
 using namespace ReiserRT::Signal;
 
@@ -71,7 +73,7 @@ int testDefaultConstructAndMove()
     bool fail = true;
     try
     {
-        combGenerator.reset( 1, M_PI / 8.0 );
+        combGenerator.reset( 1, M_PI / 8.0, nullptr, nullptr );
         std::cout << "Failed to detect exception for exceeding maxHarmonics during reset invocation!" << std::endl;
     }
     catch ( const std::length_error & )
@@ -99,7 +101,7 @@ int testDefaultConstructAndMove()
     fail = false;
     try
     {
-        combGenerator.reset( 1, M_PI / 8.0 );
+        combGenerator.reset( 1, M_PI / 8.0, nullptr, nullptr );
     }
     catch ( const std::length_error & )
     {
