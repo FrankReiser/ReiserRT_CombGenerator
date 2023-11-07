@@ -3,7 +3,7 @@
 #ifndef REISER_RT_COMBGENERATOR_COMBSCINTILLATIONENVELOPEFUNCTOR_H
 #define REISER_RT_COMBGENERATOR_COMBSCINTILLATIONENVELOPEFUNCTOR_H
 
-#include "SharedScalarVectorTypeFwd.h"
+#include "CombGeneratorScalarVectorTypeFwd.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -21,8 +21,8 @@ public:
     CombScintillationEnvelopeFunctor( const CombScintillationEnvelopeFunctor & another ) = delete;
     CombScintillationEnvelopeFunctor & operator =( const CombScintillationEnvelopeFunctor & another ) = delete;
 
-    void reset( size_t numHarmonics, size_t decorrelationSamples,
-                const ReiserRT::Signal::SharedScalarVectorType & pNominalMagnitudes, uint32_t seed );
+    void reset(size_t numHarmonics, size_t decorrelationSamples,
+               const ReiserRT::Signal::CombGeneratorScalarVectorType & pNominalMagnitudes, uint32_t seed );
 
     const double * operator()( size_t currentSampleCount, size_t numSamples, size_t nHarmonic, double nominalMag );
 

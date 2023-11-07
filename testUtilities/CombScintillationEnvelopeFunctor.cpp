@@ -27,8 +27,8 @@ private:
 
     ~Imple() = default;
 
-    void reset( size_t numHarmonics, size_t theDecorrelationSamples,
-                const ReiserRT::Signal::SharedScalarVectorType & pNominalMagnitudes, uint32_t seed )
+    void reset(size_t numHarmonics, size_t theDecorrelationSamples,
+               const ReiserRT::Signal::CombGeneratorScalarVectorType & pNominalMagnitudes, uint32_t seed )
     {
         decorrelationSamples = theDecorrelationSamples;
         rayleighDistributor.reset( seed );
@@ -83,8 +83,8 @@ CombScintillationEnvelopeFunctor::~CombScintillationEnvelopeFunctor()
     delete pImple;
 }
 
-void CombScintillationEnvelopeFunctor::reset( size_t numHarmonics, size_t decorrelationSamples,
-        const ReiserRT::Signal::SharedScalarVectorType & pNominalMagnitudes, uint32_t seed )
+void CombScintillationEnvelopeFunctor::reset(size_t numHarmonics, size_t decorrelationSamples,
+                                             const ReiserRT::Signal::CombGeneratorScalarVectorType & pNominalMagnitudes, uint32_t seed )
 {
     pImple->reset( numHarmonics, decorrelationSamples, pNominalMagnitudes, seed );
 }

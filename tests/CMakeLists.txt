@@ -1,3 +1,13 @@
+add_executable( testConstruction "" )
+target_sources( testConstruction PRIVATE testConstruction.cpp)
+target_include_directories( testConstruction PUBLIC ../src )
+target_link_libraries( testConstruction ReiserRT_CombGenerator )
+target_compile_options( testConstruction PRIVATE
+        $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
+        $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>
+)
+add_test( NAME runConstructionTest COMMAND $<TARGET_FILE:testConstruction> )
+
 add_executable( testResetDefaults "" )
 target_sources( testResetDefaults PRIVATE testResetDefaults.cpp )
 target_include_directories( testResetDefaults PUBLIC ../src )

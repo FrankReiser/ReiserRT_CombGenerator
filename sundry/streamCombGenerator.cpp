@@ -8,6 +8,7 @@
 #include "FlyingPhasorToneGeneratorDataTypes.h"
 #include "CombScintillationEnvelopeFunctor.h"
 
+#include <memory>
 #include <iostream>
 
 int main( int argc, char * argv[] )
@@ -107,7 +108,7 @@ int main( int argc, char * argv[] )
     else
     {
         // We are going to share magnitudes between our Comb Generator and our Comb Scintillation Envelope Functor
-        ReiserRT::Signal::SharedScalarVectorType sharedMagnitudes{ std::move( pMagnitudes ) };
+        ReiserRT::Signal::CombGeneratorScalarVectorType sharedMagnitudes{std::move(pMagnitudes ) };
 
        // Reset our Comb Scintillation Envelope Functor
        combScintillationEnvelopeFunctor.reset( numHarmonics, decorrelationSamples, sharedMagnitudes,
