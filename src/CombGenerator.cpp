@@ -32,9 +32,9 @@ private:
 
     ~Imple() = default;
 
-    void reset( size_t theNumHarmonics, double fundamentalRadiansPerSample,
-                 const SharedScalarVectorType & theMagVector, const SharedScalarVectorType & thePhaseVector,
-                 const CombGeneratorEnvelopeFunkType & theEnvelopeFunk )
+    void reset(size_t theNumHarmonics, double fundamentalRadiansPerSample,
+               const CombGeneratorScalarVectorType & theMagVector, const CombGeneratorScalarVectorType & thePhaseVector,
+               const CombGeneratorEnvelopeFunkType & theEnvelopeFunk )
     {
         // Ensure that the user has not specified more lines than they constructed us to handle.
         if ( maxHarmonics < theNumHarmonics )
@@ -172,7 +172,7 @@ private:
 
     const size_t maxHarmonics;
     std::vector< FlyingPhasorToneGenerator > harmonicGenerators;
-    SharedScalarVectorType magVector{};
+    CombGeneratorScalarVectorType magVector{};
     CombGeneratorEnvelopeFunkType envelopeFunk{};
     size_t numHarmonics{};
 };
@@ -204,9 +204,9 @@ CombGenerator & CombGenerator::operator =( CombGenerator && another ) noexcept
     return *this;
 }
 
-void CombGenerator::reset( size_t numHarmonics, double fundamentalRadiansPerSample,
-                            const SharedScalarVectorType & magVector, const SharedScalarVectorType & phaseVector,
-                            const CombGeneratorEnvelopeFunkType & envelopeFunk )
+void CombGenerator::reset(size_t numHarmonics, double fundamentalRadiansPerSample,
+                          const CombGeneratorScalarVectorType & magVector, const CombGeneratorScalarVectorType & phaseVector,
+                          const CombGeneratorEnvelopeFunkType & envelopeFunk )
 {
     pImple->reset( numHarmonics, fundamentalRadiansPerSample,
                    magVector, phaseVector, envelopeFunk );

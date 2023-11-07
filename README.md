@@ -52,9 +52,9 @@ The below snippet shows how this shared "block" pointer may be accomplished.
    ...
    
    // Move unique pointer into shared pointer which may be referenced numerous times.
-   // This SharedScalarVectorType also makes the data constant.
+   // This CombGeneratorScalarVectorType also makes the data constant.
    // Mutliple references are read only.
-   SharedScalarVectorType sharedMagnitudes{ std::move( magnitudes ) };
+   CombGeneratorScalarVectorType sharedMagnitudes{ std::move( magnitudes ) };
    
    // Reset a CombGenerator instance. It will increment the reference count on this data
    // and maintain it until reset with new data, or destroyed.

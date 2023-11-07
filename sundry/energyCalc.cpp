@@ -34,7 +34,7 @@ int main()
     }
 
     // Transfer managed memory in shared pointer type for CombGenerator reset operation.
-    SharedScalarVectorType sharedMagnitudes{ std::move( magnitudes ) };
+    CombGeneratorScalarVectorType sharedMagnitudes{std::move(magnitudes ) };
 
     // Now for the fundamental frequency (first harmonic), we want it to fill the epoch period
     // with one complete cycle. The harmonics will naturally have more than one cycle.

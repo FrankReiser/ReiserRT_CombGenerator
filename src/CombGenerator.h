@@ -11,7 +11,7 @@
 // Include Export Specification File
 #include "ReiserRT_CombGeneratorExport.h"
 
-#include "SharedScalarVectorTypeFwd.h"
+#include "CombGeneratorScalarVectorTypeFwd.h"
 #include "CombGeneratorEnvelopeFunkType.h"
 #include "FlyingPhasorToneGeneratorDataTypes.h"
 
@@ -124,7 +124,7 @@ namespace ReiserRT
              * to maintain the storage but, this seemed unsafe. Reference counting seemed the best choice.
              * The phase vector does not have the same requirements but, we don't want
              * to use different semantics for it. That would be confusing.
-             * @see SharedScalarVectorType
+             * @see CombGeneratorScalarVectorType
              *
              * @param numHarmonics The number of harmonics to generate. Must be less than or equal to
              * the maximum specified during construction.
@@ -132,13 +132,13 @@ namespace ReiserRT
              * @note It is not recommended that you use this operation on default constructed CombGenerator instance
              * as a `numHarmonics` value of just 1 will throw.
              * @param pMagVector This argument provides a series of magnitude values, of minimum length `numHarmonics`.
-             * The argument type is that of a constant SharedScalarVectorType reference, which may be empty.
+             * The argument type is that of a constant CombGeneratorScalarVectorType reference, which may be empty.
              * Passing an empty  pointer results in a magnitude of 1.0 for all harmonic tones.
              * @warning Not providing the minimum length of `numHarmonics`, for a non-null vector,
              * results in undefined behavior.
              * @param pPhaseVector This argument provides a series of starting phase values,
              * quantified in radians, of minimum length `numHarmonics`.
-             * The argument type is that of a constant SharedScalarVectorType reference, which may be empty.
+             * The argument type is that of a constant CombGeneratorScalarVectorType reference, which may be empty.
              * Passing an empty pointer results in an initial phase of 0.0 for all harmonic tones.
              * @warning Not providing the minimum length of `numHarmonics` harmonics, for a non-null vector
              * results in undefined behavior.
@@ -152,8 +152,8 @@ namespace ReiserRT
              * This copy must remain viable until subsequent `reset` of the CombGenerator.
              */
             void reset( size_t numHarmonics, double fundamentalRadiansPerSample,
-                         const SharedScalarVectorType & magVector,
-                         const SharedScalarVectorType & phaseVector,
+                         const CombGeneratorScalarVectorType & magVector,
+                         const CombGeneratorScalarVectorType & phaseVector,
                          const CombGeneratorEnvelopeFunkType & envelopeFunk = CombGeneratorEnvelopeFunkType{} );
 
             /**

@@ -54,8 +54,8 @@ int testMagWithEnvelopGetSamples()
 
     // Reset the Comb Generator
     constexpr double fundamentalRadiansPerSample = M_PI / 8.0;
-    SharedScalarVectorType sharedMagnitudes{ std::move( magnitudes ) };
-    SharedScalarVectorType sharedPhases{ std::move( phases ) };
+    CombGeneratorScalarVectorType sharedMagnitudes{ std::move( magnitudes ) };
+    CombGeneratorScalarVectorType sharedPhases{ std::move( phases ) };
     combGenerator.reset( numHarmonics, fundamentalRadiansPerSample, sharedMagnitudes, nullptr, envelopeFunk );
 
     // We need a buffer to store signal data provided by the CombGenerator getSamples.
@@ -130,8 +130,8 @@ int testMagWithEnvelopAccumSamples()
 
     // Reset the Comb Generator
     constexpr double fundamentalRadiansPerSample = M_PI / 8.0;
-    SharedScalarVectorType sharedMagnitudes{ std::move( magnitudes ) };
-    SharedScalarVectorType sharedPhases{ std::move( phases ) };
+    CombGeneratorScalarVectorType sharedMagnitudes{ std::move( magnitudes ) };
+    CombGeneratorScalarVectorType sharedPhases{ std::move( phases ) };
     combGenerator.reset( numHarmonics, fundamentalRadiansPerSample, sharedMagnitudes, nullptr, envelopeFunk );
 
     // We need a buffer to store signal data provided by the CombGenerator accumSamples.
