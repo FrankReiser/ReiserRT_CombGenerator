@@ -61,7 +61,7 @@ The below snippet shows how this shared "block" pointer may be accomplished.
    // In this particular example, we are accepting defaults for starting phases
    // and an empty envelope functor.
    const double fundamentalRadiansPerSample = 0.1;
-   combGenerator.reset( numHarmonics, fundamentalRadiansPerSample, sharedMagnitudes );
+   combGenerator.reset( numHarmonics, fundamentalRadiansPerSample, sharedMagnitudes, nullptr );
    ```
 
 Samples are obtained by invoking the `getSamples` operation. If an envelope modulator
