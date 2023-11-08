@@ -13,6 +13,7 @@
 #include "CombGenerator.h"
 #include "FlyingPhasorToneGenerator.h"
 
+#include <memory>
 #include <iostream>
 
 using namespace ReiserRT::Signal;

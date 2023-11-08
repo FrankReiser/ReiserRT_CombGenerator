@@ -11,8 +11,8 @@ endif()
 
 # Specify all of our public headers for easy reference.
 set( _publicHeaders
-    SharedScalarVectorTypeFwd.h
     CombGenerator.h
+    CombGeneratorScalarVectorTypeFwd.h
     CombGeneratorEnvelopeFunkType.h
     )
 
@@ -23,8 +23,8 @@ set( _privateHeaders
 
 # Specify our source files
 set( _sourceFiles
-    SharedScalarVectorTypeFwd.cpp
     CombGenerator.cpp
+    CombGeneratorScalarVectorTypeFwd.cpp
     CombGeneratorEnvelopeFunkType.cpp
     )
 

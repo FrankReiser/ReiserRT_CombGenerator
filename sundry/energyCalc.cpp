@@ -34,7 +34,7 @@ int main()
     }
 
     // Transfer managed memory in shared pointer type for CombGenerator reset operation.
-    SharedScalarVectorType sharedMagnitudes{ std::move( magnitudes ) };
+    CombGeneratorScalarVectorType sharedMagnitudes{std::move(magnitudes ) };
 
     // Now for the fundamental frequency (first harmonic), we want it to fill the epoch period
     // with one complete cycle. The harmonics will naturally have more than one cycle.
@@ -47,7 +47,7 @@ int main()
     CombGenerator combGenerator{ numHarmonics };
 
     // Reset Comb Generator and fetch an epochs worth of data
-    combGenerator.reset( numHarmonics, fundamental, sharedMagnitudes );
+    combGenerator.reset( numHarmonics, fundamental, sharedMagnitudes, nullptr, nullptr );
     combGenerator.getSamples( pEpochSampleBuffer, epochSize );
 
     // Calculate the energy as the magnitude squared by the number of samples.

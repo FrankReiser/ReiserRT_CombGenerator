@@ -13,6 +13,7 @@
 #include "CombGenerator.h"
 #include "FlyingPhasorToneGenerator.h"
 
+#include <memory>
 #include <iostream>
 
 using namespace ReiserRT::Signal;
@@ -33,8 +34,8 @@ int testMagPhaseNoEnvelopeGetSamples()
         magnitudes[i] = 4.0 - double(i);
         phases[i] = double(i) * M_PI / 32;
     }
-    SharedScalarVectorType sharedMagnitudes{ std::move( magnitudes ) };
-    SharedScalarVectorType sharedPhases{ std::move( phases ) };
+    CombGeneratorScalarVectorType sharedMagnitudes{ std::move( magnitudes ) };
+    CombGeneratorScalarVectorType sharedPhases{ std::move( phases ) };
     combGenerator.reset( numHarmonics, fundamentalRadiansPerSample,
                          sharedMagnitudes, sharedPhases );
 
@@ -91,8 +92,8 @@ int testMagPhaseNoEnvelopeAccumSamples()
         magnitudes[i] = 4.0 - double(i);
         phases[i] = double(i) * M_PI / 32;
     }
-    SharedScalarVectorType sharedMagnitudes{ std::move( magnitudes ) };
-    SharedScalarVectorType sharedPhases{ std::move( phases ) };
+    CombGeneratorScalarVectorType sharedMagnitudes{ std::move( magnitudes ) };
+    CombGeneratorScalarVectorType sharedPhases{ std::move( phases ) };
     combGenerator.reset( numHarmonics, fundamentalRadiansPerSample,
                          sharedMagnitudes, sharedPhases );
 

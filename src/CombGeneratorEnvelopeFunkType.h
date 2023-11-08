@@ -37,9 +37,10 @@ namespace ReiserRT
          *
          * @return Returns a pointer to a buffer of minimum length, `numSamples`, populated with the
          * envelope to apply for the Nth harmonic tone.
-         * Envelope data shall be incorporated immediately after functor invocation
-         * and the buffer may be safely reused for subsequent functor invocations.
-         * @warning Failure to provide envelop data of minimum length `numSamples` results in undefined behaviour.
+         * Envelope data shall be utilized or copied immediately after functor return
+         * so the implementation buffer can be reused for subsequent functor invocations.
+         * @warning Failure to provide envelope data of minimum length `numSamples` results in
+         * undefined behaviour.
          */
         using CombGeneratorEnvelopeFunkType =
                 std::function< const double *( size_t currentSample, size_t numSamples,

@@ -11,11 +11,9 @@
 // Include Export Specification File
 #include "ReiserRT_CombGeneratorExport.h"
 
-#include "SharedScalarVectorTypeFwd.h"
+#include "CombGeneratorScalarVectorTypeFwd.h"
 #include "CombGeneratorEnvelopeFunkType.h"
 #include "FlyingPhasorToneGeneratorDataTypes.h"
-
-#include <memory>
 
 namespace ReiserRT
 {
@@ -30,7 +28,7 @@ namespace ReiserRT
          * their harmonic spacing are specified at `reset` time.
          *
          * The CombGenerator also provides support for individually modulating the tones produced through
-         * an envelope functor interface also specified at `reset` time.
+         * an envelope functor interface, optionally specified at `reset` time.
          */
         class ReiserRT_CombGenerator_EXPORT CombGenerator
         {
@@ -42,14 +40,6 @@ namespace ReiserRT
 
         public:
             /**
-             * @brief Default Construction is Disallowed
-             *
-             * The CombGenerator requires a maximum number of harmonics to be specified.
-             * Use the qualified constructor.
-             */
-            CombGenerator() = delete;
-
-            /**
              * @brief Qualified Constructor
              *
              * This constructor instantiates the implementation. This results in the creation of a
@@ -57,11 +47,16 @@ namespace ReiserRT
              * of the instance during its lifetime. This `maxHarmonics` is inclusive of any fundamental frequency.
              *
              * @note A newly constructed instance will produce a series of zeros should the `getSamples`
-             * operation be invoked prior to a `reset` invocation.
+             * operation be invoked prior to a `reset` invocation with specific harmonic series generation parameters.
              *
-             * @param maxHarmonics The maximum number of harmonics that an instance will support (fundamental included).
+             * @param maxHarmonics The maximum number of harmonics that an instance will support (fundamental included)
+             * during its lifetime.
+             * @note Accepting the default value of zero instantiates a relatively useless CombGenerator instance.
+             * It cannot be `reset` to generate any tones without throwing an exception. The reasons we allow this
+             * is so that another instance can be "moved" into such a defaulted instance. It also helps get past
+             * some issues should you try to reserve vector space for CombGenerator instances.
              */
-            explicit CombGenerator( size_t maxHarmonics );
+            explicit CombGenerator( size_t maxHarmonics = 0 );
 
             /**
              * @brief Destructor
@@ -85,62 +80,88 @@ namespace ReiserRT
             CombGenerator & operator =( const CombGenerator & another ) = delete;
 
             /**
-             * @brief The Reset Operation
+             * @brief Move Constructor
+             *
+             * This Constructor moves the "Implementation Pointer" out of another instance
+             * resulting in a nullptr for said instance.
+             * @note Moving raw pointer `pImple` requires a non-default move constructor implementation
+             * as the compiler default treats it the same as a copy.
+             *
+             * @param another Another instance being moved from.
+             */
+            CombGenerator( CombGenerator && another ) noexcept;
+
+            /**
+             * @brief Move Assignment Operator
+             *
+             * This Assignment operator deletes its current "Implementation Pointer" and
+             * moves the the one out of the other instance resulting in a nullptr for said instance.
+             * @note Moving raw pointer `pImple` requires a non-default assignment operator implementation
+             * as the compiler default treats it the same as a copy.
+             *
+             * @param another Another instance being moved from.
+             */
+            CombGenerator & operator =( CombGenerator && another ) noexcept;
+
+            /**
+             * @brief The Reset Operation with Specific Generation Parameters
              *
              * This operation prepares the CombGenerator for a subsequent series of `getSamples` invocations.
-             * It sets 'N' ReiserRT_FlyingPhasor instances for the appropriate harmonic spacing based on the fundamental
-             * frequency. It also establishes the magnitudes and initial phase angle of each harmonic tone.
-             * Lastly, if magnitude envelop control is required, a callback functor may be registered.
+             * It sets up 'N' ReiserRT_FlyingPhasor instances for the appropriate harmonic spacing based on
+             * a fundamental frequency. It also establishes the magnitudes and initial phase angle of each
+             * harmonic tone. Lastly, if magnitude envelope control is required, a callback functor may be registered.
              *
              * @note We specify a shared pointer interface for the passing of scalar vectors
-             * for this operation although we allow for nullptr defaults.
+             * for this operation although we allow these to be empty pointers (containing nullptr).
              * This shared pointer interface was a design decision. It is anticipated that
              * CombGenerator instances are seldom `reset` and that it would be the `getSamples`
              * operation that is primarily leveraged. It is the `getSamples` operation
              * that actually makes use of any magnitude vector we register here.
              * By specifying a shared pointer type, we are ensuring a reference count on it.
              * Anticipated use cases of CombGenerator called for reuse of magnitude vectors.
-             * Other design choices were considered such as copying the const data at registration time but,
+             * Other design choices were considered such as copying the const data at `reset` time but,
              * this seemed wasteful. Also considered was just storing the data address and trusting the client
              * to maintain the storage but, this seemed unsafe. Reference counting seemed the best choice.
              * The phase vector does not have the same requirements but, we don't want
              * to use different semantics for it. That would be confusing.
-             * @see SharedScalarVectorType
+             * @see CombGeneratorScalarVectorType
              *
              * @param numHarmonics The number of harmonics to generate. Must be less than or equal to
              * the maximum specified during construction.
+             * @throw std::length_error If numHarmonics exceeds the maximum specified during construction.
+             * @note It is not recommended that you use this operation on default constructed CombGenerator instance
+             * as a `numHarmonics` value of just 1 will throw.
              * @param pMagVector This argument provides a series of magnitude values, of minimum length `numHarmonics`.
-             * The argument type is that of a constant shared pointer reference, which may be empty (null pointer).
-             * Passing a null pointer (the default) results in a magnitude of 1.0 for all harmonic tones.
+             * The argument type is that of a constant CombGeneratorScalarVectorType reference, which may be empty.
+             * Passing an empty  pointer results in a magnitude of 1.0 for all harmonic tones.
              * @warning Not providing the minimum length of `numHarmonics`, for a non-null vector,
              * results in undefined behavior.
              * @param pPhaseVector This argument provides a series of starting phase values,
              * quantified in radians, of minimum length `numHarmonics`.
-             * The argument type is that of a constant shared pointer reference, which may be empty (null pointer).
-             * Passing a null pointer (the default) results in an initial phase of 0.0 for all harmonic tones.
+             * The argument type is that of a constant CombGeneratorScalarVectorType reference, which may be empty.
+             * Passing an empty pointer results in an initial phase of 0.0 for all harmonic tones.
              * @warning Not providing the minimum length of `numHarmonics` harmonics, for a non-null vector
              * results in undefined behavior.
              * @param envelopeFunk Callback functor interface for hooking magnitude envelopes applied during
-             * harmonic tone generation. The default for this parameter is to utilize an empty function object.
-             * In these cases, the magnitude specified in the pMagVector alone will be used.
-             * @warning Functor `envelopeFunk` will be copied for subsequent usage by `getSamples` and must
-             * remain valid until subsequently `reset`.
-             * @note Non-empty `envelopeFunk` will be invoked for each harmonic tone generated during a `getSamples`
+             * harmonic tone generation. The default for this parameter (empty function object) results
+             * in constant magnitudes specified in the pMagVector for each harmonic tone.
+             * A non-empty `envelopeFunk` will be invoked for each harmonic tone accumulated during a `getSamples`
              * invocation. Adequate information is provided through the CombGeneratorEnvelopeFunkType interface.
-             * @see CombGeneratorEnvelopeFunkType
-             *
-             * @throw std::length_error If numHarmonics exceeds the maximum specified during construction.
+             * @see CombGeneratorEnvelopeFunkType for callback interface details.
+             * @warning Functor `envelopeFunk` will be copied for subsequent usage by `getSamples`
+             * This copy must remain viable until subsequent `reset` of the CombGenerator.
              */
             void reset( size_t numHarmonics, double fundamentalRadiansPerSample,
-                         const SharedScalarVectorType & magVector = nullptr,
-                         const SharedScalarVectorType & phaseVector = nullptr,
+                         const CombGeneratorScalarVectorType & magVector,
+                         const CombGeneratorScalarVectorType & phaseVector,
                          const CombGeneratorEnvelopeFunkType & envelopeFunk = CombGeneratorEnvelopeFunkType{} );
 
             /**
              * @brief Get Samples Operation
              *
-             * This operation delivers 'N' number of samples from the CombGenerator into the user provided buffer.
-             * If the user specified a non-null envelope functor during the `reset` operation. That functor
+             * This operation delivers 'N' number of samples from the CombGenerator into the user provided buffer
+             * overwriting the buffers content.
+             * If the user specified a non-empty envelope functor during the `reset` operation. That functor
              * will be invoked once per harmonic tone being accumulated over the `numSamples` epoch.
              *
              * @param pElementBuffer User provided buffer large enough to hold the requested number of samples.
@@ -153,7 +174,7 @@ namespace ReiserRT
              *
              * This operation accumulates 'N' number of samples from the CombGenerator onto the user provided buffer.
              * This affords the ability to collect the output of multiple CombGenerator instances.
-             * If the user specified a non-null envelope functor during the `reset` operation. That functor
+             * If the user specified a non-empty envelope functor during the `reset` operation. That functor
              * will be invoked once per harmonic tone being accumulated over the `numSamples` epoch.
              *
              * @param pElementBuffer User provided buffer large enough to hold the requested number of samples.
@@ -161,8 +182,31 @@ namespace ReiserRT
              */
             void accumSamples( FlyingPhasorElementBufferTypePtr pElementBuffer, size_t numSamples );
 
+            /**
+             * @brief The Reset Operation No Generation Parameters (Pure Reset)
+             *
+             * This "pure reset" operation exists to return an instance to its freshly constructed state.
+             * A CombGenerator in this state will produce a "zero signal". This is useful for a larger use case
+             * where a bank of CombGenerator instances may exist and contain contaminated state from a previous
+             * generation run. If only some of a bank will be required on a subsequent generation run, a "pure reset"
+             * on reserved instances ensures that so you don't leave trash laying around.
+             */
+            void reset();
+
+            /**
+             * @brief Query the Current Number of Harmonics
+             *
+             * This operation returns the current number of harmonic tones that will be produced
+             * (fundamental included), within the signal data  delivered via a `getSamples` invocation.
+             * This is primarily useful for verification purposes as the return value shall be zero right
+             * after construction and potentially non-zero after a `reset` invocation.
+             *
+             * @return The number of harmonics
+             */
+            [[nodiscard]] size_t getNumHarmonics() const;
+
         private:
-            Imple * pImple;    //!< Pointer to hidden implementation.
+            Imple * pImple{};    //!< Pointer to hidden implementation.
         };
     }
 }
