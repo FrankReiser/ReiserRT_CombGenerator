@@ -11,33 +11,81 @@
 #include <memory>
 #include <iostream>
 
+void printHelpScreen()
+{
+    std::cout << "Usage:" << std::endl;
+    std::cout << "    streamCombGenerator [options]" << std::endl;
+    std::cout << "Available Options:" << std::endl;
+    std::cout << "    --help" << std::endl;
+    std::cout << "        Displays this help screen and exits." << std::endl;
+    std::cout << "    --spacingRadsPerSample=<double>" << std::endl;
+    std::cout << "        TThe spacing in radians per sample to use." << std::endl;
+    std::cout << "        Defaults to pi/256 radians per sample if unspecified." << std::endl;
+    std::cout << "    --chunkSize=<uint>" << std::endl;
+    std::cout << "        The number of samples to produce per chunk. If zero, no samples are produced." << std::endl;
+    std::cout << "        Defaults to 4096 samples if unspecified." << std::endl;
+    std::cout << "    --numChunks=<uint>" << std::endl;
+    std::cout << "        The number of chunks to generate. If zero, runs continually up to max uint64 chunks." << std::endl;
+    std::cout << "        This maximum value is inclusive of any skipped chunks." << std::endl;
+    std::cout << "        Defaults to 1 chunk if unspecified." << std::endl;
+    std::cout << "    --skipChunks=<uint>" << std::endl;
+    std::cout << "        The number of chunks to skip before any chunks are output. Does not effect the numChunks output." << std::endl;
+    std::cout << "        In essence if numChunks is 1 and skip chunks is 4, chunk number 5 is the only chunk output." << std::endl;
+    std::cout << "        Defaults to 0 chunks skipped if unspecified." << std::endl;
+    std::cout << "    --decorrelSamples=<ulong>: The number of samples for scintillation decorrelation." << std::endl;
+    std::cout << "        Defaults to zero (no scintillation)." << std::endl;
+    std::cout << "    --seed=<uint>: Random seed for random phases and scintillation effects." << std::endl;
+    std::cout << "        Defaults to zero which results in phases of zero and usage of std::random_device for" << std::endl;
+    std::cout << "        scintillation effects assuming decorrelationSamples is non-zero." << std::endl;
+    std::cout << "    --profile=<uint>: Use 0 for equal magnitude comb, 1 for tapered at the reciprocal of harmonic number." << std::endl;
+    std::cout << "        Defaults to 1." << std::endl;
+    std::cout << "    --streamFormat=<string>" << std::endl;
+    std::cout << "        t32 - Outputs samples in text format with floating point precision of (9 decimal places)." << std::endl;
+    std::cout << "        t64 - Outputs samples in text format with floating point precision (17 decimal places)." << std::endl;
+    std::cout << "        b32 - Outputs data in raw binary with 32bit precision (uint32 and float), native endian-ness." << std::endl;
+    std::cout << "        b64 - Outputs data in raw binary 64bit precision (uint64 and double), native endian-ness." << std::endl;
+    std::cout << "        Defaults to t64 if unspecified." << std::endl;
+    std::cout << "    --includeX" << std::endl;
+    std::cout << "        Include sample count in the output stream. This is useful for gnuplot using any format." << std::endl;
+    std::cout << "        Defaults to no inclusion if unspecified." << std::endl;
+    std::cout << std::endl;
+    std::cout << "Error Returns:" << std::endl;
+    std::cout << "    1 - Command Line Parsing Error - Unrecognized Long Option." << std::endl;
+    std::cout << "    2 - Command Line Parsing Error - Unrecognized Short Option (none supported)." << std::endl;
+    std::cout << "    3 - Invalid streamFormat specified." << std::endl;
+}
+
 int main( int argc, char * argv[] )
 {
     // Parse potential command line. Defaults provided otherwise.
     CommandLineParser cmdLineParser{};
-    if ( 0 != cmdLineParser.parseCommandLine(argc, argv) )
-    {
-        std::cout << "Failed parsing command line" << std::endl;
-        std::cout << "Optional Arguments are:" << std::endl;
-        std::cout << "\t--spacingRadsPerSample=<double>: The spacing in radians per sample to use (default pi/16)." << std::endl;
-        std::cout << "\t--numHarmonics=<ulong>: The number of harmonics to generate at given spacing (default 10)." << std::endl;
-        std::cout << "\t--maxEpochSize=<ulong>: The number of samples to stream out (default 2048)." << std::endl;
-        std::cout << "\t--decorrelSamples=<ulong>: The number of samples for scintillation decorrelation (default 0 no scint)." << std::endl;
-        std::cout << "\t--profile=<uint>: 0 for equal mag comb, 1 for tapered 3db per tone (default 0)." << std::endl;
-        std::cout << "\t--seed=<uint>: Random seed for phase and scintillation. Use zero for std::random_device." << std::endl;
 
-        exit( -1 );
+    auto parseRes = cmdLineParser.parseCommandLine(argc, argv);
+    if ( 0 != parseRes )
+    {
+        std::cerr << "streamCombGenerator Parse Error: Use command line argument --help for instructions" << std::endl;
+        exit(parseRes);
     }
-#if 1
+
+    if ( cmdLineParser.getHelpFlag() )
+    {
+        printHelpScreen();
+        exit( 0 );
+    }
+#if 0
     else
     {
         std::cout << "Parsed: " << std::endl
                   << " --spacingRadsPerSample=" << cmdLineParser.getSpacingRadsPerSample() << std::endl
                   << " --numHarmonics=" << cmdLineParser.getNumHarmonics() << std::endl
-                  << " --maxEpochSize=" << cmdLineParser.getEpochSize() << std::endl
+                  << " --chunkSize=" << cmdLineParser.getChunkSize() << std::endl
+                  << " --numChunks=" << cmdLineParser.getNumChunks() << std::endl
+                  << " --skipChunks=" << cmdLineParser.getSkipChunks() << std::endl
                   << " --decorrelSamples=" << cmdLineParser.getDecorrelSamples() << std::endl
                   << " --profile=" << cmdLineParser.getProfile() << std::endl
                   << " --seed=" << cmdLineParser.getProfile() << std::endl
+                  << " --streamFormat=" << (int)cmdLineParser.getStreamFormat() << std::endl
+                  << " --includeX=" << (int)cmdLineParser.getIncludeX() << std::endl
                   << std::endl;
     }
 #endif
@@ -94,7 +142,7 @@ int main( int argc, char * argv[] )
 
     // We may, or may not use our Comb Scintillation Envelope Functor, but we will instantiate it
     // regardless.
-    auto epochSize = cmdLineParser.getEpochSize();
+    auto epochSize = cmdLineParser.getChunkSize();
     CombScintillationEnvelopeFunctor combScintillationEnvelopeFunctor{ MAX_HARMONICS, epochSize };
 
     // Reset the Comb Generator for the job at hand
@@ -129,7 +177,7 @@ int main( int argc, char * argv[] )
     // Write to standard out. It can be redirected.
     std::cout << std::scientific;
     std::cout.precision(17);
-    for ( size_t n = 0; cmdLineParser.getEpochSize() != n; ++n )
+    for (size_t n = 0; cmdLineParser.getChunkSize() != n; ++n )
     {
         const auto & sample = epochSampleBuffer[n];
         std::cout << sample.real() << " " << sample.imag() << std::endl;
