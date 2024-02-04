@@ -36,7 +36,7 @@ private:
     unsigned long numChunksIn{ 1 };
     unsigned long skipChunksIn{ 0 };
     unsigned int profileIn{ 1 };
-    unsigned int seedIn{ 1 };                   // Zero will use std::random_device to initialize.
+    unsigned int seedIn{ 0 };
 
     bool helpFlagIn{ false };
     bool includeX_In{ false };

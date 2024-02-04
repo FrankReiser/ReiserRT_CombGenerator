@@ -99,12 +99,12 @@ int CommandLineParser::parseCommandLine( int argc, char * argv[] )
 
             case '?':
                 std::cout << "The getopt_long call returned '?'" << std::endl;
-                retCode = -1;
+                retCode = 1;
                 break;
 
             default:
                 std::cout << "The getopt_long call returned character code" << c << std::endl;
-                retCode = -1;
+                retCode = 2;
                 break;
         }
     }
