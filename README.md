@@ -39,12 +39,11 @@ Anticipated use cases of CombGenerator call for a sharing of magnitude vectors.
 Other design choices were considered such as copying the const data at registration time but,
 this seemed wasteful. Also considered was just storing the data address and trusting the client
 to maintain the storage but, this seemed unsafe. Reference counting seemed the best choice.
-The below snippet shows how this shared "block" pointer may be accomplished.
+The below snippet shows one way how this shared "block" pointer may be accomplished.
+You could also use the BlockPool provided by ReiserRT_Core.
 
    ```
    // Allocate block of doubles and encapsulate in a unique pointer.
-   // Note the 'array' syntax. This is required and is only reliably 
-   // supported by the C++17 standard.
    const size_t numHarmonics = 12;
    std::unique_ptr< double[] > magnitudes{ new double[ numHarmonics ] };
    
@@ -54,6 +53,9 @@ The below snippet shows how this shared "block" pointer may be accomplished.
    // Move unique pointer into shared pointer which may be referenced numerous times.
    // This CombGeneratorScalarVectorType also makes the data constant.
    // Mutliple references are read only.
+   //
+   // NOTE: the 'array' syntax for shared pointers is required and is only reliably 
+   // supported by the C++17 standard.
    CombGeneratorScalarVectorType sharedMagnitudes{ std::move( magnitudes ) };
    
    // Reset a CombGenerator instance. It will increment the reference count on this data
@@ -73,8 +75,42 @@ Additional state data may be managed by the observer instance.
 
 Please refer to the test harness and sundry applications for additional details.
 
+# Example Data Characteristics
+Here, we present some example data created with the 'streamCombGenerator' utility program included
+with the project. We generated 1024 samples with 12 harmonics (fundamental inclusive), 
+with a harmonic spacing of pi/256 radians per sample, using profile 1 (sawtooth waveform profile).
+This data is plotted below:
+
+Figure 1 - Example Comb Generator Sample Series Data
+
+![Figure 1](graphics/figure1.svg)
+
+This data is complex in nature, having both real and imaginary components. The imaginary component
+shows the typical "sawtooth" pattern that would result from adding sinusoids for N harmonics where
+the amplitudes are scaled by the reciprocal of their harmonic number and all start at a phase of 0 radians.
+This data looks pretty good. What does the spectrum look like? Are there any notable spurs in the frequency domain?
+We will take a look at the power spectrum, plotted in decibels for an extended dynamic range view. We
+did not apply any window to the sample series data here as our harmonic tones are right on a basis functions.
+Applying a window in this case would distract from our analysis.
+This data is plotted below:
+
+Figure 2 - Example Comb Generator Power Spectrum
+
+![Figure 2](graphics/figure2.svg)
+
+As can be seen, we have in excess of 300 dB of spur free dynamic range in the portion of the spectrum plotted.
+It does however extend to the portions, left and right, not plotted. The plot has the look of a comb. The harmonic
+tones are evenly space. This power spectrum plot is why this generator gets the name of "Comb Generator".
+
+# Interface Compatibility
+This component has been tested to be interface-able with C++20 compiles. Note that the compiled library code
+is built using the c++17 standard. API/ABI stability will be maintained between minor versions of this project.
+
+# Dependencies
+This component is dependent upon ReiserRT_FlyingPhasor, version 3.0 in order to configure and build.
+
 ## Thread Safety
-This CombGenerator is NOT "thread safe". There are no concurrent access mechanisms
+This Comb Generator is NOT "thread safe". There are no concurrent access mechanisms
 in place and there is no good reason for addressing this. To the contrary,
 state left by one thread would make no sense to another, never mind the concurrency issues.
 Have threads use their own unique instances.
