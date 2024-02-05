@@ -39,12 +39,11 @@ Anticipated use cases of CombGenerator call for a sharing of magnitude vectors.
 Other design choices were considered such as copying the const data at registration time but,
 this seemed wasteful. Also considered was just storing the data address and trusting the client
 to maintain the storage but, this seemed unsafe. Reference counting seemed the best choice.
-The below snippet shows how this shared "block" pointer may be accomplished.
+The below snippet shows one way how this shared "block" pointer may be accomplished.
+You could also use the BlockPool provided by ReiserRT_Core.
 
    ```
    // Allocate block of doubles and encapsulate in a unique pointer.
-   // Note the 'array' syntax. This is required and is only reliably 
-   // supported by the C++17 standard.
    const size_t numHarmonics = 12;
    std::unique_ptr< double[] > magnitudes{ new double[ numHarmonics ] };
    
@@ -54,6 +53,9 @@ The below snippet shows how this shared "block" pointer may be accomplished.
    // Move unique pointer into shared pointer which may be referenced numerous times.
    // This CombGeneratorScalarVectorType also makes the data constant.
    // Mutliple references are read only.
+   //
+   // NOTE: the 'array' syntax for shared pointers is required and is only reliably 
+   // supported by the C++17 standard.
    CombGeneratorScalarVectorType sharedMagnitudes{ std::move( magnitudes ) };
    
    // Reset a CombGenerator instance. It will increment the reference count on this data
@@ -72,6 +74,20 @@ the current harmonic (0=fundamental), and the nominal magnitude for the harmonic
 Additional state data may be managed by the observer instance.
 
 Please refer to the test harness and sundry applications for additional details.
+
+# Example Data Characteristics
+Here, we present some example data created with the 'streamCombGenerator' utility program included
+with the project. We generated 1024 samples with 12 harmonics (fundamental inclusive), 
+with a harmonic spacing of pi/256 radians per sample, using profile 1 (sawtooth waveform profile).
+This data is plotted below:
+
+Figure 1 - Example Flying Phasor Sample Series Data
+
+![Figure 1](graphics/figure1.svg)
+
+This data is complex in nature, having both real and imaginary components. The imaginary component
+shows the typical "sawtooth" pattern that would result from adding sinusoids for N harmonics where
+the amplitudes are scaled by the reciprocal of their harmonic number.
 
 ## Thread Safety
 This CombGenerator is NOT "thread safe". There are no concurrent access mechanisms
