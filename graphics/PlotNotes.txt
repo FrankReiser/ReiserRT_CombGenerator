@@ -1,0 +1,29 @@
+# I wrote this, so I can remember how I accomplished the graphics in the README
+# in case I ever need to redo them. The project needs to be built and ideally installed
+# beforehand.
+
+################### FIGURE 1 #######################
+# To Generate the "Figure 1 - Example Comb Generator Sample Series Data" graphic contained in the README file,
+#  I used the below command off in some directory outside the source tree:
+streamCombGenerator --chunkSize=1024 --includeX --streamFormat=b32 --numHarmonics=12 > combGeneratorB32.in
+
+# The output binary file contains three binary columns (sampleNum, real, imaginary) for 1024 samples.
+# The data is binary in 32 bit precision and by default has a radians per sample harmonic spacing of pi/256
+# and a phase of zero. Note that 32 bit precision is more than adequate for a plot.
+
+# In the same directory where the file 'combGeneratorB32.in' sits, enter gnuplot.
+# You will need gnuplot to be installed obviously to do this.
+gnuplot
+
+
+set xrange [0:1023]
+set yrange [-2.0:3.5]
+set xtics 128
+set ytics 0.5
+set grid xtics
+set grid ytics
+set style line 1 linecolor "grey70"
+set style line 2 linecolor rgb '#0060ad'
+set title "CombGenerator harmonicSpacing=pi/256, numHarmonics=12, profile=1"
+
+plot 'combGeneratorB32.in' binary format="%uint%float%float" using 1:2 with lines linestyle 1 title "real(n)", 'combGeneratorB32.in' binary format="%uint%float%float" using 1:3 with lines linestyle 2 title "imag(n)"
