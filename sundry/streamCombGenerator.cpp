@@ -13,6 +13,11 @@
 
 using namespace ReiserRT::Signal;
 
+// It would be normal to instantiate a Comb Generator for some maximum use case and
+// then consistently use less than the maximum, thereby supporting numerous reset cycles for a
+// variety of signals.
+constexpr size_t MAX_HARMONICS = 240;
+
 void printHelpScreen()
 {
     std::cout << "Usage:" << std::endl;
@@ -21,16 +26,18 @@ void printHelpScreen()
     std::cout << "    --help" << std::endl;
     std::cout << "        Displays this help screen and exits." << std::endl;
     std::cout << "    --spacingRadsPerSample=<double>" << std::endl;
-    std::cout << "        TThe spacing in radians per sample to use." << std::endl;
+    std::cout << "        The spacing in radians per sample to use." << std::endl;
     std::cout << "        Defaults to pi/256 radians per sample if unspecified." << std::endl;
-    std::cout << "    --chunkSize=<uint>" << std::endl;
+    std::cout << "    --numHarmonics=<ulong>" << std::endl;
+    std::cout << "        The number of harmonics to generate. Defaults to 12 if unspecified." << std::endl;
+    std::cout << "    --chunkSize=<ulong>" << std::endl;
     std::cout << "        The number of samples to produce per chunk. If zero, no samples are produced." << std::endl;
     std::cout << "        Defaults to 4096 samples if unspecified." << std::endl;
-    std::cout << "    --numChunks=<uint>" << std::endl;
+    std::cout << "    --numChunks=<ulong>" << std::endl;
     std::cout << "        The number of chunks to generate. If zero, runs continually up to max uint64 chunks." << std::endl;
     std::cout << "        This maximum value is inclusive of any skipped chunks." << std::endl;
     std::cout << "        Defaults to 1 chunk if unspecified." << std::endl;
-    std::cout << "    --skipChunks=<uint>" << std::endl;
+    std::cout << "    --skipChunks=<ulong>" << std::endl;
     std::cout << "        The number of chunks to skip before any chunks are output. Does not effect the numChunks output." << std::endl;
     std::cout << "        In essence if numChunks is 1 and skip chunks is 4, chunk number 5 is the only chunk output." << std::endl;
     std::cout << "        Defaults to 0 chunks skipped if unspecified." << std::endl;
@@ -54,7 +61,9 @@ void printHelpScreen()
     std::cout << "Error Returns:" << std::endl;
     std::cout << "    1 - Command Line Parsing Error - Unrecognized Long Option." << std::endl;
     std::cout << "    2 - Command Line Parsing Error - Unrecognized Short Option (none supported)." << std::endl;
-    std::cout << "    3 - Invalid streamFormat specified." << std::endl;
+    std::cout << "    3 - Number of harmonics exceeds the maximum of " << MAX_HARMONICS << "." << std::endl;
+    std::cout << "    4 - Invalid streamFormat specified." << std::endl;
+    std::cout << "    5 - Invalid profile specified." << std::endl;
 }
 
 int main( int argc, char * argv[] )
@@ -88,11 +97,6 @@ int main( int argc, char * argv[] )
               << " --includeX=" << (int)cmdLineParser.getIncludeX() << std::endl
               << std::endl;
 #endif
-
-    // It would be normal to instantiate a Comb Generator for some maximum use case and
-    // then consistently use less than the maximum, thereby supporting numerous reset cycles for a
-    // variety of signals.
-    constexpr size_t MAX_HARMONICS = 240;
 
     // If the user desired greater than our maximums. Error out.
     const auto numHarmonics = cmdLineParser.getNumHarmonics();
