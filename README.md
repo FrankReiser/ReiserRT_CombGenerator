@@ -100,7 +100,7 @@ Figure 2 - Example Comb Generator Power Spectrum
 
 As can be seen, we have in excess of 300 dB of spur free dynamic range in the portion of the spectrum plotted.
 It does however extend to the portions, left and right, not plotted. The plot has the look of a comb. The harmonic
-tones are evenly space. This power spectrum plot is why this generator gets the name of "Comb Generator".
+tones are evenly spaced. This power spectrum plot is why this generator gets the name of "Comb Generator".
 
 # Interface Compatibility
 This component has been tested to be interface-able with C++20 compiles. Note that the compiled library code
