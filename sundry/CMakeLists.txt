@@ -25,3 +25,18 @@ target_compile_options( streamCombGenerator PRIVATE
         $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Werror>
 )
 
+# Install streamFlyingPhasorGen and streamLegacyPhasorGen with RPATH setting
+set_target_properties( streamCombGenerator
+        PROPERTIES
+        SKIP_BUILD_RPATH OFF
+        BUILD_WITH_INSTALL_RPATH OFF
+        INSTALL_RPATH "${MY_LIBRARY_RPATH}"
+        INSTALL_RPATH_USE_LINK_PATH ON
+)
+
+# Installation of our binary executable component.
+install(
+        TARGETS streamCombGenerator
+        RUNTIME DESTINATION ${INSTALL_BINDIR} COMPONENT bin
+)
+
