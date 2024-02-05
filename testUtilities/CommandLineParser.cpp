@@ -12,7 +12,8 @@ int CommandLineParser::parseCommandLine( int argc, char * argv[] )
 //    int digitOptIndex = 0;
     int retCode = 0;
 
-    enum eOptions { SpacingRadsPerSample=1, NumHarmonics, Profile, EpochSize, DecorrelSamples, Seed, };
+    enum eOptions { SpacingRadsPerSample=1, NumHarmonics, Profile, ChunkSize, NumChunks, SkipChunks, DecorrelSamples,
+            Seed, StreamFormat, Help, IncludeX };
 
     while (true) {
 //        int thisOptionOptIndex = optind ? optind : 1;
@@ -21,9 +22,14 @@ int CommandLineParser::parseCommandLine( int argc, char * argv[] )
                 {"spacingRadsPerSample", required_argument, nullptr, SpacingRadsPerSample },
                 {"numHarmonics", required_argument, nullptr, NumHarmonics },
                 {"profile", required_argument, nullptr, Profile },
-                {"maxEpochSize", required_argument, nullptr, EpochSize },
+                {"chunkSize", required_argument, nullptr, ChunkSize },
+                {"numChunks", required_argument, nullptr, NumChunks },
+                {"skipChunks", required_argument, nullptr, SkipChunks },
                 {"decorrelSamples", required_argument, nullptr, DecorrelSamples },
                 {"seed", required_argument, nullptr, Seed },
+                {"streamFormat", required_argument, nullptr, StreamFormat },
+                {"help", no_argument, nullptr, Help },
+                {"includeX", no_argument, nullptr, IncludeX },
                 {nullptr, 0, nullptr, 0 }
         };
 
@@ -36,53 +42,69 @@ int CommandLineParser::parseCommandLine( int argc, char * argv[] )
         switch (c) {
             case SpacingRadsPerSample:
                 spacingRadsPerSampleIn = std::stod(optarg );
-#if 0
-                std::cout << "The getopt_long call detected the --spacingRadsPerSample=" << optarg
-                          << ". Value extracted = " << spacingRadsPerSampleIn << "." << std::endl;
-#endif
                 break;
+
             case NumHarmonics:
                 numHarmonicsIn = std::stoul(optarg );
-#if 0
-                std::cout << "The getopt_long call detected the --numHarmonics=" << optarg
-                          << ". Value extracted = " << numHarmonicsIn << "." << std::endl;
-#endif
                 break;
+
             case Profile:
                 profileIn = std::stoul(optarg );
-#if 0
-                std::cout << "The getopt_long call detected the --profile=" << optarg
-                          << ". Value extracted = " << profileIn << "." << std::endl;
-#endif
                 break;
-            case EpochSize:
-                epochSizeIn = std::stoul(optarg );
-#if 0
-                std::cout << "The getopt_long call detected the --epochSize=" << optarg
-                          << ". Value extracted = " << epochSizeIn << "." << std::endl;
-#endif
+
+            case ChunkSize:
+                chunkSizeIn = std::stoul(optarg );
                 break;
+
+            case NumChunks:
+                numChunksIn = std::stoul( optarg );
+                break;
+
+            case SkipChunks:
+                skipChunksIn = std::stoul( optarg );
+                break;
+
             case DecorrelSamples:
                 decorrelSamplesIn = std::stoul(optarg );
-#if 0
-                std::cout << "The getopt_long call detected the --decorrelSamples=" << optarg
-                          << ". Value extracted = " << decorrelSamplesIn << "." << std::endl;
-#endif
                 break;
+
             case Seed:
                 seedIn = std::stoul(optarg );
-#if 0
-                std::cout << "The getopt_long call detected the --seed=" << optarg
-                          << ". Value extracted = " << seedIn << "." << std::endl;
-#endif
                 break;
+
+            case StreamFormat:
+            {
+                // This one is more complicated. We either detect a valid string here, or we don't.
+                const std::string streamFormatStr{ optarg };
+                if ( streamFormatStr == "t32" )
+                    streamFormatIn = StreamFormat::Text32;
+                else if ( streamFormatStr == "t64" )
+                    streamFormatIn = StreamFormat::Text64;
+                else if ( streamFormatStr == "b32" )
+                    streamFormatIn = StreamFormat::Bin32;
+                else if ( streamFormatStr == "b64" )
+                    streamFormatIn = StreamFormat::Bin64;
+                else
+                    streamFormatIn = StreamFormat::Invalid;
+                break;
+            }
+
+            case Help:
+                helpFlagIn = true;
+                break;
+
+            case IncludeX:
+                includeX_In = true;
+                break;
+
             case '?':
                 std::cout << "The getopt_long call returned '?'" << std::endl;
-                retCode = -1;
+                retCode = 1;
                 break;
+
             default:
                 std::cout << "The getopt_long call returned character code" << c << std::endl;
-                retCode = -1;
+                retCode = 2;
                 break;
         }
     }
